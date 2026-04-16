@@ -1,0 +1,123 @@
+from pathlib import Path
+
+import cv2
+import pandas as pd
+import torch
+from torch.utils.data import Dataset
+
+from src.config.config import (
+    TRAIN_CSV,
+    TRAIN_IMAGE_DIR,
+    IMAGE_ID_COL,
+    LABEL_COL,
+    VARIETY_COL,
+    AGE_COL,
+    CLASS_TO_IDX,
+)
+
+
+class PaddyMetadataDataset(Dataset):
+    """
+    Dataset for image + metadata classification.
+    Metadata used:
+    - variety (categorical)
+    - age (numerical)
+    """
+
+    def __init__(self, csv_path=TRAIN_CSV, image_dir=TRAIN_IMAGE_DIR, transform=None):
+        self.csv_path = Path(csv_path)
+        self.image_dir = Path(image_dir)
+        self.transform = transform
+
+        if not self.csv_path.exists():
+            raise FileNotFoundError(f"CSV file not found: {self.csv_path}")
+
+        if not self.image_dir.exists():
+            raise FileNotFoundError(f"Image directory not found: {self.image_dir}")
+
+        self.data = pd.read_csv(self.csv_path)
+
+        required_columns = [IMAGE_ID_COL, LABEL_COL, VARIETY_COL, AGE_COL]
+        missing_cols = [col for col in required_columns if col not in self.data.columns]
+        if missing_cols:
+            raise ValueError(f"Missing required columns in CSV: {missing_cols}")
+
+        self.data = self.data.dropna(subset=[IMAGE_ID_COL, LABEL_COL]).reset_index(drop=True)
+
+        unknown_labels = sorted(set(self.data[LABEL_COL].unique()) - set(CLASS_TO_IDX.keys()))
+        if unknown_labels:
+            raise ValueError(
+                f"These labels are present in train.csv but not in CLASS_NAMES/config.py: {unknown_labels}"
+            )
+
+        # Build variety vocabulary
+        self.data[VARIETY_COL] = self.data[VARIETY_COL].fillna("unknown").astype(str).str.strip()
+        unique_varieties = sorted(self.data[VARIETY_COL].unique().tolist())
+        self.variety_to_idx = {name: idx for idx, name in enumerate(unique_varieties)}
+        self.idx_to_variety = {idx: name for name, idx in self.variety_to_idx.items()}
+
+    def __len__(self):
+        return len(self.data)
+
+    def _resolve_image_path(self, image_id: str, label_name: str) -> Path:
+        label_folder = self.image_dir / label_name
+
+        possible_names = []
+        if image_id.lower().endswith((".jpg", ".jpeg", ".png")):
+            possible_names.append(image_id)
+        else:
+            possible_names.extend([
+                f"{image_id}.jpg",
+                f"{image_id}.JPG",
+                f"{image_id}.jpeg",
+                f"{image_id}.png",
+            ])
+
+        for name in possible_names:
+            candidate = label_folder / name
+            if candidate.exists():
+                return candidate
+
+        raise FileNotFoundError(
+            f"Image not found for image_id='{image_id}' in label folder '{label_folder}'"
+        )
+
+    def __getitem__(self, idx):
+        row = self.data.iloc[idx]
+
+        image_id = str(row[IMAGE_ID_COL]).strip()
+        label_name = str(row[LABEL_COL]).strip()
+        variety = str(row[VARIETY_COL]).strip() if pd.notna(row[VARIETY_COL]) else "unknown"
+        age = float(row[AGE_COL]) if pd.notna(row[AGE_COL]) else 0.0
+
+        image_path = self._resolve_image_path(image_id=image_id, label_name=label_name)
+
+        image = cv2.imread(str(image_path))
+        if image is None:
+            raise ValueError(f"Failed to read image: {image_path}")
+
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        if self.transform is not None:
+            transformed = self.transform(image=image)
+            image = transformed["image"]
+
+        label = CLASS_TO_IDX[label_name]
+        variety_idx = self.variety_to_idx[variety]
+
+        metadata = {
+            "image_id": image_id,
+            "label_name": label_name,
+            "variety": variety,
+            "age": age,
+            "variety_idx": variety_idx,
+            "image_path": str(image_path),
+        }
+
+        return (
+            image,
+            torch.tensor(variety_idx, dtype=torch.long),
+            torch.tensor(age, dtype=torch.float32),
+            torch.tensor(label, dtype=torch.long),
+            metadata,
+        )
