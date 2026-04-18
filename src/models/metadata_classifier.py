@@ -1,3 +1,26 @@
+"""
+PaddyMetadataClassifier
+=======================
+Fuses image features (ResNet-18 backbone, 512-dim) with metadata features
+(variety embedding + age MLP, 32-dim) and classifies into disease categories.
+
+Fusion pipeline
+───────────────
+  image        → ImageEncoder   → [B, 512]
+  variety_idx  ┐
+               ├─ MetadataEncoder → [B, 32]
+  age          ┘
+                  concatenate   → [B, 544]
+                  BatchNorm1d
+                  Linear(256) → ReLU → Dropout
+                  Linear(128) → ReLU → Dropout
+                  Linear(num_classes)           → logits
+
+BatchNorm1d on the concatenated vector normalises the scale difference
+between the 512-dim image features and the 32-dim metadata features,
+preventing one branch from dominating the gradient signal.
+"""
+
 import torch
 import torch.nn as nn
 
@@ -7,30 +30,69 @@ from src.models.metadata_encoder import MetadataEncoder
 
 
 class PaddyMetadataClassifier(nn.Module):
-    """
-    Image + metadata disease classifier.
-    """
 
-    def __init__(self, num_varieties: int, num_classes: int = NUM_CLASSES, pretrained: bool = True):
+    def __init__(
+        self,
+        num_varieties: int,
+        num_classes: int = NUM_CLASSES,
+        pretrained: bool = True,
+        variety_embed_dim: int = 16,
+        age_embed_dim: int = 16,
+        dropout: float = 0.3,
+    ):
+        """
+        Parameters
+        ----------
+        num_varieties     : vocabulary size from PaddyMetadataDataset.num_varieties
+        num_classes       : number of disease output classes (default: 10)
+        pretrained        : use ImageNet weights for the ResNet-18 backbone
+        variety_embed_dim : dimension of the variety embedding vector
+        age_embed_dim     : dimension of the age MLP output vector
+        dropout           : dropout rate for the fusion classifier head
+        """
         super().__init__()
 
         self.image_encoder = ImageEncoder(pretrained=pretrained)
-        self.metadata_encoder = MetadataEncoder(num_varieties=num_varieties)
-
-        fusion_dim = self.image_encoder.output_dim + self.metadata_encoder.output_dim
-
-        self.classifier = nn.Sequential(
-            nn.Linear(fusion_dim, 256),
-            nn.ReLU(inplace=True),
-            nn.Dropout(0.3),
-            nn.Linear(256, num_classes)
+        self.metadata_encoder = MetadataEncoder(
+            num_varieties=num_varieties,
+            variety_embed_dim=variety_embed_dim,
+            age_embed_dim=age_embed_dim,
+            dropout=dropout * 0.67,   # slightly lower inside the encoder
         )
 
-    def forward(self, image: torch.Tensor, variety_idx: torch.Tensor, age: torch.Tensor) -> torch.Tensor:
-        image_features = self.image_encoder(image)
-        metadata_features = self.metadata_encoder(variety_idx, age)
+        fusion_dim = self.image_encoder.output_dim + self.metadata_encoder.output_dim
+        # 512 (ResNet-18) + 32 (variety 16 + age 16) = 544
 
-        fused_features = torch.cat([image_features, metadata_features], dim=1)
-        logits = self.classifier(fused_features)
+        self.classifier = nn.Sequential(
+            # BatchNorm bridges the scale gap between the two feature branches
+            nn.BatchNorm1d(fusion_dim),
+            nn.Linear(fusion_dim, 256),
+            nn.ReLU(inplace=True),
+            nn.Dropout(p=dropout),
+            nn.Linear(256, 128),
+            nn.ReLU(inplace=True),
+            nn.Dropout(p=dropout * 0.5),
+            nn.Linear(128, num_classes),
+        )
 
-        return logits
+    def forward(
+        self,
+        image: torch.Tensor,
+        variety_idx: torch.Tensor,
+        age: torch.Tensor,
+    ) -> torch.Tensor:
+        """
+        Parameters
+        ----------
+        image       : FloatTensor [B, 3, H, W]
+        variety_idx : LongTensor  [B]
+        age         : FloatTensor [B]  (z-score normalised)
+
+        Returns
+        -------
+        logits      : FloatTensor [B, num_classes]
+        """
+        img_feat  = self.image_encoder(image)                # [B, 512]
+        meta_feat = self.metadata_encoder(variety_idx, age)  # [B, 32]
+        fused     = torch.cat([img_feat, meta_feat], dim=1)  # [B, 544]
+        return self.classifier(fused)                         # [B, num_classes]

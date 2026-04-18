@@ -57,6 +57,9 @@ def create_dataloaders():
         batch_size=BATCH_SIZE,
         shuffle=True,
         num_workers=NUM_WORKERS
+  
+  
+  
     )
 
     val_loader = DataLoader(

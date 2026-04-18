@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PaddySense Pro — Paddy Disease Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+/* ═══════════════════════════════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════════════════════════════ */
+:root {
+  --bg-root        : #030c07;
+  --bg-dark        : #050f0a;
+  --bg-card        : rgba(255,255,255,0.035);
+  --bg-card-hover  : rgba(255,255,255,0.065);
+  --bg-glass       : rgba(8,22,12,0.72);
+
+  --green-900 : #071a0c;
+  --green-700 : #166534;
+  --green-600 : #16a34a;
+  --green-500 : #22c55e;
+  --green-400 : #4ade80;
+  --green-300 : #86efac;
+  --green-100 : #dcfce7;
+
+  --teal-500  : #14b8a6;
+  --teal-400  : #2dd4bf;
+  --amber-500 : #f59e0b;
+  --amber-300 : #fcd34d;
+  --red-500   : #ef4444;
+  --red-300   : #fca5a5;
+  --blue-500  : #3b82f6;
+  --blue-300  : #93c5fd;
+  --purple-500: #a855f7;
+  --purple-300: #d8b4fe;
+
+  --grad-primary : linear-gradient(135deg, #2e9e46 0%, #4ac864 100%);
+  --grad-hero    : linear-gradient(160deg, #030c07 0%, #071a0c 25%, #0c2a14 50%, #071218 75%, #030c07 100%);
+  --grad-card    : linear-gradient(145deg, rgba(34,197,94,.10) 0%, rgba(20,184,166,.06) 100%);
+
+  --border       : rgba(255,255,255,0.06);
+  --border-green : rgba(34,197,94,0.20);
+  --border-hi    : rgba(255,255,255,0.10);
+
+  --text-primary  : #f0fdf4;
+  --text-secondary: #86efac;
+  --text-muted    : #4b7a5a;
+  --text-dim      : #1e3a28;
+
+  --font-sans  : 'Inter', system-ui, sans-serif;
+  --font-head  : 'Poppins', 'Inter', system-ui, sans-serif;
+
+  --r-sm  : 8px;
+  --r-md  : 12px;
+  --r-lg  : 16px;
+  --r-xl  : 24px;
+  --r-2xl : 32px;
+  --r-pill: 999px;
+
+  --shadow-sm : 0 4px 16px rgba(0,0,0,.40);
+  --shadow-md : 0 10px 30px rgba(0,0,0,.50);
+  --shadow-lg : 0 20px 60px rgba(0,0,0,.60);
+  --shadow-glow: 0 0 40px rgba(46,158,70,.18);
+
+  --t-fast: .18s ease;
+  --t-med : .30s ease;
+  --t-slow: .50s ease;
+
+  --nav-h : 70px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RESET
+═══════════════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: var(--font-sans);
+  background : var(--bg-root);
+  color      : var(--text-primary);
+  line-height: 1.6;
+  overflow-x : hidden;
+}
+img, svg { display: block; max-width: 100%; }
+a { text-decoration: none; color: inherit; }
+ul { list-style: none; }
+button { cursor: pointer; border: none; outline: none; font-family: inherit; }
+input  { outline: none; font-family: inherit; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   KEYFRAMES
+═══════════════════════════════════════════════════════════════════ */
+@keyframes fadeUp    { from { opacity:0; transform:translateY(28px) } to { opacity:1; transform:translateY(0) } }
+@keyframes fadeIn    { from { opacity:0 }                             to { opacity:1 } }
+@keyframes scaleIn   { from { opacity:0; transform:scale(.94) }       to { opacity:1; transform:scale(1) } }
+@keyframes shimmer   { 0%{background-position:-600px 0} 100%{background-position:600px 0} }
+@keyframes blink     { 0%,100%{opacity:1} 50%{opacity:.2} }
+@keyframes orb       { 0%,100%{transform:scale(1) translate(0,0)} 40%{transform:scale(1.12) translate(18px,-14px)} 70%{transform:scale(.92) translate(-12px,16px)} }
+@keyframes gridMove  { from{background-position:0 0} to{background-position:40px 40px} }
+@keyframes glowPulse { 0%,100%{box-shadow:0 0 20px rgba(34,197,94,.15)} 50%{box-shadow:0 0 44px rgba(34,197,94,.35)} }
+@keyframes scanline  { 0%{top:0;opacity:1} 90%{top:100%;opacity:.8} 100%{top:100%;opacity:0} }
+@keyframes barFill   { from{width:0} to{width:var(--w)} }
+@keyframes float     { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+@keyframes spin      { to{transform:rotate(360deg)} }
+
+/* ═══════════════════════════════════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar       { width:6px; background:var(--bg-root); }
+::-webkit-scrollbar-thumb { background:var(--green-700); border-radius:var(--r-pill); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════════════════════════════════ */
+.container { max-width:1280px; margin:0 auto; padding:0 clamp(16px,4vw,64px); }
+.section-pad { padding: clamp(64px,8vw,120px) 0; }
+.tag {
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:.72rem; font-weight:700; letter-spacing:1.2px; text-transform:uppercase;
+  padding:5px 14px; border-radius:var(--r-pill);
+  background:rgba(34,197,94,.10); border:1px solid rgba(34,197,94,.22);
+  color:var(--green-400);
+}
+.tag-dot { width:6px; height:6px; border-radius:50%; background:var(--green-400); animation:blink 2s infinite; }
+.sec-eyebrow { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+.sec-title {
+  font-family:var(--font-head); font-size:clamp(1.8rem,3.5vw,2.8rem);
+  font-weight:800; line-height:1.15; letter-spacing:-.5px;
+  color:var(--text-primary); margin-bottom:16px;
+}
+.sec-sub { font-size:1rem; color:var(--text-muted); line-height:1.8; max-width:560px; }
+.highlight { color:var(--green-400); }
+.glass {
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--r-xl);
+  backdrop-filter:blur(20px) saturate(150%);
+  -webkit-backdrop-filter:blur(20px) saturate(150%);
+}
+.glass-hover { transition:background var(--t-fast),border-color var(--t-med),transform var(--t-med),box-shadow var(--t-med); }
+.glass-hover:hover {
+  background:var(--bg-card-hover);
+  border-color:var(--border-green);
+  transform:translateY(-4px);
+  box-shadow:var(--shadow-md), var(--shadow-glow);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════════════════════════════ */
+.btn {
+  display:inline-flex; align-items:center; gap:8px;
+  font-size:.9rem; font-weight:700; letter-spacing:.3px;
+  padding:12px 28px; border-radius:var(--r-pill);
+  transition:transform var(--t-fast), box-shadow var(--t-fast), opacity var(--t-fast);
+}
+.btn:hover { transform:translateY(-2px); }
+.btn-primary {
+  background:var(--grad-primary);
+  color:#fff;
+  box-shadow:0 0 24px rgba(46,158,70,.35), var(--shadow-sm);
+}
+.btn-primary:hover { box-shadow:0 0 44px rgba(46,158,70,.55), var(--shadow-md); }
+.btn-ghost {
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--border-green);
+  color:var(--green-300);
+}
+.btn-ghost:hover { background:rgba(34,197,94,.10); border-color:rgba(34,197,94,.40); }
+.btn-sm { padding:8px 20px; font-size:.82rem; }
+.btn-lg { padding:16px 44px; font-size:1.05rem; }
+.btn-icon { width:42px; height:42px; padding:0; justify-content:center; border-radius:var(--r-md); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   NAVBAR
+═══════════════════════════════════════════════════════════════════ */
+#navbar {
+  position:fixed; top:0; left:0; right:0; z-index:1000;
+  height:var(--nav-h);
+  background:rgba(3,12,7,.82);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(24px) saturate(160%);
+  -webkit-backdrop-filter:blur(24px) saturate(160%);
+  transition:background var(--t-med), box-shadow var(--t-med);
+}
+#navbar.scrolled {
+  background:rgba(3,12,7,.95);
+  box-shadow:0 4px 32px rgba(0,0,0,.50);
+}
+.nav-inner {
+  display:flex; align-items:center; gap:32px;
+  height:var(--nav-h);
+}
+.nav-logo {
+  display:flex; align-items:center; gap:10px;
+  flex-shrink:0;
+}
+.nav-logo-icon {
+  width:36px; height:36px; border-radius:var(--r-md);
+  background:var(--grad-primary);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.2rem;
+  box-shadow:0 0 16px rgba(34,197,94,.30);
+}
+.nav-logo-text {
+  font-family:var(--font-head); font-size:1.1rem; font-weight:800;
+  background:linear-gradient(135deg,#86efac,#4ade80 50%,#2dd4bf);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.nav-logo-sub {
+  font-size:.62rem; font-weight:600; letter-spacing:1.2px; text-transform:uppercase;
+  color:var(--text-muted); display:block; margin-top:-2px;
+}
+.nav-links {
+  display:flex; align-items:center; gap:4px;
+  margin-left:auto;
+}
+.nav-link {
+  font-size:.86rem; font-weight:600; letter-spacing:.2px;
+  padding:7px 14px; border-radius:var(--r-md);
+  color:var(--text-muted);
+  transition:color var(--t-fast), background var(--t-fast);
+  white-space:nowrap;
+}
+.nav-link:hover, .nav-link.active {
+  color:var(--green-300);
+  background:rgba(34,197,94,.08);
+}
+.nav-link.active { color:var(--green-400); }
+.nav-cta { margin-left:8px; }
+.nav-hamburger {
+  display:none; flex-direction:column; gap:5px;
+  width:36px; height:36px; justify-content:center; align-items:center;
+  background:rgba(255,255,255,.05); border:1px solid var(--border);
+  border-radius:var(--r-md); padding:8px; cursor:pointer;
+  margin-left:auto;
+  transition:background var(--t-fast);
+}
+.nav-hamburger:hover { background:rgba(34,197,94,.10); }
+.nav-hamburger span { display:block; width:18px; height:2px; background:var(--green-300); border-radius:2px; transition:transform var(--t-med), opacity var(--t-med); }
+.nav-hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+.nav-hamburger.open span:nth-child(2) { opacity:0; }
+.nav-hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+.nav-mobile {
+  display:none; position:fixed; top:var(--nav-h); left:0; right:0;
+  background:rgba(3,12,7,.97); border-bottom:1px solid var(--border);
+  backdrop-filter:blur(24px); padding:16px 24px 24px;
+  flex-direction:column; gap:4px;
+  animation:fadeIn .2s ease both;
+  z-index:999;
+}
+.nav-mobile.open { display:flex; }
+.nav-mobile .nav-link { padding:12px 16px; font-size:.95rem; border-radius:var(--r-md); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════════════════════════════ */
+#hero {
+  position:relative; overflow:hidden; isolation:isolate;
+  min-height:100vh;
+  display:flex; flex-direction:column; justify-content:center;
+  padding-top:var(--nav-h);
+  background:var(--grad-hero);
+}
+.hero-orb {
+  position:absolute; border-radius:50%; pointer-events:none;
+  filter:blur(80px); z-index:0; animation:orb 18s ease-in-out infinite;
+}
+.hero-orb-1 { width:700px; height:560px; top:-180px; left:-200px; background:radial-gradient(ellipse,rgba(22,163,74,.28) 0%,transparent 70%); }
+.hero-orb-2 { width:560px; height:460px; bottom:-140px; right:-120px; background:radial-gradient(ellipse,rgba(20,184,166,.20) 0%,transparent 70%); animation-delay:-7s; }
+.hero-orb-3 { width:380px; height:300px; top:50%; left:50%; transform:translate(-50%,-50%); background:radial-gradient(ellipse,rgba(34,197,94,.08) 0%,transparent 70%); animation-delay:-12s; }
+.hero-grid {
+  position:absolute; inset:0; z-index:0; pointer-events:none;
+  background-image:radial-gradient(circle,rgba(255,255,255,.04) 1px,transparent 1px);
+  background-size:40px 40px;
+  animation:gridMove 12s linear infinite;
+  mask-image:radial-gradient(ellipse 75% 75% at 50% 50%,black 30%,transparent 100%);
+}
+.hero-content {
+  position:relative; z-index:2;
+  display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center;
+  padding:80px 0;
+}
+.hero-eyebrow { margin-bottom:20px; }
+.hero-title {
+  font-family:var(--font-head); font-size:clamp(2.4rem,5vw,3.8rem);
+  font-weight:900; line-height:1.08; letter-spacing:-1.5px;
+  margin-bottom:20px; color:#fff;
+}
+.hero-title-grad {
+  background:linear-gradient(135deg,#a7f3d0 0%,#4ade80 40%,#2dd4bf 80%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.hero-sub {
+  font-size:1.05rem; color:rgba(134,239,172,.70);
+  line-height:1.80; max-width:480px; margin-bottom:36px;
+}
+.hero-actions { display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:48px; }
+.hero-stats { display:flex; gap:24px; flex-wrap:wrap; }
+.hero-stat {
+  display:flex; flex-direction:column; gap:4px;
+  padding:16px 24px; border-radius:var(--r-lg);
+  background:rgba(34,197,94,.06);
+  border:1px solid rgba(34,197,94,.14);
+  backdrop-filter:blur(12px);
+  min-width:100px; text-align:center;
+}
+.hero-stat-num { font-family:var(--font-head); font-size:1.8rem; font-weight:900; color:#fff; letter-spacing:-1px; }
+.hero-stat-lbl { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:var(--green-400); }
+.hero-visual {
+  position:relative; display:flex; justify-content:center; align-items:center;
+  animation:float 6s ease-in-out infinite;
+}
+.hero-card {
+  width:100%; max-width:420px;
+  background:rgba(8,22,12,.80);
+  border:1px solid var(--border-green);
+  border-radius:var(--r-2xl);
+  backdrop-filter:blur(24px);
+  box-shadow:var(--shadow-lg), 0 0 60px rgba(34,197,94,.12);
+  overflow:hidden;
+}
+.hero-card-top {
+  background:linear-gradient(135deg,rgba(22,163,74,.15),rgba(20,184,166,.08));
+  padding:24px; display:flex; align-items:center; gap:14px;
+  border-bottom:1px solid var(--border);
+}
+.hero-card-avatar {
+  width:48px; height:48px; border-radius:var(--r-md);
+  background:var(--grad-primary);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.5rem; flex-shrink:0;
+  box-shadow:0 0 20px rgba(34,197,94,.30);
+}
+.hero-card-info { flex:1; }
+.hero-card-title { font-weight:700; font-size:.95rem; color:#fff; }
+.hero-card-sub   { font-size:.75rem; color:var(--green-400); margin-top:2px; }
+.status-dot { width:8px; height:8px; border-radius:50%; background:var(--green-400); box-shadow:0 0 8px var(--green-400); animation:blink 2s infinite; flex-shrink:0; }
+.hero-card-body { padding:20px 24px; display:flex; flex-direction:column; gap:14px; }
+.scan-bar { display:flex; flex-direction:column; gap:6px; }
+.scan-bar-label { display:flex; justify-content:space-between; font-size:.78rem; font-weight:600; color:var(--text-muted); }
+.scan-bar-track { height:6px; border-radius:var(--r-pill); background:rgba(255,255,255,.06); overflow:hidden; }
+.scan-bar-fill  { height:100%; border-radius:var(--r-pill); }
+.scan-bar-fill-1 { width:92%; background:linear-gradient(90deg,#166534,#4ade80); box-shadow:0 0 8px rgba(74,222,128,.40); }
+.scan-bar-fill-2 { width:87%; background:linear-gradient(90deg,#134e4a,#2dd4bf); box-shadow:0 0 8px rgba(45,212,191,.40); animation-delay:.3s; }
+.scan-bar-fill-3 { width:78%; background:linear-gradient(90deg,#1e3a8a,#93c5fd); box-shadow:0 0 8px rgba(147,197,253,.35); animation-delay:.6s; }
+.hero-card-result {
+  padding:14px 16px; border-radius:var(--r-lg);
+  background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.20);
+  display:flex; align-items:center; gap:12px;
+}
+.result-icon { font-size:1.5rem; }
+.result-label { font-size:.72rem; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:rgba(252,165,165,.65); }
+.result-name  { font-size:.95rem; font-weight:700; color:#fff; margin-top:2px; }
+.result-conf  { margin-left:auto; text-align:right; }
+.result-pct   { font-size:1.3rem; font-weight:900; color:#fca5a5; }
+.result-sub   { font-size:.65rem; color:rgba(252,165,165,.50); letter-spacing:.5px; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   DIAGNOSE SECTION
+═══════════════════════════════════════════════════════════════════ */
+#diagnose { background:linear-gradient(180deg,var(--bg-root),var(--bg-dark)); }
+.diagnose-grid { display:grid; grid-template-columns:1fr 1fr; gap:32px; }
+
+/* Upload */
+.upload-card {
+  padding:40px 32px; text-align:center;
+  background:rgba(8,22,12,.60);
+  border:1px solid var(--border);
+  border-radius:var(--r-2xl);
+  backdrop-filter:blur(20px);
+}
+.upload-zone {
+  border:2px dashed rgba(34,197,94,.30);
+  border-radius:var(--r-xl);
+  padding:48px 24px;
+  display:flex; flex-direction:column; align-items:center; gap:16px;
+  cursor:pointer;
+  transition:border-color var(--t-med), background var(--t-med), box-shadow var(--t-med);
+  position:relative; overflow:hidden;
+}
+.upload-zone::after {
+  content:''; position:absolute; left:0; top:0; right:0; bottom:0;
+  background:linear-gradient(135deg,rgba(34,197,94,.03),transparent);
+  pointer-events:none;
+}
+.upload-zone:hover, .upload-zone.drag-over {
+  border-color:rgba(34,197,94,.70);
+  background:rgba(34,197,94,.04);
+  box-shadow:0 0 32px rgba(34,197,94,.12);
+}
+.upload-icon-wrap {
+  width:72px; height:72px; border-radius:var(--r-xl);
+  background:rgba(34,197,94,.10); border:1px solid rgba(34,197,94,.20);
+  display:flex; align-items:center; justify-content:center;
+  font-size:2rem;
+  transition:transform var(--t-med), box-shadow var(--t-med);
+}
+.upload-zone:hover .upload-icon-wrap {
+  transform:scale(1.08);
+  box-shadow:0 0 24px rgba(34,197,94,.25);
+}
+.upload-title { font-weight:700; font-size:1.05rem; color:var(--text-primary); }
+.upload-sub   { font-size:.85rem; color:var(--text-muted); }
+.upload-formats { font-size:.72rem; font-weight:600; text-transform:uppercase; letter-spacing:.8px; color:var(--text-dim); margin-top:4px; }
+.upload-preview {
+  margin-top:20px; width:100%; height:160px; border-radius:var(--r-lg);
+  background:rgba(255,255,255,.03); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-size:.85rem; color:var(--text-muted);
+}
+.model-select { margin-top:24px; text-align:left; }
+.model-select-label { font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-bottom:12px; }
+.model-btns { display:flex; gap:10px; flex-wrap:wrap; }
+.model-btn {
+  padding:9px 20px; border-radius:var(--r-pill); font-size:.84rem; font-weight:700;
+  background:rgba(255,255,255,.05); border:1px solid var(--border);
+  color:var(--text-muted);
+  transition:all var(--t-fast);
+}
+.model-btn:hover, .model-btn.active {
+  background:rgba(34,197,94,.12); border-color:rgba(34,197,94,.35);
+  color:var(--green-300);
+}
+.model-btn.active { box-shadow:0 0 12px rgba(34,197,94,.18); }
+.analyze-btn { width:100%; margin-top:24px; padding:15px; font-size:1rem; border-radius:var(--r-lg); }
+
+/* Results */
+.results-card {
+  padding:32px;
+  background:rgba(8,22,12,.60);
+  border:1px solid var(--border);
+  border-radius:var(--r-2xl);
+  backdrop-filter:blur(20px);
+  display:flex; flex-direction:column; gap:20px;
+}
+.result-header { display:flex; align-items:center; justify-content:space-between; }
+.result-title-grp { display:flex; flex-direction:column; gap:4px; }
+.result-card-title { font-size:1.1rem; font-weight:700; color:var(--text-primary); }
+.result-card-sub   { font-size:.78rem; color:var(--text-muted); }
+.risk-badge {
+  font-size:.70rem; font-weight:800; letter-spacing:1px; text-transform:uppercase;
+  padding:5px 12px; border-radius:var(--r-pill);
+}
+.risk-high   { background:rgba(239,68,68,.12);  color:#fca5a5; border:1px solid rgba(239,68,68,.25); }
+.risk-medium { background:rgba(245,158,11,.10); color:#fcd34d; border:1px solid rgba(245,158,11,.22); }
+.risk-low    { background:rgba(34,197,94,.10);  color:#86efac; border:1px solid rgba(34,197,94,.22); }
+.diagnosis-box {
+  padding:20px; border-radius:var(--r-xl);
+  background:linear-gradient(135deg,rgba(239,68,68,.08),rgba(239,68,68,.04));
+  border:1px solid rgba(239,68,68,.18);
+}
+.diagnosis-name { font-family:var(--font-head); font-size:1.35rem; font-weight:800; color:#fff; margin-bottom:6px; }
+.diagnosis-sci  { font-size:.82rem; font-style:italic; color:rgba(252,165,165,.65); }
+.conf-section { display:flex; flex-direction:column; gap:10px; }
+.conf-label  { display:flex; justify-content:space-between; align-items:center; }
+.conf-text   { font-size:.82rem; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--text-muted); }
+.conf-pct    { font-size:1.1rem; font-weight:900; color:#fca5a5; }
+.conf-track  { height:10px; border-radius:var(--r-pill); background:rgba(255,255,255,.05); overflow:hidden; }
+.conf-fill   { height:100%; border-radius:var(--r-pill); --w:89%; width:0; animation:barFill 1.2s .5s cubic-bezier(.4,0,.2,1) forwards; }
+.conf-fill-red  { background:linear-gradient(90deg,#7f1d1d,#ef4444); box-shadow:0 0 8px rgba(239,68,68,.45); }
+.conf-fill-grn  { background:linear-gradient(90deg,#166534,#4ade80); box-shadow:0 0 8px rgba(74,222,128,.40); }
+.img-previews { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.img-preview-box {
+  border-radius:var(--r-lg); overflow:hidden;
+  background:rgba(255,255,255,.03); border:1px solid var(--border);
+  aspect-ratio:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:8px;
+  font-size:.78rem; color:var(--text-muted); text-align:center; padding:12px;
+}
+.img-preview-box .icon { font-size:2rem; }
+.img-preview-label { font-size:.70rem; font-weight:700; text-transform:uppercase; letter-spacing:.8px; }
+.heatmap-box {
+  background:linear-gradient(135deg,rgba(239,68,68,.06),rgba(245,158,11,.04));
+  border-color:rgba(239,68,68,.12);
+}
+.detail-row { display:flex; gap:10px; flex-wrap:wrap; }
+.detail-chip {
+  font-size:.75rem; font-weight:600; padding:5px 12px; border-radius:var(--r-pill);
+  background:rgba(255,255,255,.05); border:1px solid var(--border); color:var(--text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DISEASE EXPLORER
+═══════════════════════════════════════════════════════════════════ */
+#explorer { background:var(--bg-dark); }
+.explorer-header {
+  display:flex; justify-content:space-between; align-items:flex-end; gap:24px;
+  margin-bottom:40px; flex-wrap:wrap;
+}
+.filter-btns { display:flex; gap:8px; flex-wrap:wrap; }
+.filter-btn {
+  padding:7px 16px; border-radius:var(--r-pill); font-size:.82rem; font-weight:600;
+  background:rgba(255,255,255,.05); border:1px solid var(--border); color:var(--text-muted);
+  cursor:pointer; transition:all var(--t-fast);
+}
+.filter-btn:hover, .filter-btn.active {
+  background:rgba(34,197,94,.10); border-color:rgba(34,197,94,.28); color:var(--green-300);
+}
+.disease-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; }
+.disease-card {
+  padding:24px;
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--r-xl);
+  backdrop-filter:blur(16px);
+  transition:transform var(--t-med), box-shadow var(--t-med), border-color var(--t-med);
+  animation:fadeUp .5s ease both;
+}
+.disease-card:hover {
+  transform:translateY(-6px);
+  box-shadow:var(--shadow-md), var(--shadow-glow);
+  border-color:var(--border-green);
+}
+.disease-card-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:14px; }
+.disease-icon {
+  width:46px; height:46px; border-radius:var(--r-md); font-size:1.4rem;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(34,197,94,.08); border:1px solid var(--border-green);
+  flex-shrink:0;
+}
+.sev-badge {
+  font-size:.65rem; font-weight:800; text-transform:uppercase; letter-spacing:.8px;
+  padding:3px 9px; border-radius:var(--r-pill);
+}
+.sev-critical { background:rgba(239,68,68,.12);  color:#fca5a5; border:1px solid rgba(239,68,68,.22); }
+.sev-high     { background:rgba(245,158,11,.10); color:#fcd34d; border:1px solid rgba(245,158,11,.20); }
+.sev-moderate { background:rgba(168,85,247,.10); color:#d8b4fe; border:1px solid rgba(168,85,247,.20); }
+.sev-low      { background:rgba(34,197,94,.08);  color:#86efac; border:1px solid rgba(34,197,94,.18); }
+.disease-name { font-weight:700; font-size:1rem; color:var(--text-primary); margin-bottom:6px; }
+.disease-sci  { font-size:.75rem; font-style:italic; color:var(--text-muted); margin-bottom:10px; }
+.disease-desc { font-size:.84rem; color:rgba(134,239,172,.55); line-height:1.65; margin-bottom:14px; }
+.disease-tags { display:flex; gap:6px; flex-wrap:wrap; }
+.disease-tag  { font-size:.67rem; font-weight:600; padding:3px 8px; border-radius:var(--r-pill); background:rgba(255,255,255,.05); border:1px solid var(--border); color:var(--text-muted); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   TREATMENT
+═══════════════════════════════════════════════════════════════════ */
+#treatment { background:linear-gradient(180deg,var(--bg-dark),var(--bg-root)); }
+.treatment-grid { display:grid; grid-template-columns:1.2fr 1fr; gap:40px; align-items:start; }
+.treatment-steps { display:flex; flex-direction:column; gap:16px; }
+.treatment-step {
+  display:flex; gap:18px; align-items:flex-start;
+  padding:20px 24px; border-radius:var(--r-xl);
+  background:var(--bg-card); border:1px solid var(--border);
+  backdrop-filter:blur(16px);
+  transition:all var(--t-med);
+}
+.treatment-step:hover { border-color:var(--border-green); transform:translateX(6px); box-shadow:var(--shadow-md); }
+.step-num {
+  width:36px; height:36px; border-radius:var(--r-md); flex-shrink:0;
+  background:var(--grad-primary); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-size:.82rem; font-weight:800; box-shadow:0 0 14px rgba(34,197,94,.25);
+}
+.step-content { flex:1; }
+.step-title { font-weight:700; font-size:.95rem; color:var(--text-primary); margin-bottom:4px; }
+.step-desc  { font-size:.83rem; color:var(--text-muted); line-height:1.65; }
+.prevention-card {
+  padding:28px; border-radius:var(--r-2xl);
+  background:rgba(8,22,12,.70); border:1px solid var(--border-green);
+  backdrop-filter:blur(20px); position:sticky; top:88px;
+}
+.prevention-title { font-weight:700; font-size:1.05rem; color:var(--text-primary); margin-bottom:20px; display:flex; align-items:center; gap:8px; }
+.prevention-list { display:flex; flex-direction:column; gap:12px; margin-bottom:24px; }
+.prevention-item { display:flex; gap:12px; align-items:flex-start; }
+.prev-dot { width:7px; height:7px; border-radius:50%; background:var(--green-400); box-shadow:0 0 6px var(--green-400); flex-shrink:0; margin-top:7px; }
+.prev-text { font-size:.85rem; color:rgba(134,239,172,.70); line-height:1.65; }
+.recommend-box {
+  padding:18px 20px; border-radius:var(--r-lg);
+  background:rgba(34,197,94,.06); border:1px solid rgba(34,197,94,.14);
+}
+.recommend-label { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.9px; color:var(--green-400); margin-bottom:8px; }
+.recommend-text  { font-size:.85rem; color:rgba(134,239,172,.70); line-height:1.65; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   MODEL COMPARISON
+═══════════════════════════════════════════════════════════════════ */
+#models { background:var(--bg-root); }
+.model-table-wrap {
+  border-radius:var(--r-2xl); overflow:hidden;
+  border:1px solid var(--border);
+  backdrop-filter:blur(20px);
+}
+.model-table {
+  width:100%; border-collapse:collapse;
+  background:rgba(8,22,12,.60);
+}
+.model-table thead { background:linear-gradient(135deg,rgba(22,163,74,.12),rgba(20,184,166,.08)); }
+.model-table th {
+  padding:18px 24px; text-align:left;
+  font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:1.2px;
+  color:var(--green-400); border-bottom:1px solid var(--border);
+}
+.model-table td {
+  padding:16px 24px; font-size:.9rem; color:var(--text-primary);
+  border-bottom:1px solid rgba(255,255,255,.03);
+  transition:background var(--t-fast);
+}
+.model-table tr:last-child td { border-bottom:none; }
+.model-table tbody tr:hover td { background:rgba(34,197,94,.03); }
+.model-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  font-weight:700; font-size:.88rem; padding:4px 12px;
+  border-radius:var(--r-pill);
+}
+.model-badge-best { background:var(--grad-primary); color:#fff; box-shadow:0 0 12px rgba(34,197,94,.25); }
+.metric-bar-mini { display:flex; align-items:center; gap:10px; }
+.metric-bar-mini-track { flex:1; height:5px; border-radius:var(--r-pill); background:rgba(255,255,255,.06); overflow:hidden; }
+.metric-bar-mini-fill  { height:100%; border-radius:var(--r-pill); }
+.fill-green  { background:linear-gradient(90deg,#166534,#4ade80); }
+.fill-blue   { background:linear-gradient(90deg,#1e3a8a,#93c5fd); }
+.fill-purple { background:linear-gradient(90deg,#4c1d95,#d8b4fe); }
+.fill-teal   { background:linear-gradient(90deg,#134e4a,#2dd4bf); }
+.metric-val  { font-weight:700; font-size:.88rem; min-width:38px; text-align:right; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   AI ARCHITECTURE
+═══════════════════════════════════════════════════════════════════ */
+#architecture { background:var(--bg-dark); }
+.arch-flow {
+  display:flex; align-items:center; gap:0;
+  overflow-x:auto; padding:8px 0;
+}
+.arch-block {
+  flex-shrink:0; display:flex; flex-direction:column;
+  align-items:center; gap:12px;
+  padding:24px 20px; border-radius:var(--r-xl);
+  background:var(--bg-card); border:1px solid var(--border);
+  backdrop-filter:blur(16px); min-width:160px;
+  transition:transform var(--t-med), box-shadow var(--t-med), border-color var(--t-med);
+  animation:fadeUp .5s ease both;
+}
+.arch-block:hover { transform:translateY(-6px); box-shadow:var(--shadow-md); border-color:var(--border-green); }
+.arch-block-icon {
+  width:52px; height:52px; border-radius:var(--r-lg);
+  display:flex; align-items:center; justify-content:center; font-size:1.5rem;
+  transition:transform var(--t-fast);
+}
+.arch-block:hover .arch-block-icon { transform:scale(1.10); }
+.arch-block-num { font-size:.65rem; font-weight:800; letter-spacing:1px; color:var(--text-dim); text-transform:uppercase; }
+.arch-block-name { font-size:.88rem; font-weight:700; color:var(--text-primary); text-align:center; }
+.arch-block-sub  { font-size:.72rem; color:var(--text-muted); text-align:center; line-height:1.5; }
+.arch-block-chips { display:flex; flex-wrap:wrap; gap:4px; justify-content:center; margin-top:4px; }
+.arch-chip {
+  font-size:.62rem; font-weight:600; padding:2px 7px; border-radius:var(--r-pill);
+  background:rgba(255,255,255,.05); border:1px solid var(--border); color:var(--text-dim);
+}
+.arch-arrow {
+  flex-shrink:0; display:flex; align-items:center; padding:0 8px;
+  color:rgba(34,197,94,.35); font-size:1.4rem;
+}
+.arch-block-green  .arch-block-icon { background:rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.22); }
+.arch-block-blue   .arch-block-icon { background:rgba(59,130,246,.12); border:1px solid rgba(59,130,246,.22); }
+.arch-block-purple .arch-block-icon { background:rgba(168,85,247,.12); border:1px solid rgba(168,85,247,.22); }
+.arch-block-teal   .arch-block-icon { background:rgba(20,184,166,.12); border:1px solid rgba(20,184,166,.22); }
+.arch-block-amber  .arch-block-icon { background:rgba(245,158,11,.10); border:1px solid rgba(245,158,11,.20); }
+
+.arch-detail {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px;
+  margin-top:40px;
+}
+.arch-detail-card {
+  padding:20px; border-radius:var(--r-xl);
+  background:var(--bg-card); border:1px solid var(--border);
+  backdrop-filter:blur(16px);
+  transition:all var(--t-med);
+}
+.arch-detail-card:hover { border-color:var(--border-green); box-shadow:var(--shadow-sm); }
+.arch-detail-label { font-size:.70rem; font-weight:700; text-transform:uppercase; letter-spacing:.9px; color:var(--text-muted); margin-bottom:8px; }
+.arch-detail-val   { font-family:var(--font-head); font-size:1.3rem; font-weight:800; color:#fff; }
+.arch-detail-sub   { font-size:.78rem; color:var(--text-muted); margin-top:4px; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════════════════════════════ */
+#footer {
+  background:rgba(3,10,6,.98);
+  border-top:1px solid var(--border);
+  padding:64px 0 32px;
+}
+.footer-grid { display:grid; grid-template-columns:1.5fr 1fr 1fr 1fr; gap:40px; margin-bottom:48px; }
+.footer-brand { display:flex; flex-direction:column; gap:16px; }
+.footer-logo-wrap { display:flex; align-items:center; gap:10px; }
+.footer-logo-icon {
+  width:40px; height:40px; border-radius:var(--r-md);
+  background:var(--grad-primary);
+  display:flex; align-items:center; justify-content:center; font-size:1.3rem;
+}
+.footer-logo-text { font-family:var(--font-head); font-size:1.1rem; font-weight:800; color:#fff; }
+.footer-desc { font-size:.84rem; color:var(--text-muted); line-height:1.75; max-width:260px; }
+.footer-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:.70rem; font-weight:700; letter-spacing:.8px; text-transform:uppercase;
+  padding:5px 12px; border-radius:var(--r-pill);
+  background:rgba(34,197,94,.08); border:1px solid rgba(34,197,94,.16);
+  color:var(--green-400); width:fit-content;
+}
+.footer-col-title { font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:1.1px; color:var(--text-secondary); margin-bottom:16px; }
+.footer-links { display:flex; flex-direction:column; gap:10px; }
+.footer-link { font-size:.85rem; color:var(--text-muted); transition:color var(--t-fast); }
+.footer-link:hover { color:var(--green-300); }
+.footer-contact-item { display:flex; gap:10px; align-items:flex-start; margin-bottom:12px; }
+.footer-contact-icon { font-size:1rem; flex-shrink:0; margin-top:1px; }
+.footer-contact-text { font-size:.83rem; color:var(--text-muted); line-height:1.55; }
+.footer-bottom {
+  display:flex; justify-content:space-between; align-items:center;
+  padding-top:24px; border-top:1px solid var(--border);
+  gap:16px; flex-wrap:wrap;
+}
+.footer-copy { font-size:.80rem; color:var(--text-dim); }
+.footer-tech  { display:flex; gap:8px; flex-wrap:wrap; }
+.footer-tech-tag {
+  font-size:.68rem; font-weight:600; padding:3px 9px; border-radius:var(--r-pill);
+  background:rgba(255,255,255,.04); border:1px solid var(--border); color:var(--text-dim);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SECTION DIVIDER
+═══════════════════════════════════════════════════════════════════ */
+.sec-divider {
+  height:1px; border:none; margin:0;
+  background:linear-gradient(90deg,transparent,var(--border) 20%,rgba(255,255,255,.06) 50%,var(--border) 80%,transparent);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SCROLL REVEAL
+═══════════════════════════════════════════════════════════════════ */
+.reveal { opacity:0; transform:translateY(28px); transition:opacity .6s ease, transform .6s ease; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════════════════════ */
+@media (max-width:1200px) {
+  .hero-content        { gap:40px; }
+  .diagnose-grid       { gap:24px; }
+  .treatment-grid      { grid-template-columns:1fr; }
+  .prevention-card     { position:static; }
+  .footer-grid         { grid-template-columns:1fr 1fr; }
+}
+@media (max-width:900px) {
+  .hero-content        { grid-template-columns:1fr; text-align:center; }
+  .hero-sub            { margin:0 auto 36px; }
+  .hero-actions        { justify-content:center; }
+  .hero-stats          { justify-content:center; }
+  .hero-visual         { display:none; }
+  .diagnose-grid       { grid-template-columns:1fr; }
+  .arch-flow           { gap:0; }
+  .nav-links, .nav-cta { display:none; }
+  .nav-hamburger       { display:flex; }
+  .model-table-wrap    { overflow-x:auto; }
+}
+@media (max-width:600px) {
+  .disease-grid        { grid-template-columns:1fr; }
+  .footer-grid         { grid-template-columns:1fr; }
+  .footer-bottom       { flex-direction:column; align-items:flex-start; }
+  .img-previews        { grid-template-columns:1fr; }
+  .arch-detail         { grid-template-columns:1fr 1fr; }
+  .hero-stats          { gap:12px; }
+  .hero-stat           { padding:12px 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════════
+     NAVBAR
+════════════════════════════════════════════════════════════════ -->
+<nav id="navbar" role="navigation" aria-label="Main navigation">
+  <div class="container">
+    <div class="nav-inner">
+      <a class="nav-logo" href="#hero" aria-label="PaddySense Pro home">
+        <div class="nav-logo-icon">🌾</div>
+        <div>
+          <div class="nav-logo-text">PaddySense Pro</div>
+          <span class="nav-logo-sub">Paddy Disease Intelligence</span>
+        </div>
+      </a>
+
+      <ul class="nav-links" role="list">
+        <li><a class="nav-link active" href="#hero">Home</a></li>
+        <li><a class="nav-link" href="#diagnose">Diagnose</a></li>
+        <li><a class="nav-link" href="#explorer">Disease Explorer</a></li>
+        <li><a class="nav-link" href="#models">Model Insights</a></li>
+        <li><a class="nav-link" href="#treatment">Treatments</a></li>
+        <li><a class="nav-link" href="#footer">About</a></li>
+      </ul>
+
+      <a class="btn btn-primary btn-sm nav-cta" href="#diagnose">Start Diagnosis</a>
+
+      <button class="nav-hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <div class="nav-mobile" id="mobile-menu" role="menu">
+    <a class="nav-link active" href="#hero" role="menuitem">Home</a>
+    <a class="nav-link" href="#diagnose" role="menuitem">Diagnose</a>
+    <a class="nav-link" href="#explorer" role="menuitem">Disease Explorer</a>
+    <a class="nav-link" href="#models" role="menuitem">Model Insights</a>
+    <a class="nav-link" href="#treatment" role="menuitem">Treatments</a>
+    <a class="nav-link" href="#footer" role="menuitem">About</a>
+    <a class="btn btn-primary" href="#diagnose" style="margin-top:8px;justify-content:center;" role="menuitem">Start Diagnosis</a>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════════════════════════════
+     HERO
+════════════════════════════════════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-orb hero-orb-3"></div>
+  <div class="hero-grid"></div>
+
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-left">
+        <div class="hero-eyebrow">
+          <span class="tag"><span class="tag-dot"></span>AI-Powered · Tamil Nadu Agri-AI 2025</span>
+        </div>
+        <h1 class="hero-title">
+          AI-Powered<br>
+          <span class="hero-title-grad">Paddy Disease</span><br>
+          Intelligence
+        </h1>
+        <p class="hero-sub">
+          Upload a paddy leaf image and receive an instant AI diagnosis with
+          Grad-CAM explainability, confidence scoring, and expert treatment
+          recommendations — all in under 2 seconds.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary btn-lg" href="#diagnose">
+            🌾&nbsp; Start Diagnosis
+          </a>
+          <a class="btn btn-ghost btn-lg" href="#explorer">
+            Explore Diseases
+          </a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="hero-stat-num">98.4%</span>
+            <span class="hero-stat-lbl">Accuracy</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-num">10+</span>
+            <span class="hero-stat-lbl">Disease Classes</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-num">ResNet</span>
+            <span class="hero-stat-lbl">Model Type</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-num">&lt;2s</span>
+            <span class="hero-stat-lbl">Inference</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="hero-card">
+          <div class="hero-card-top">
+            <div class="hero-card-avatar">🔬</div>
+            <div class="hero-card-info">
+              <div class="hero-card-title">PaddySense Analysis</div>
+              <div class="hero-card-sub">Real-time scanning active</div>
+            </div>
+            <div class="status-dot"></div>
+          </div>
+          <div class="hero-card-body">
+            <div class="scan-bar">
+              <div class="scan-bar-label"><span>CNN Confidence</span><span style="color:#4ade80;">92%</span></div>
+              <div class="scan-bar-track"><div class="scan-bar-fill scan-bar-fill-1"></div></div>
+            </div>
+            <div class="scan-bar">
+              <div class="scan-bar-label"><span>Grad-CAM Signal</span><span style="color:#2dd4bf;">87%</span></div>
+              <div class="scan-bar-track"><div class="scan-bar-fill scan-bar-fill-2"></div></div>
+            </div>
+            <div class="scan-bar">
+              <div class="scan-bar-label"><span>Metadata Fusion</span><span style="color:#93c5fd;">78%</span></div>
+              <div class="scan-bar-track"><div class="scan-bar-fill scan-bar-fill-3"></div></div>
+            </div>
+            <div class="hero-card-result">
+              <div class="result-icon">🦠</div>
+              <div>
+                <div class="result-label">Detected</div>
+                <div class="result-name">Bacterial Leaf Blight</div>
+              </div>
+              <div class="result-conf">
+                <div class="result-pct">92%</div>
+                <div class="result-sub">Confidence</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="sec-divider" />
+
+<!-- ════════════════════════════════════════════════════════════════
+     DIAGNOSE
+════════════════════════════════════════════════════════════════ -->
+<section id="diagnose" class="section-pad">
+  <div class="container">
+    <div class="sec-eyebrow reveal">
+      <span class="tag"><span class="tag-dot"></span>AI Diagnosis</span>
+    </div>
+    <h2 class="sec-title reveal">Upload &amp; Diagnose</h2>
+    <p class="sec-sub reveal" style="margin-bottom:40px;">
+      Drag and drop a paddy leaf image below. Our AI pipeline will scan the image,
+      extract features, and return a detailed disease prediction with visual explanations.
+    </p>
+
+    <div class="diagnose-grid reveal">
+      <!-- Upload Card -->
+      <div class="upload-card">
+        <div
+          class="upload-zone"
+          id="upload-zone"
+          role="button"
+          tabindex="0"
+          aria-label="Upload leaf image"
+        >
+          <div class="upload-icon-wrap">📷</div>
+          <div class="upload-title">Drag &amp; Drop Leaf Image</div>
+          <div class="upload-sub">or click to browse from your device</div>
+          <div class="upload-formats">JPG · JPEG · PNG · Max 10MB</div>
+        </div>
+
+        <div class="upload-preview" id="file-preview">
+          <span>📂&nbsp; No file selected — preview will appear here</span>
+        </div>
+
+        <div class="model-select">
+          <div class="model-select-label">Select AI Model</div>
+          <div class="model-btns">
+            <button class="model-btn" onclick="selectModel(this)">DB-PCAN</button>
+            <button class="model-btn active" onclick="selectModel(this)">CNN</button>
+            <button class="model-btn" onclick="selectModel(this)">ResNet-18</button>
+          </div>
+        </div>
+
+        <button class="btn btn-primary analyze-btn" onclick="runAnalysis()">
+          🔬&nbsp; Analyze Image
+        </button>
+      </div>
+
+      <!-- Results Card -->
+      <div class="results-card" id="results-card">
+        <div class="result-header">
+          <div class="result-title-grp">
+            <div class="result-card-title">Diagnosis Result</div>
+            <div class="result-card-sub">AI-powered analysis with XAI explanation</div>
+          </div>
+          <span class="risk-badge risk-high" id="risk-badge">⚠ High Risk</span>
+        </div>
+
+        <div class="diagnosis-box">
+          <div class="diagnosis-name" id="diagnosis-name">Bacterial Leaf Blight</div>
+          <div class="diagnosis-sci">Xanthomonas oryzae pv. oryzae</div>
+        </div>
+
+        <div class="conf-section">
+          <div class="conf-label">
+            <span class="conf-text">Model Confidence</span>
+            <span class="conf-pct">92.3%</span>
+          </div>
+          <div class="conf-track">
+            <div class="conf-fill conf-fill-red" style="--w:92.3%"></div>
+          </div>
+          <div class="conf-label" style="margin-top:10px;">
+            <span class="conf-text">Grad-CAM Attention</span>
+            <span class="conf-pct" style="color:#2dd4bf;">87.1%</span>
+          </div>
+          <div class="conf-track">
+            <div class="conf-fill conf-fill-grn" style="--w:87.1%"></div>
+          </div>
+        </div>
+
+        <div class="img-previews">
+          <div class="img-preview-box">
+            <div class="icon">🖼</div>
+            <div class="img-preview-label">Original Image</div>
+            <div style="font-size:.72rem;color:var(--text-dim);margin-top:4px;">Input leaf photo</div>
+          </div>
+          <div class="img-preview-box heatmap-box">
+            <div class="icon">🔥</div>
+            <div class="img-preview-label">Grad-CAM Heatmap</div>
+            <div style="font-size:.72rem;color:var(--text-dim);margin-top:4px;">XAI attention map</div>
+          </div>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-chip">🦠 Bacterial Pathogen</span>
+          <span class="detail-chip">🌿 Leaf Infection</span>
+          <span class="detail-chip">⚡ Critical Stage</span>
+          <span class="detail-chip">🔬 CNN · ResNet-18</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="sec-divider" />
+
+<!-- ════════════════════════════════════════════════════════════════
+     DISEASE EXPLORER
+════════════════════════════════════════════════════════════════ -->
+<section id="explorer" class="section-pad">
+  <div class="container">
+    <div class="explorer-header">
+      <div>
+        <div class="sec-eyebrow reveal"><span class="tag"><span class="tag-dot"></span>Disease Library</span></div>
+        <h2 class="sec-title reveal" style="margin-bottom:0;">Disease Explorer</h2>
+        <p class="sec-sub reveal" style="margin-top:12px;">Browse all paddy diseases detected by PaddySense Pro.</p>
+      </div>
+      <div class="filter-btns reveal">
+        <button class="filter-btn active" onclick="filterDiseases(this,'all')">All</button>
+        <button class="filter-btn" onclick="filterDiseases(this,'bacterial')">Bacterial</button>
+        <button class="filter-btn" onclick="filterDiseases(this,'fungal')">Fungal</button>
+        <button class="filter-btn" onclick="filterDiseases(this,'viral')">Viral</button>
+        <button class="filter-btn" onclick="filterDiseases(this,'pest')">Pest</button>
+      </div>
+    </div>
+
+    <div class="disease-grid" id="disease-grid">
+
+      <div class="disease-card" data-type="bacterial">
+        <div class="disease-card-top">
+          <div class="disease-icon">🦠</div>
+          <span class="sev-badge sev-critical">Critical</span>
+        </div>
+        <div class="disease-name">Bacterial Leaf Blight</div>
+        <div class="disease-sci">Xanthomonas oryzae pv. oryzae</div>
+        <div class="disease-desc">Water-soaked lesions turning yellow-white along leaf margins. Can devastate 70% of yield if untreated.</div>
+        <div class="disease-tags">
+          <span class="disease-tag">Bacterial</span>
+          <span class="disease-tag">Leaf</span>
+          <span class="disease-tag">Wind-spread</span>
+        </div>
+      </div>
+
+      <div class="disease-card" data-type="bacterial">
+        <div class="disease-card-top">
+          <div class="disease-icon">🧫</div>
+          <span class="sev-badge sev-high">High</span>
+        </div>
+        <div class="disease-name">Bacterial Leaf Streak</div>
+        <div class="disease-sci">Xanthomonas oryzae pv. oryzicola</div>
+        <div class="disease-desc">Narrow brown water-soaked streaks running between leaf veins, reducing photosynthesis significantly.</div>
+        <div class="disease-tags">
+          <span class="disease-tag">Bacterial</span>
+          <span class="disease-tag">Streak</span>
+          <span class="disease-tag">Inter-vein</span>
+        </div>
+      </div>
+
+      <div class="disease-card" data-type="bacterial">
+        <div class="disease-card-top">
+          <div class="disease-icon">🌾</div>
+          <span class="sev-badge sev-critical">Critical</span>
+        </div>
+        <div class="disease-name">Bacterial Panicle Blight</div>
+        <div class="disease-sci">Burkholderia glumae</div>
+        <div class="disease-desc">Sterile, chalky-white grains causing total grain loss during heading stage in warm humid conditions.</div>
+        <div class="disease-tags">
+          <span class="disease-tag">Bacterial</span>
+          <span class="disease-tag">Panicle</span>
+          <span class="disease-tag">Seed-borne</span>
+        </div>
+      </div>
+
+      <div class="disease-card" data-type="fungal">
+        <div class="disease-card-top">
+          <div class="disease-icon">💥</div>
+          <span class="sev-badge sev-critical">Critical</span>
+        </div>
+        <div class="disease-name">Rice Blast</div>
+        <div class="disease-sci">Magnaporthe oryzae</div>
+        <div class="disease-desc">Diamond-shaped lesions with grey centres and brown borders. Airborne spores spread rapidly in cool humid nights.</div>
+        <div class="disease-tags">
+          <span class="disease-tag">Fungal</span>
+          <span class="disease-tag">Airborne</span>
+          <span class="disease-tag">All Stages</span>
+        </div>
+      </div>
+
+      <div class="disease-card" data-type="fungal">
+        <div class="disease-card-top">
+          <div class="disease-icon">🟤</div>
+          <span class="sev-badge sev-moderate">Moderate</span>
+        </div>
+        <div class="disease-name">Brown Spot</div>
+        <div class="disease-sci">Bipolaris oryzae</div>
+        <div class="disease-desc">Circular brown spots with yellow halos. Often linked to soil nutrient deficiency and drought stress.</div>
+        <div class="disease-tags">
+          <span class="disease-tag">Fungal</span>
+          <span class="disease-tag">Leaf Spot</span>
+          <span class="disease-tag">Nutrient-linked</span>
+        </div>
+      </div>
+
+      <div class="disease-card" data-type="pest">
+        <div class="disease-card-top">
+          <div class="disease-icon">🪲</div>
+          <span class="sev-badge sev-high">High</span>
+        </div>
+        <div class="disease-name">Dead Heart</div>
+        <div class="disease-sci">Scirpophaga incertulas</div>
+        <div class="disease-desc">Central shoot death from stem borer larval feeding. Dead central shoot pulls out easily from tiller base.</div>
+        <div class="disease-tags">
+          <span class="disease-tag">Pest</span>
+          <span class="disease-tag">Stem Borer</span>
+          <span class="disease-tag">Tillering</span>
+        </div>
+      </div>
+
+      <div class="disease-card" data-type="fungal">
+        <div class="disease-card-top">
+          <div class="disease-icon">🌫</div>
+          <span class="sev-badge sev-moderate">Moderate</span>
+        </div>
+        <div class="disease-name">Downy Mildew</div>
+        <div class="disease-sci">Sclerophthora macrospora</div>
+        <div class="disease-desc">Pale yellow leaf patches with white downy growth on underside. Favoured by standing water and cool temperatures.</div>
+        <div class="disease-tags">
+          <span class="disease-tag">Oomycete</span>
+          <span class="disease-tag">Waterlogging</span>
+          <span class="disease-tag">Systemic</span>
+        </div>
+      </div>
+
+      <div class="disease-card" data-type="pest">
+        <div class="disease-card-top">
+          <div class="disease-icon">🐛</div>
+          <span class="sev-badge sev-moderate">Moderate</span>
+        </div>
+        <div class="disease-name">Rice Hispa</div>
+        <div class="disease-sci">Dicladispa armigera</div>
+        <div class="disease-desc">White parallel scraping marks from adult feeding and irregular transparent blotches from larval mining.</div>
+        <div class="disease-tags">
+          <span class="disease-tag">Pest</span>
+          <span class="disease-tag">Beetle</span>
+          <span class="disease-tag">Leaf Mining</span>
+        </div>
+      </div>
+
+      <div class="disease-card" data-type="viral">
+        <div class="disease-card-top">
+          <div class="disease-icon">🟡</div>
+          <span class="sev-badge sev-critical">Critical</span>
+        </div>
+        <div class="disease-name">Tungro Virus Disease</div>
+        <div class="disease-sci">RTBV + RTSV</div>
+        <div class="disease-desc">Yellow-orange leaf discolouration and severe stunting from dual-virus infection transmitted by green leafhopper.</div>
+        <div class="disease-tags">
+          <span class="disease-tag">Viral</span>
+          <span class="disease-tag">Leafhopper</span>
+          <span class="disease-tag">Vector-borne</span>
+        </div>
+      </div>
+
+      <div class="disease-card" data-type="">
+        <div class="disease-card-top">
+          <div class="disease-icon">✅</div>
+          <span class="sev-badge sev-low">Healthy</span>
+        </div>
+        <div class="disease-name">Normal (Healthy Paddy)</div>
+        <div class="disease-sci">No pathogen detected</div>
+        <div class="disease-desc">Uniform green colour, no lesions, upright and vigorous posture with normal tillering and leaf development.</div>
+        <div class="disease-tags">
+          <span class="disease-tag">Healthy</span>
+          <span class="disease-tag">Normal</span>
+          <span class="disease-tag">Monitor</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<hr class="sec-divider" />
+
+<!-- ════════════════════════════════════════════════════════════════
+     TREATMENT
+════════════════════════════════════════════════════════════════ -->
+<section id="treatment" class="section-pad">
+  <div class="container">
+    <div class="sec-eyebrow reveal"><span class="tag"><span class="tag-dot"></span>Expert Guidance</span></div>
+    <h2 class="sec-title reveal">Treatment Guidance</h2>
+    <p class="sec-sub reveal" style="margin-bottom:40px;">
+      Step-by-step treatment protocol for <strong style="color:var(--green-300);">Bacterial Leaf Blight</strong>.
+      Always consult a certified agronomist for field-level decisions.
+    </p>
+
+    <div class="treatment-grid reveal">
+      <div class="treatment-steps">
+        <div class="treatment-step">
+          <div class="step-num">01</div>
+          <div class="step-content">
+            <div class="step-title">Immediate Field Drainage</div>
+            <div class="step-desc">Drain standing water from the field within 24 hours to reduce leaf wetness and bacterial spread through irrigation channels.</div>
+          </div>
+        </div>
+        <div class="treatment-step">
+          <div class="step-num">02</div>
+          <div class="step-content">
+            <div class="step-title">Apply Copper Bactericide</div>
+            <div class="step-desc">Spray copper oxychloride (3g/L) or streptomycin sulphate at 500ppm uniformly across affected areas. Repeat after 7 days.</div>
+          </div>
+        </div>
+        <div class="treatment-step">
+          <div class="step-num">03</div>
+          <div class="step-content">
+            <div class="step-title">Remove Infected Plant Material</div>
+            <div class="step-desc">Uproot and destroy severely infected tillers immediately. Do not compost — burn or bury infected material far from the field.</div>
+          </div>
+        </div>
+        <div class="treatment-step">
+          <div class="step-num">04</div>
+          <div class="step-content">
+            <div class="step-title">Reduce Nitrogen Fertilisation</div>
+            <div class="step-desc">Stop or reduce nitrogen application during the outbreak period. Excess nitrogen increases susceptibility and speeds bacterial proliferation.</div>
+          </div>
+        </div>
+        <div class="treatment-step">
+          <div class="step-num">05</div>
+          <div class="step-content">
+            <div class="step-title">Monitor &amp; Follow Up</div>
+            <div class="step-desc">Monitor the field every 3 days for 2 weeks. Report to local agriculture extension officer if spread is not contained after second treatment.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="prevention-card">
+        <div class="prevention-title">🛡 Prevention Tips</div>
+        <div class="prevention-list">
+          <div class="prevention-item">
+            <div class="prev-dot"></div>
+            <div class="prev-text">Use certified disease-free seed from registered suppliers before every planting season.</div>
+          </div>
+          <div class="prevention-item">
+            <div class="prev-dot"></div>
+            <div class="prev-text">Plant resistant or tolerant varieties such as IR64, IR36 in high-risk zones.</div>
+          </div>
+          <div class="prevention-item">
+            <div class="prev-dot"></div>
+            <div class="prev-text">Synchronise transplanting dates with neighbouring farms to break pathogen cycles.</div>
+          </div>
+          <div class="prevention-item">
+            <div class="prev-dot"></div>
+            <div class="prev-text">Maintain balanced potassium and silicon fertilisation to strengthen cell walls.</div>
+          </div>
+          <div class="prevention-item">
+            <div class="prev-dot"></div>
+            <div class="prev-text">Sanitise irrigation equipment and avoid field-to-field water flow during outbreaks.</div>
+          </div>
+          <div class="prevention-item">
+            <div class="prev-dot"></div>
+            <div class="prev-text">Conduct routine AI-assisted field scans every 10 days during the growing season.</div>
+          </div>
+        </div>
+        <div class="recommend-box">
+          <div class="recommend-label">🌾 AI Recommendation</div>
+          <div class="recommend-text">
+            Based on the detected confidence level of <strong style="color:var(--green-300);">92.3%</strong>,
+            immediate field drainage and bactericide application are recommended within
+            <strong style="color:var(--green-300);">24–48 hours</strong> to prevent spread.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="sec-divider" />
+
+<!-- ════════════════════════════════════════════════════════════════
+     MODEL INSIGHTS
+════════════════════════════════════════════════════════════════ -->
+<section id="models" class="section-pad">
+  <div class="container">
+    <div class="sec-eyebrow reveal"><span class="tag"><span class="tag-dot"></span>Performance</span></div>
+    <h2 class="sec-title reveal">Model Comparison</h2>
+    <p class="sec-sub reveal" style="margin-bottom:40px;">
+      Benchmark comparison of all AI models available in PaddySense Pro across key classification metrics.
+    </p>
+
+    <div class="model-table-wrap reveal">
+      <table class="model-table" aria-label="Model performance comparison">
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>Accuracy</th>
+            <th>Precision</th>
+            <th>Recall</th>
+            <th>F1-Score</th>
+            <th>Inference</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <span class="model-badge model-badge-best">⭐ ResNet-18</span>
+            </td>
+            <td>
+              <div class="metric-bar-mini">
+                <div class="metric-bar-mini-track"><div class="metric-bar-mini-fill fill-green" style="width:98.4%"></div></div>
+                <span class="metric-val" style="color:#4ade80;">98.4%</span>
+              </div>
+            </td>
+            <td>
+              <div class="metric-bar-mini">
+                <div class="metric-bar-mini-track"><div class="metric-bar-mini-fill fill-green" style="width:97.8%"></div></div>
+                <span class="metric-val" style="color:#4ade80;">97.8%</span>
+              </div>
+            </td>
+            <td>
+              <div class="metric-bar-mini">
+                <div class="metric-bar-mini-track"><div class="metric-bar-mini-fill fill-green" style="width:98.1%"></div></div>
+                <span class="metric-val" style="color:#4ade80;">98.1%</span>
+              </div>
+            </td>
+            <td>
+              <div class="metric-bar-mini">
+                <div class="metric-bar-mini-track"><div class="metric-bar-mini-fill fill-green" style="width:97.9%"></div></div>
+                <span class="metric-val" style="color:#4ade80;">97.9%</span>
+              </div>
+            </td>
+            <td><span style="color:var(--green-300);font-weight:700;">&lt;1.2s</span></td>
+          </tr>
+          <tr>
+            <td><span style="font-weight:600;">CNN (Custom)</span></td>
+            <td>
+              <div class="metric-bar-mini">
+                <div class="metric-bar-mini-track"><div class="metric-bar-mini-fill fill-blue" style="width:94.6%"></div></div>
+                <span class="metric-val" style="color:#93c5fd;">94.6%</span>
+              </div>
+            </td>
+            <td>
+              <div class="metric-bar-mini">
+                <div class="metric-bar-mini-track"><div class="metric-bar-mini-fill fill-blue" style="width:93.2%"></div></div>
+                <span class="metric-val" style="color:#93c5fd;">93.2%</span>
+              </div>
+            </td>
+            <td>
+              <div class="metric-bar-mini">
+                <div class="metric-bar-mini-track"><div class="metric-bar-mini-fill fill-blue" style="width:94.1%"></div></div>
+                <span class="metric-val" style="color:#93c5fd;">94.1%</span>
+              </div>
+            </td>
+            <td>
+              <div class="metric-bar-mini">
+                <div class="metric-bar-mini-track"><div class="metric-bar-mini-fill fill-blue" style="width:93.6%"></div></div>
+                <span class="metric-val" style="color:#93c5fd;">93.6%</span>
+              </div>
+            </td>
+            <td><span style="color:var(--text-muted);font-weight:600;">&lt;0.9s</span></td>
+          </tr>
+          <tr>
+            <td><span style="font-weight:600;">DB-PCAN</span></td>
+            <td>
+              <div class="metric-bar-mini">
+                <div class="metric-bar-mini-track"><div class="metric-bar-mini-fill fill-purple" style="width:96.2%"></div></div>
+                <span class="metric-val" style="color:#d8b4fe;">96.2%</span>
+              </div>
+            </td>
+            <td>
+              <div class="metric-bar-mini">
+                <div class="metric-bar-mini-track"><div class="metric-bar-mini-fill fill-purple" style="width:95.8%"></div></div>
+                <span class="metric-val" style="color:#d8b4fe;">95.8%</span>
+              </div>
+            </td>
+            <td>
+              <div class="metric-bar-mini">
+                <div class="metric-bar-mini-track"><div class="metric-bar-mini-fill fill-purple" style="width:96.0%"></div></div>
+                <span class="metric-val" style="color:#d8b4fe;">96.0%</span>
+              </div>
+            </td>
+            <td>
+              <div class="metric-bar-mini">
+                <div class="metric-bar-mini-track"><div class="metric-bar-mini-fill fill-purple" style="width:95.9%"></div></div>
+                <span class="metric-val" style="color:#d8b4fe;">95.9%</span>
+              </div>
+            </td>
+            <td><span style="color:var(--text-muted);font-weight:600;">&lt;1.8s</span></td>
+          </tr>
+          <tr>
+            <td><span style="font-weight:600;">VGG-16</span></td>
+            <td>
+              <div class="metric-bar-mini">
+                <div class="metric-bar-mini-track"><div class="metric-bar-mini-fill fill-teal" style="width:91.3%"></div></div>
+                <span class="metric-val" style="color:#2dd4bf;">91.3%</span>
+              </div>
+            </td>
+            <td>
+              <div class="metric-bar-mini">
+                <div class="metric-bar-mini-track"><div class="metric-bar-mini-fill fill-teal" style="width:90.7%"></div></div>
+                <span class="metric-val" style="color:#2dd4bf;">90.7%</span>
+              </div>
+            </td>
+            <td>
+              <div class="metric-bar-mini">
+                <div class="metric-bar-mini-track"><div class="metric-bar-mini-fill fill-teal" style="width:91.1%"></div></div>
+                <span class="metric-val" style="color:#2dd4bf;">91.1%</span>
+              </div>
+            </td>
+            <td>
+              <div class="metric-bar-mini">
+                <div class="metric-bar-mini-track"><div class="metric-bar-mini-fill fill-teal" style="width:90.9%"></div></div>
+                <span class="metric-val" style="color:#2dd4bf;">90.9%</span>
+              </div>
+            </td>
+            <td><span style="color:var(--text-muted);font-weight:600;">&lt;2.4s</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<hr class="sec-divider" />
+
+<!-- ════════════════════════════════════════════════════════════════
+     ARCHITECTURE
+════════════════════════════════════════════════════════════════ -->
+<section id="architecture" class="section-pad">
+  <div class="container">
+    <div class="sec-eyebrow reveal"><span class="tag"><span class="tag-dot"></span>AI Pipeline</span></div>
+    <h2 class="sec-title reveal">AI Architecture</h2>
+    <p class="sec-sub reveal" style="margin-bottom:48px;">
+      End-to-end deep learning pipeline from raw leaf image to explainable disease prediction.
+    </p>
+
+    <div class="arch-flow reveal">
+
+      <div class="arch-block arch-block-green">
+        <div class="arch-block-num">Input</div>
+        <div class="arch-block-icon">📷</div>
+        <div class="arch-block-name">Image Input</div>
+        <div class="arch-block-sub">Raw leaf photo uploaded by user</div>
+        <div class="arch-block-chips">
+          <span class="arch-chip">JPG/PNG</span>
+          <span class="arch-chip">224×224</span>
+        </div>
+      </div>
+
+      <div class="arch-arrow">→</div>
+
+      <div class="arch-block arch-block-blue">
+        <div class="arch-block-num">Stage 01</div>
+        <div class="arch-block-icon">⚙️</div>
+        <div class="arch-block-name">Preprocessing</div>
+        <div class="arch-block-sub">Resize · Normalise · Augment</div>
+        <div class="arch-block-chips">
+          <span class="arch-chip">torchvision</span>
+          <span class="arch-chip">ImageNet μ/σ</span>
+        </div>
+      </div>
+
+      <div class="arch-arrow">→</div>
+
+      <div class="arch-block arch-block-purple">
+        <div class="arch-block-num">Stage 02</div>
+        <div class="arch-block-icon">🧠</div>
+        <div class="arch-block-name">Feature Extraction</div>
+        <div class="arch-block-sub">ResNet-18 backbone · 512-dim</div>
+        <div class="arch-block-chips">
+          <span class="arch-chip">ResNet-18</span>
+          <span class="arch-chip">512-dim</span>
+          <span class="arch-chip">ImageNet</span>
+        </div>
+      </div>
+
+      <div class="arch-arrow">→</div>
+
+      <div class="arch-block arch-block-teal">
+        <div class="arch-block-num">Stage 03</div>
+        <div class="arch-block-icon">🧬</div>
+        <div class="arch-block-name">Metadata Fusion</div>
+        <div class="arch-block-sub">Variety embed + Age MLP · 32-dim</div>
+        <div class="arch-block-chips">
+          <span class="arch-chip">Embedding</span>
+          <span class="arch-chip">BatchNorm</span>
+          <span class="arch-chip">MLP</span>
+        </div>
+      </div>
+
+      <div class="arch-arrow">→</div>
+
+      <div class="arch-block arch-block-amber">
+        <div class="arch-block-num">Stage 04</div>
+        <div class="arch-block-icon">🔬</div>
+        <div class="arch-block-name">Classification</div>
+        <div class="arch-block-sub">Disease prediction · 10 classes</div>
+        <div class="arch-block-chips">
+          <span class="arch-chip">Softmax</span>
+          <span class="arch-chip">10 classes</span>
+        </div>
+      </div>
+
+      <div class="arch-arrow">→</div>
+
+      <div class="arch-block arch-block-green">
+        <div class="arch-block-num">Output</div>
+        <div class="arch-block-icon">🔥</div>
+        <div class="arch-block-name">Grad-CAM XAI</div>
+        <div class="arch-block-sub">Visual attention heatmap overlay</div>
+        <div class="arch-block-chips">
+          <span class="arch-chip">Grad-CAM</span>
+          <span class="arch-chip">JET colormap</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="arch-detail reveal">
+      <div class="arch-detail-card">
+        <div class="arch-detail-label">Backbone</div>
+        <div class="arch-detail-val">ResNet-18</div>
+        <div class="arch-detail-sub">Pre-trained on ImageNet · Fine-tuned on paddy dataset</div>
+      </div>
+      <div class="arch-detail-card">
+        <div class="arch-detail-label">Feature Dim</div>
+        <div class="arch-detail-val">544-dim</div>
+        <div class="arch-detail-sub">512 image + 32 metadata fusion vector</div>
+      </div>
+      <div class="arch-detail-card">
+        <div class="arch-detail-label">Classes</div>
+        <div class="arch-detail-val">10</div>
+        <div class="arch-detail-sub">9 diseases + 1 healthy class</div>
+      </div>
+      <div class="arch-detail-card">
+        <div class="arch-detail-label">XAI Method</div>
+        <div class="arch-detail-val">Grad-CAM</div>
+        <div class="arch-detail-sub">Gradient-weighted class activation mapping</div>
+      </div>
+      <div class="arch-detail-card">
+        <div class="arch-detail-label">Training</div>
+        <div class="arch-detail-val">CosineAnneal</div>
+        <div class="arch-detail-sub">Label smoothing 0.05 · Weight decay 1e-4</div>
+      </div>
+      <div class="arch-detail-card">
+        <div class="arch-detail-label">Inference</div>
+        <div class="arch-detail-val">&lt;2s</div>
+        <div class="arch-detail-sub">CPU and GPU supported · PyTorch 2.x</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="sec-divider" />
+
+<!-- ════════════════════════════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════════════════════════ -->
+<footer id="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo-wrap">
+          <div class="footer-logo-icon">🌾</div>
+          <div class="footer-logo-text">PaddySense Pro</div>
+        </div>
+        <p class="footer-desc">
+          AI-powered paddy disease intelligence platform built for Tamil Nadu farmers,
+          agronomists, and agricultural researchers. Combining CNN, Grad-CAM, and
+          metadata fusion for explainable precision agriculture.
+        </p>
+        <span class="footer-badge"><span class="tag-dot"></span>Tamil Nadu Agri-AI 2025</span>
+      </div>
+
+      <div>
+        <div class="footer-col-title">Navigate</div>
+        <ul class="footer-links">
+          <li><a class="footer-link" href="#hero">Home</a></li>
+          <li><a class="footer-link" href="#diagnose">Diagnose</a></li>
+          <li><a class="footer-link" href="#explorer">Disease Explorer</a></li>
+          <li><a class="footer-link" href="#models">Model Insights</a></li>
+          <li><a class="footer-link" href="#treatment">Treatments</a></li>
+          <li><a class="footer-link" href="#architecture">Architecture</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="footer-col-title">Technology</div>
+        <ul class="footer-links">
+          <li><a class="footer-link" href="#">PyTorch 2.x</a></li>
+          <li><a class="footer-link" href="#">ResNet-18</a></li>
+          <li><a class="footer-link" href="#">Grad-CAM XAI</a></li>
+          <li><a class="footer-link" href="#">Streamlit</a></li>
+          <li><a class="footer-link" href="#">scikit-learn</a></li>
+          <li><a class="footer-link" href="#">albumentations</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="footer-col-title">Contact</div>
+        <div class="footer-contact-item">
+          <span class="footer-contact-icon">📧</span>
+          <span class="footer-contact-text">paddysense@agriai.tn.gov.in</span>
+        </div>
+        <div class="footer-contact-item">
+          <span class="footer-contact-icon">🏛</span>
+          <span class="footer-contact-text">Tamil Nadu Agricultural University<br>Coimbatore, India</span>
+        </div>
+        <div class="footer-contact-item">
+          <span class="footer-contact-icon">🔬</span>
+          <span class="footer-contact-text">Hackathon Finalist · Agri-AI 2025<br>Research &amp; Prototype</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span class="footer-copy">
+        © 2025 PaddySense Pro · Built for research &amp; demonstration · Tamil Nadu Agri-AI Initiative
+      </span>
+      <div class="footer-tech">
+        <span class="footer-tech-tag">PyTorch</span>
+        <span class="footer-tech-tag">ResNet-18</span>
+        <span class="footer-tech-tag">Grad-CAM</span>
+        <span class="footer-tech-tag">Streamlit</span>
+        <span class="footer-tech-tag">Python 3.11</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ════════════════════════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════════════════════ -->
+<script>
+/* ── Navbar scroll shadow ── */
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 30);
+}, { passive: true });
+
+/* ── Active nav link on scroll ── */
+const sections = document.querySelectorAll('section[id], footer[id]');
+const navLinks  = document.querySelectorAll('.nav-link');
+const observer  = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(l => {
+        l.classList.toggle('active', l.getAttribute('href') === '#' + e.target.id);
+      });
+    }
+  });
+}, { rootMargin: '-40% 0px -55% 0px' });
+sections.forEach(s => observer.observe(s));
+
+/* ── Mobile nav ── */
+const hamburger  = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobile-menu');
+hamburger.addEventListener('click', () => {
+  const open = mobileMenu.classList.toggle('open');
+  hamburger.classList.toggle('open', open);
+  hamburger.setAttribute('aria-expanded', open);
+});
+mobileMenu.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => {
+    mobileMenu.classList.remove('open');
+    hamburger.classList.remove('open');
+    hamburger.setAttribute('aria-expanded', false);
+  });
+});
+
+/* ── Scroll reveal ── */
+const revealObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      revealObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+/* ── Upload zone drag-and-drop ── */
+const zone = document.getElementById('upload-zone');
+const preview = document.getElementById('file-preview');
+['dragenter','dragover'].forEach(evt => {
+  zone.addEventListener(evt, e => { e.preventDefault(); zone.classList.add('drag-over'); });
+});
+['dragleave','drop'].forEach(evt => {
+  zone.addEventListener(evt, e => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    if (e.type === 'drop' && e.dataTransfer.files.length) {
+      handleFile(e.dataTransfer.files[0]);
+    }
+  });
+});
+zone.addEventListener('click', () => {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*';
+  inp.onchange = () => { if (inp.files[0]) handleFile(inp.files[0]); };
+  inp.click();
+});
+function handleFile(file) {
+  if (!file.type.startsWith('image/')) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    preview.innerHTML = '<img src="' + ev.target.result + '" style="width:100%;height:160px;object-fit:cover;border-radius:10px;" alt="Uploaded leaf" />';
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ── Model selection ── */
+function selectModel(btn) {
+  document.querySelectorAll('.model-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+/* ── Analyze button (demo) ── */
+function runAnalysis() {
+  const analyzeBtn = document.querySelector('.analyze-btn');
+  analyzeBtn.textContent = '⏳  Analyzing…';
+  analyzeBtn.style.opacity = '.7';
+  analyzeBtn.disabled = true;
+  setTimeout(() => {
+    analyzeBtn.innerHTML = '🔬&nbsp; Analyze Image';
+    analyzeBtn.style.opacity = '1';
+    analyzeBtn.disabled = false;
+    document.getElementById('results-card').scrollIntoView({ behavior:'smooth', block:'start' });
+  }, 2200);
+}
+
+/* ── Disease filter ── */
+function filterDiseases(btn, type) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.disease-card').forEach(card => {
+    const show = type === 'all' || card.dataset.type === type;
+    card.style.display = show ? '' : 'none';
+    if (show) {
+      card.style.animation = 'none';
+      void card.offsetWidth;
+      card.style.animation = 'fadeUp .4s ease both';
+    }
+  });
+}
+
+/* ── Disease card staggered animation delay ── */
+document.querySelectorAll('.disease-card').forEach((card, i) => {
+  card.style.animationDelay = (i * 0.07) + 's';
+});
+
+/* ── Arch block staggered delay ── */
+document.querySelectorAll('.arch-block').forEach((block, i) => {
+  block.style.animationDelay = (i * 0.10) + 's';
+});
+</script>
+</body>
+</html>
