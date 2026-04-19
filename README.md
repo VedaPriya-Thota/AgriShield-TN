@@ -287,14 +287,6 @@ python -m src.training.train_metadata_classifier
 * Combines AI + domain knowledge
 * Explainable AI (not black-box)
 * Scalable to full AgriTech system
-
----
-
-## 🧑‍💻 Author
-
-Vedagrani Burragoni
-B.Tech CSE (DS & AI)
-
 ---
 
 ## 🏁 Final Note
