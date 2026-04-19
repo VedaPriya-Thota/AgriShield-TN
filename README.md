@@ -50,11 +50,12 @@ The primary objectives of this project are:
 ### Utilities
 - scikit-learn
 - tqdm
-###AI Advisory
-- Groq API (AI advisory)
 
-### (Planned)
+
+
+### Key features
 - Weather APIs
+- Groq API (AI advisory)
 
 ---
 
@@ -71,7 +72,7 @@ Disease Prediction + Confidence
    ↓
 Grad-CAM Heatmap (Explainability)
    ↓
-(Planned) Weather Risk Analysis
+ Weather Risk Analysis
    ↓
  AI Advisory (Groq)
    ↓
@@ -107,7 +108,7 @@ The system follows a modular architecture:
 * Encodes crop variety and age
 * Fuses with image features
 
-### 6. Future Extensions
+### 6. Key features
 
 * Weather-based risk modeling
 * AI advisory using LLMs
@@ -312,13 +313,13 @@ python -m src.training.train_metadata_classifier
 * Basic Streamlit UI
 * Modular project structure
 * Groq AI advisory integration
+* Weather-based risk analysis
 
 ---
 
 ### 🚧 In Progress
 
 * Advanced frontend redesign (product-level UI)
-* Weather-based risk analysis
 ---
 
 ## ⚠️ Challenges Faced
@@ -335,7 +336,6 @@ python -m src.training.train_metadata_classifier
 ## 🔮 Future Scope
 
 * Disease severity estimation (percentage or segmentation)
-* Weather-aware disease spread prediction
 * Multi-language support (Tamil, Hindi)
 * Mobile-friendly interface
 * Voice interaction for farmers
