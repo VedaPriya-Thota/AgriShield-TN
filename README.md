@@ -277,6 +277,8 @@ outputs/
 
 ```bash
 streamlit run app/streamlit_app.py
+or
+python -m streamlit run app/streamlit_app.py
 ```
 
 ✔ Features:
