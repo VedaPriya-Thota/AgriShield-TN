@@ -1,50 +1,135 @@
-# 🌾 AgriShield-TN
-
-**Multimodal Paddy Disease Detection & Risk Analysis System**
-
----
-
-## 🚀 Overview
-
-AgriShield-TN is an AI-powered system designed to detect paddy leaf diseases using deep learning. It combines:
-
-* 🌿 **Image-based disease classification**
-* 📊 **Metadata (variety + age) awareness**
-* 🔍 **Explainable AI (Grad-CAM heatmaps)**
-* 📈 Future extension: **Weather-based risk prediction**
-
-The goal is to provide **accurate, explainable, and actionable insights** for farmers in Tamil Nadu.
+# 🌾 AgriShield-TN  
+### AI-Based Crop Health Diagnosis & Decision Support System
 
 ---
 
-## 🎯 Objectives
+## 📌 Overview
 
-* Detect paddy diseases from leaf images
-* Improve prediction using metadata (variety, age)
-* Provide visual explanations (heatmaps)
-* Build a scalable pipeline for future weather integration
+AgriShield-TN is an AI-powered system designed to assist farmers in detecting paddy crop diseases from leaf images and providing meaningful insights for decision-making.
+
+Unlike basic image classification projects, this system focuses on:
+
+- Disease detection  
+- Explainability (why the model predicted)  
+- Risk awareness (weather-based extension)  
+- Actionable guidance (future AI advisory layer)
+
+The project is designed with a **real-world agricultural use case in mind**, specifically targeting **Tamil Nadu paddy farming conditions**.
 
 ---
 
-## 🧱 Project Structure
+## 🎯 Objective
 
-```
+The primary objectives of this project are:
+
+- Detect paddy leaf diseases using deep learning  
+- Provide explainable predictions using Grad-CAM  
+- Improve trust in AI predictions  
+- Extend diagnosis with contextual information (metadata & weather)  
+- Move from simple classification → decision support system  
+
+---
+
+## ⚙️ Tech Stack
+
+### AI / ML
+- Python
+- PyTorch
+- Torchvision
+- OpenCV
+- Albumentations
+- NumPy, Pandas
+
+### Explainability
+- Grad-CAM
+- Matplotlib
+
+### Frontend
+- Streamlit
+
+### Utilities
+- scikit-learn
+- tqdm
+
+### (Planned)
+- Groq API (AI advisory)
+- Weather APIs
+
+---
+
+## 🧠 Project Workflow
+
+```text
+Image Upload
+   ↓
+Preprocessing (resize, normalize)
+   ↓
+CNN Model (ResNet-18)
+   ↓
+Disease Prediction + Confidence
+   ↓
+Grad-CAM Heatmap (Explainability)
+   ↓
+(Planned) Weather Risk Analysis
+   ↓
+ AI Advisory (Groq)
+   ↓
+Frontend Output
+````
+
+---
+
+## 🏗️ Technical Architecture
+
+The system follows a modular architecture:
+
+### 1. Input Layer
+
+* Leaf image
+* Metadata (variety, age) *(optional)*
+
+### 2. Image Encoder
+
+* Pretrained **ResNet-18**
+* Extracts deep visual features
+
+### 3. Classification Head
+
+* Predicts disease class
+
+### 4. Explainability Layer
+
+* Grad-CAM highlights important regions
+
+### 5. Metadata Encoder (Optional)
+
+* Encodes crop variety and age
+* Fuses with image features
+
+### 6. Future Extensions
+
+* Weather-based risk modeling
+* AI advisory using LLMs
+
+---
+
+## 📁 Project Structure
+
+```text
 AgriShield-TN/
 │
+├── app/
+│   └── streamlit_app.py
+│
 ├── data/
-│   ├── raw/
-│   │   ├── train_images/
-│   │   ├── test_images/
-│   │   ├── train.csv
-│   │   └── sample_submission.csv
-│   │
-│   ├── processed/
-│   └── metadata/
+│   └── raw/
+│       ├── train_images/
+│       ├── test_images/
+│       ├── train.csv
+│       └── sample_submission.csv
 │
 ├── src/
 │   ├── config/
-│   │   └── config.py
-│   │
 │   ├── datasets/
 │   │   ├── image_dataset.py
 │   │   ├── metadata_dataset.py
@@ -69,9 +154,6 @@ AgriShield-TN/
 │   └── utils/
 │       └── visualization.py
 │
-├── app/
-│   └── streamlit_app.py
-│
 ├── checkpoints/
 ├── outputs/
 ├── requirements.txt
@@ -82,110 +164,77 @@ AgriShield-TN/
 
 ## ⚙️ Setup Instructions
 
-### 1️⃣ Create Virtual Environment
+### 1. Clone Repository
+
+```bash
+git clone <your-repo-url>
+cd AgriShield-TN
+```
+
+---
+
+### 2. Create Virtual Environment
+
+#### Windows (PowerShell)
 
 ```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+```
+
+#### Windows (CMD)
+
+```cmd
 python -m venv venv
 venv\Scripts\activate
 ```
 
 ---
 
-### 2️⃣ Install Dependencies
+### 3. Install Dependencies
 
-```powershell
+```bash
 pip install -r requirements.txt
 ```
 
 ---
 
-### 3️⃣ Dataset Setup
+### 4. Place Dataset
 
-Place dataset inside:
+Ensure dataset is placed correctly:
 
-```
+```text
 data/raw/
-```
-
-Required:
-
-```
-train.csv
-train_images/
-test_images/
-```
-
----
-
-## 🧠 Technical Architecture
-
-### 🔹 Phase 1: Image-only Model
-
-```
-Image → CNN (ResNet18) → Feature Vector → Classifier → Disease
+├── train.csv
+├── train_images/
+│   ├── bacterial_leaf_blight/
+│   ├── blast/
+│   ├── brown_spot/
+│   └── ...
+└── test_images/
 ```
 
 ---
 
-### 🔹 Phase 2: Metadata-aware Model
+## ▶️ Commands to Run
 
-```
-Image → CNN → Image Features
-Metadata → Encoder → Metadata Features
+### 1. Test Dataset Loading
 
-           ↓
-      Fusion Layer
-           ↓
-    Disease Prediction
-```
-
----
-
-### 🔹 Phase 3 (Future)
-
-```
-Image + Metadata + Weather → Fusion → Disease + Severity + Risk
-```
-
----
-
-## 📊 Workflow
-
-```
-Input Image
-    ↓
-Preprocessing (resize, normalize)
-    ↓
-Model (CNN)
-    ↓
-Prediction (Disease Class)
-    ↓
-Grad-CAM → Heatmap
-    ↓
-Streamlit UI Output
-```
-
----
-
-## 🧪 Commands (VERY IMPORTANT)
-
-### ✅ 1. Test Dataset Loading
-
-```powershell
+```bash
 python -m src.datasets.test_dataset_loading
 ```
 
 ✔ Verifies:
 
-* images loading
-* labels correct
+* image loading
+* label correctness
 * transformations working
 
 ---
 
-### ✅ 2. Train Image-only Model
+### 2. Train Image-only Model
 
-```powershell
+```bash
 python -m src.training.train_classifier
 ```
 
@@ -195,28 +244,26 @@ python -m src.training.train_classifier
 checkpoints/best_disease_classifier.pth
 ```
 
----
+⏳ Note:
 
-### ⏳ Note:
-
-Training may take time (CPU).
-First epoch is always slow → **normal**
+* Training may take time (CPU)
+* First epoch is slower → normal behavior
 
 ---
 
-### ✅ 3. Evaluate Model
+### 3. Evaluate Model
 
-```powershell
+```bash
 python -m src.training.evaluate
 ```
 
 ✔ Generates:
 
-* accuracy
-* precision / recall / F1
-* confusion matrix (image)
+* Accuracy
+* Precision / Recall / F1-score
+* Confusion Matrix
 
-Saved in:
+✔ Saved in:
 
 ```
 outputs/
@@ -224,81 +271,88 @@ outputs/
 
 ---
 
-### ✅ 4. Run Streamlit App
+### 4. Run Streamlit App
 
-```powershell
+```bash
 streamlit run app/streamlit_app.py
 ```
 
 ✔ Features:
 
-* upload image
-* prediction
-* confidence
+* Upload image
+* Disease prediction
+* Confidence score
 * Grad-CAM heatmap
 
 ---
 
-### ✅ 5. Train Metadata Model (Optional)
+### 5. Train Metadata Model (Optional)
 
-```powershell
+```bash
 python -m src.training.train_metadata_classifier
 ```
 
 ✔ Uses:
 
-* image
-* variety
-* age
+* Image
+* Variety
+* Age
 
 ---
 
-## 🔍 Explainability (Grad-CAM)
+## 📊 Current Progress
 
-* Highlights important leaf regions
-* Shows **why** model predicted disease
-* Improves trust and interpretability
+### ✅ Completed
 
----
-
-## 📈 Current Progress
-
-✔ Dataset loading
-✔ Image classification model
-✔ Training pipeline
-✔ Evaluation metrics
-✔ Streamlit UI
-✔ Grad-CAM explainability
+* Dataset pipeline (image + metadata)
+* Image classification model (ResNet-18)
+* Training & evaluation pipeline
+* Grad-CAM explainability
+* Basic Streamlit UI
+* Modular project structure
+* Groq AI advisory integration
 
 ---
 
-## 🚧 Next Steps
+### 🚧 In Progress
 
-* Add weather data integration
-* Yield risk prediction
-* Severity segmentation (heatmap masks)
-* Tamil language support
+* Advanced frontend redesign (product-level UI)
+* Weather-based risk analysis
+---
+
+## ⚠️ Challenges Faced
+
+* Dataset structure mismatch (class-wise folders vs CSV)
+* File path issues (image_id handling)
+* Integrating Grad-CAM correctly
+* Slow CPU training performance
+* Virtual environment path issues (Streamlit launcher error)
+* Transitioning from “model project” → “product system”
 
 ---
 
-## 💡 Key Highlights
+## 🔮 Future Scope
 
-* Uses real-world agricultural dataset
-* Combines AI + domain knowledge
-* Explainable AI (not black-box)
-* Scalable to full AgriTech system
----
-
-## 🏁 Final Note
-
-This project evolves step-by-step:
-
-```
-Data → Model → Evaluation → UI → Explainability → Multimodal AI
-```
-
-You have already completed the **hardest part (data pipeline + training setup)**.
+* Disease severity estimation (percentage or segmentation)
+* Weather-aware disease spread prediction
+* Multi-language support (Tamil, Hindi)
+* Mobile-friendly interface
+* Voice interaction for farmers
+* Offline support for low connectivity
 
 ---
 
-🔥 **You are now building a real-world AI system, not just a project.**
+## 💡 Key Takeaway
+
+This project evolves beyond a simple classifier into a:
+
+👉 **Crop Health Decision Support System**
+
+Combining:
+
+* Computer Vision
+* Explainable AI
+* Context Awareness
+* AI-driven guidance
+
+---
