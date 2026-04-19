@@ -277,10 +277,13 @@ outputs/
 
 ```bash
 streamlit run app/streamlit_app.py
+
+```
 or
+
+```bash
 python -m streamlit run app/streamlit_app.py
 ```
-
 ✔ Features:
 
 * Upload image
