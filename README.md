@@ -50,9 +50,10 @@ The primary objectives of this project are:
 ### Utilities
 - scikit-learn
 - tqdm
+###AI Advisory
+- Groq API (AI advisory)
 
 ### (Planned)
-- Groq API (AI advisory)
 - Weather APIs
 
 ---
