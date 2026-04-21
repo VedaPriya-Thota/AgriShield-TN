@@ -21,10 +21,9 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-from _shared import inject_css, inject_sidebar_brand, inject_header  # noqa: E402
+from _shared import inject_css, inject_sidebar_brand  # noqa: E402
 
 inject_css()
-inject_header()
 
 # st.navigation MUST be called before inject_sidebar_brand so that st.page_link
 # can resolve each page's url_pathname from the pages manager.
