@@ -8,7 +8,8 @@ for _p in [str(_APP_DIR.parent), str(_APP_DIR)]:
         sys.path.insert(0, _p)
 
 import streamlit as st
-from _shared import ui_footer
+from _shared import ui_footer, inject_sidebar_brand, inject_header
+from i18n import t
 
 st.session_state["_cur_page"] = "field_guide"
 
@@ -324,7 +325,7 @@ DISEASES = [
 if "selected_disease" not in st.session_state:
     st.session_state["selected_disease"] = DISEASES[0]["key"]
 if "dl_filter" not in st.session_state:
-    st.session_state["dl_filter"] = "All"
+    st.session_state["dl_filter"] = t("disease_lib.filter_all")
 
 selected = next(d for d in DISEASES if d["key"] == st.session_state["selected_disease"])
 
@@ -334,9 +335,8 @@ hdr_left, hdr_right = st.columns([3, 1], gap="large")
 with hdr_left:
     st.markdown(
         '<div style="padding:1.5rem 0 0;">'
-        '<h1 class="dl-h1">Disease Library</h1>'
-        '<p class="dl-sub">A complete reference for all paddy disease classes detected by AgriShield-TN. '
-        'Use this guide to understand symptoms, causes, and recommended actions.</p>'
+        f'<h1 class="dl-h1">{t("disease_lib.title")}</h1>'
+        f'<p class="dl-sub">{t("disease_lib.subtitle")}</p>'
         '</div>',
         unsafe_allow_html=True,
     )
@@ -349,8 +349,7 @@ with hdr_left:
         '<div class="dl-tips">'
         f'<div class="dl-tips-imgs">{leaf_imgs}</div>'
         '<div class="dl-tips-text">'
-        'Use anomalies to identify different symptoms across leaf surfaces. '
-        'Examine leaf colour, lesion shape, and spread pattern to distinguish disease classes.'
+        f'{t("disease_lib.tips_text")}'
         '</div>'
         '</div>',
         unsafe_allow_html=True,
@@ -377,16 +376,16 @@ cards_col, detail_col = st.columns([55, 45], gap="large")
 # ── LEFT: card grid ───────────────────────────────────────────────────────────
 with cards_col:
     st.markdown(
-        '<div class="dl-sec-label">ALL DISEASES &nbsp;&bull;&nbsp; 10 CLASSES</div>',
+        f'<div class="dl-sec-label">{t("disease_lib.all_classes")}</div>',
         unsafe_allow_html=True,
     )
 
-    sev_options = ["All", "CRITICAL", "HIGH", "MODERATE", "LOW", "NONE"]
-    filt_c, _ = st.columns([2, 5])
+    sev_options = [t("disease_lib.filter_all"), "CRITICAL", "HIGH", "MODERATE", "LOW", "NONE"]
+    filt_c, _ = st.columns([2.5, 5])
     with filt_c:
-        selected_sev = st.selectbox("Filter", options=sev_options, label_visibility="collapsed", key="dl_sev_filter")
+        selected_sev = st.selectbox(t("disease_lib.filter_label"), options=sev_options, label_visibility="visible", key="dl_sev_filter")
 
-    shown = DISEASES if selected_sev == "All" else [d for d in DISEASES if d["severity"] == selected_sev]
+    shown = DISEASES if selected_sev == t("disease_lib.filter_all") else [d for d in DISEASES if d["severity"] == selected_sev]
 
     for row_start in range(0, len(shown), 2):
         row_d = shown[row_start:row_start + 2]
@@ -410,10 +409,10 @@ with cards_col:
 
                     # Image zone with leaf gradient
                     f'<div class="dl-card-img" style="background:{d["card_gradient"]};">'
-                    f'<div class="dl-card-sev-badge {d["sev_class"]}">{d["severity"]}</div>'
+                    f'<div class="dl-card-sev-badge {d["sev_class"]}">{t("severity." + d["severity"])}</div>'
                     f'<div class="dl-card-critical-label" '
                     f'style="background:{sev_lbl_bg};color:{sev_lbl_color};">'
-                    f'{d["severity"].capitalize()}</div>'
+                    f'{t("severity." + d["severity"]).capitalize()}</div>'
                     f'</div>'
 
                     # Card body
@@ -424,14 +423,14 @@ with cards_col:
                     f'</div>',
                     unsafe_allow_html=True,
                 )
-                if st.button("View Details", key=f"sel_{d['key']}", use_container_width=True):
+                if st.button(t("disease_lib.view_details"), key=f"sel_{d['key']}", use_container_width=True):
                     st.session_state["selected_disease"] = d["key"]
                     st.rerun()
 
 # ── RIGHT: detail panel ───────────────────────────────────────────────────────
 with detail_col:
     st.markdown(
-        '<div class="dl-sec-label">ALL DISEASES &nbsp;&bull;&nbsp; 10 CLASSES</div>',
+        f'<div class="dl-sec-label">{t("disease_lib.all_classes")}</div>',
         unsafe_allow_html=True,
     )
 
@@ -442,11 +441,11 @@ with detail_col:
         f'<div class="dl-detail-top">'
         f'<div style="display:flex;align-items:center;justify-content:space-between;">'
         f'<span style="font-size:.6rem;font-weight:700;letter-spacing:2px;'
-        f'text-transform:uppercase;color:#16a34a;">SYMPTOMS:</span>'
+        f'text-transform:uppercase;color:#16a34a;">{t("disease_lib.symptoms")}</span>'
         f'<span style="background:{selected["sev_bg"]};color:{selected["sev_color"]};'
         f'border:1px solid {selected["sev_border"]};border-radius:999px;'
         f'padding:2px 10px;font-size:.6rem;font-weight:800;letter-spacing:.5px;">'
-        f'{selected["severity"]}</span>'
+        f'{t("severity." + selected["severity"])}</span>'
         f'</div>'
         f'</div>'
 
@@ -483,8 +482,8 @@ with detail_col:
     )
     st.markdown(
         '<div class="dl-cond-box">'
-        '<div style="font-size:.6rem;font-weight:700;letter-spacing:2px;'
-        'text-transform:uppercase;color:#16a34a;">FAVOURABLE CONDITIONS:</div>'
+        f'<div style="font-size:.6rem;font-weight:700;letter-spacing:2px;'
+        f'text-transform:uppercase;color:#16a34a;">{t("disease_lib.conditions")}</div>'
         f'<div class="dl-cond-items">{cond_html}</div>'
         '</div>',
         unsafe_allow_html=True,
@@ -500,8 +499,8 @@ with detail_col:
     )
     st.markdown(
         '<div style="margin-top:4px;">'
-        '<div style="font-size:.6rem;font-weight:700;letter-spacing:2px;'
-        'text-transform:uppercase;color:#6b7280;margin-bottom:8px;">RECOMMENDED ACTIONS:</div>'
+        f'<div style="font-size:.6rem;font-weight:700;letter-spacing:2px;'
+        f'text-transform:uppercase;color:#6b7280;margin-bottom:8px;">{t("disease_lib.actions")}</div>'
         f'<div class="dl-actions-grid">{action_html}</div>'
         '</div>',
         unsafe_allow_html=True,

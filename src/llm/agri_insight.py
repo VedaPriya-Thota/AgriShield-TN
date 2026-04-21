@@ -67,6 +67,19 @@ _CONFIDENCE_GUIDANCE = {
     "low":    "The AI model has low confidence (<40%). Emphasise that this result is uncertain and that expert inspection is strongly recommended.",
 }
 
+# Language instruction injected into the system prompt
+_LANG_INSTRUCTION = {
+    "en": "Respond in English.",
+    "ta": (
+        "Respond ENTIRELY in Tamil (தமிழ்). Use simple Tamil words a rural farmer would understand. "
+        "Do not use English except for the disease name itself."
+    ),
+    "hi": (
+        "Respond ENTIRELY in Hindi (हिंदी). Use simple Hindi words a rural farmer would understand. "
+        "Do not use English except for the disease name itself."
+    ),
+}
+
 
 def _build_prompt(disease: str, confidence: float, tier: str) -> str:
     pct = confidence * 100
@@ -328,11 +341,18 @@ def _parse_response(raw: str) -> Optional[dict]:
 def generate_agri_insight(
     disease: str,
     confidence: float,
+    lang: str = "en",
 ) -> AgriInsight:
     """
     Generate a structured agricultural advisory for a disease prediction.
     Always returns an AgriInsight — uses Groq if available, otherwise falls
     back to the static knowledge base. Never raises.
+
+    Parameters
+    ----------
+    disease    : predicted disease class key (e.g. "blast")
+    confidence : model confidence 0.0–1.0
+    lang       : ISO language code ("en" | "ta" | "hi"); controls advisory language
     """
     tier    = _tier(confidence)
     display = disease.replace("_", " ").title()
@@ -341,7 +361,10 @@ def generate_agri_insight(
 
     try:
         prompt = _build_prompt(disease, confidence, tier)
-        raw    = call_groq(user_prompt=prompt, system_prompt=_SYSTEM, max_tokens=700)
+        # Build language-aware system prompt
+        lang_instruction = _LANG_INSTRUCTION.get(lang, _LANG_INSTRUCTION["en"])
+        system = _SYSTEM + " " + lang_instruction
+        raw    = call_groq(user_prompt=prompt, system_prompt=system, max_tokens=700)
 
         if raw is None:
             return _make_fallback(disease, confidence, tier)

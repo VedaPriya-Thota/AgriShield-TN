@@ -21,7 +21,7 @@ import streamlit as st
 # ─────────────────────────────────────────────────────────────────────────────
 
 _CSS = """
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
 
 /* ── Tokens ─────────────────────────────────────────────────────────────── */
 :root {
@@ -126,8 +126,20 @@ html, body,
   max-width: 1140px !important;
 }
 
-/* ── Hide Streamlit chrome ───────────────────────────────────────────────── */
-[data-testid="stHeader"],
+/* ── Header & Chrome ─────────────────────────────────────────────────── */
+[data-testid="stHeader"] {
+  background: transparent !important;
+  color: var(--text-900) !important;
+  height: 48px !important;
+}
+/* Re-enable the built-in sidebar toggle arrow if collapsed */
+[data-testid="stSidebarCollapseButton"] button {
+  color: #22c55e !important;
+  background: rgba(34,197,94,.1) !important;
+  border: 1px solid rgba(34,197,94,.2) !important;
+  top: 12px !important;
+}
+
 [data-testid="stToolbar"],
 [data-testid="stDecoration"],
 [data-testid="stStatusWidget"],
@@ -209,7 +221,6 @@ section[data-testid="stSidebar"] div[data-testid="stButton"] > button:active {
   line-height   : 1.4;
 }
 
-/* Collapse button */
 [data-testid="stSidebarCollapseButton"] button,
 button[data-testid="collapsedControl"],
 [data-testid="stSidebarCollapsedControl"] {
@@ -217,6 +228,110 @@ button[data-testid="collapsedControl"],
   border        : 1px solid rgba(22,163,74,.25) !important;
   border-radius : 8px !important;
   color         : #22c55e !important;
+}
+
+/* Sidebar Radio Selector */
+div[data-testid="stSidebarUserContent"] [data-testid="stWidgetLabel"] {
+  display: none !important;
+}
+div[data-testid="stSidebarUserContent"] [data-testid="stRadio"] > div {
+  gap: 4px !important;
+}
+div[data-testid="stSidebarUserContent"] [data-testid="stRadio"] label {
+  background: rgba(255,255,255,0.03) !important;
+  border: 1px solid rgba(255,255,255,0.05) !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  color: rgba(255,255,255,0.5) !important;
+  transition: all 0.2s ease !important;
+  font-size: 0.85rem !important;
+}
+div[data-testid="stSidebarUserContent"] [data-testid="stRadio"] label:hover {
+  background: rgba(34,197,94,0.1) !important;
+  color: rgba(255,255,255,0.9) !important;
+}
+div[data-testid="stSidebarUserContent"] [data-testid="stRadio"] label[data-baseweb="radio"] > div:first-child {
+  display: none !important; /* Hide the native circle */
+}
+div[data-testid="stSidebarUserContent"] [data-testid="stRadio"] label div[data-testid="stMarkdownContainer"] p {
+  color: inherit !important;
+  font-weight: 500 !important;
+}
+/* Selected state */
+div[data-testid="stSidebarUserContent"] [data-testid="stRadio"] label:has(input:checked) {
+  background: rgba(34,197,94,0.18) !important;
+  border-color: rgba(34,197,94,0.4) !important;
+  color: #22c55e !important;
+}
+
+/* ── Main Area (Top Header) Radio Selector ────────────────────────────── */
+.top-lang-wrapper [data-testid="stRadio"] > div {
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  gap: 24px !important; /* Increased spacing between options */
+  justify-content: flex-end !important;
+  padding-top: 8px !important;
+}
+
+.top-lang-wrapper [data-testid="stRadio"] label {
+  background: transparent !important;
+  border: none !important;
+  padding: 4px 8px !important;
+  min-height: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  color: #1B5E20 !important; /* High-contrast dark green for unselected */
+  font-size: 1.05rem !important; /* Slightly larger text */
+  font-weight: 400 !important;
+  cursor: pointer !important;
+  transition: color 0.2s ease !important;
+  box-shadow: none !important;
+}
+
+.top-lang-wrapper [data-testid="stRadio"] label:hover {
+  background: rgba(46,125,50,0.05) !important;
+  color: #2E7D32 !important;
+}
+
+/* Ensure dots are visible and correctly colored */
+.top-lang-wrapper [data-testid="stRadio"] label div[data-baseweb="radio"] {
+  border-width: 2px !important;
+  border-color: #1B5E20 !important; /* Visible dark green border for unselected dot */
+}
+
+.top-lang-wrapper [data-testid="stRadio"] label:has(input:checked) {
+  color: #2E7D32 !important; /* Vibrant green for selected text */
+}
+
+.top-lang-wrapper [data-testid="stRadio"] label:has(input:checked) div[data-baseweb="radio"] {
+  border-color: #2E7D32 !important;
+}
+
+/* Selected dot inner circle */
+.top-lang-wrapper [data-testid="stRadio"] label div[data-baseweb="radio"] div:nth-child(2) {
+  background: #2E7D32 !important;
+}
+
+div[data-testid="stMain"] [data-testid="stRadio"] label div[data-testid="stMarkdownContainer"] p {
+  color: #1F2937 !important; /* Dark neutral grey for high contrast unselected text */
+  margin: 0 !important;
+  padding: 0 !important;
+  font-weight: 500 !important;
+  font-size: 1.05rem !important;
+}
+
+/* Bold selected active label text */
+.top-lang-wrapper [data-testid="stRadio"] label:has(input:checked) p {
+  color: #2E7D32 !important; /* Vibrant green for selected text */
+  font-weight: 900 !important;
+}
+
+/* Ensure the radio group itself doesn't add odd spacing/dots */
+div[data-testid="stMain"] [data-testid="stRadio"] [role="radiogroup"] {
+  gap: 12px !important;
+}
+div[data-testid="stMain"] [data-testid="stRadio"] [role="radiogroup"] > div {
+  margin-right: 0 !important;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────── */
@@ -995,6 +1110,30 @@ div[data-testid="stButton"] > button:disabled {
 }
 .ds-footer-brand { display:inline-flex; align-items:center; gap:7px; font-size:.875rem; font-weight:700; color:#16a34a; margin-bottom:.5rem; }
 .ds-footer-note  { font-size:.74rem; color:var(--text-300); margin-top:.375rem; }
+
+/* ── Top Header ──────────────────────────────────────────────────────────── */
+.top-nav-container {
+  position: absolute;
+  top: -48px;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 100;
+  height: 48px;
+}
+.top-nav-bg {
+  padding: 0 1rem;
+  background: rgba(247,249,247,.8);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border-soft);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 2rem;
+  margin-top: -1rem;
+  border-radius: 12px;
+}
 """
 
 
@@ -1004,9 +1143,9 @@ def inject_css() -> None:
 
 # ── Nav definitions ───────────────────────────────────────────────────────────
 _NAV = [
-    ("home",       "🏠", "Home",        "pages/1_Home.py"),
-    ("diagnose",   "🩺", "Diagnose",    "pages/2_Analyze_Leaf.py"),
-    ("field_guide","📖", "Field Guide", "pages/6_Disease_Library.py"),
+    ("home",        "🏠", "nav.home",        "pages/1_Home.py"),
+    ("diagnose",    "🩺", "nav.diagnose",    "pages/2_Analyze_Leaf.py"),
+    ("field_guide", "📖", "nav.field_guide", "pages/6_Disease_Library.py"),
 ]
 
 
@@ -1029,7 +1168,6 @@ def inject_sidebar_brand() -> None:
         # ── Brand ────────────────────────────────────────────────────────────
         st.markdown(
             '<div style="padding:28px 18px 20px;">'
-
             '<div style="display:flex;align-items:center;gap:12px;margin-bottom:30px;">'
             '<div style="width:40px;height:40px;border-radius:12px;flex-shrink:0;'
             'background:linear-gradient(145deg,#22c55e,#15803d);'
@@ -1040,14 +1178,22 @@ def inject_sidebar_brand() -> None:
             '<div style="font-size:.66rem;color:rgba(255,255,255,.32);margin-top:2px;letter-spacing:.2px;">AI Crop Health Assistant</div>'
             '</div>'
             '</div>'
-
             '<div style="font-size:.57rem;font-weight:700;letter-spacing:2.5px;'
-            'text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:8px;">Navigation</div>',
+            'text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:8px;">Navigation</div>'
+            '</div>',
             unsafe_allow_html=True,
         )
 
+        # ── i18n helpers ──────────────────────────────────────────────────────
+        try:
+            from i18n import t as _t, get_lang as _gl
+        except ImportError:
+            _t = lambda k, **kw: k
+            _gl = lambda: "en"
+
         # ── Nav items ─────────────────────────────────────────────────────────
-        for key, icon, label, path in _NAV:
+        for key, icon, label_key, path in _NAV:
+            label = _t(label_key)
             if key == cur:
                 st.markdown(
                     f'<div class="sb-nav-active">{icon}&nbsp;&nbsp;{label}</div>',
@@ -1057,7 +1203,14 @@ def inject_sidebar_brand() -> None:
                 if st.button(f"{icon}  {label}", key=f"_nav_{path}", use_container_width=True):
                     st.switch_page(path)
 
-        st.markdown('</div>', unsafe_allow_html=True)
+        # ── Navigation Title ──────────────────────────────────────────────────
+        st.markdown(
+            f'<div style="margin:16px 18px 8px;border-top:1px solid rgba(34,197,94,.1);padding-top:16px;">'
+            f'<div style="font-size:.57rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;'
+            f'color:rgba(255,255,255,.28);margin-bottom:12px;">AgriShield-TN</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
 
         # ── Sidebar footer ────────────────────────────────────────────────────
         st.markdown(
@@ -1094,33 +1247,74 @@ def ui_divider() -> None:
     st.markdown('<hr class="ds-divider">', unsafe_allow_html=True)
 
 
+def inject_header() -> None:
+    """Renders an always-visible top header with the language switcher."""
+    try:
+        from i18n import get_lang as _gl
+    except ImportError:
+        _gl = lambda: "en"
+
+    _lang_display = {"en": "English", "ta": "தமிழ்", "hi": "हिन्दी"}
+    _cur_lang = _gl()
+
+    # We use a columns layout at the top of the page area
+    # This renders in the main block container
+    c1, c2 = st.columns([1, 1])
+
+    with c2:
+        # Align selection to the right
+        st.markdown('<div class="top-lang-wrapper">', unsafe_allow_html=True)
+        _chosen_lang = st.radio(
+            "top_lang_selector",
+            options=list(_lang_display.keys()),
+            format_func=lambda x: _lang_display[x],
+            index=list(_lang_display.keys()).index(_cur_lang),
+            label_visibility="collapsed",
+            horizontal=True,
+            key="_top_lang_radio",
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    if _chosen_lang != _cur_lang:
+        st.session_state["lang"] = _chosen_lang
+        st.rerun()
+
+    st.markdown('<div class="top-nav-bg"></div>', unsafe_allow_html=True)
+
+
+
 def ui_error(msg: str) -> None:
+    try:
+        from i18n import t as _t
+    except ImportError:
+        _t = lambda k, **kw: k
     st.markdown(
         '<div class="ds-error">'
-        f'&#9888;&#65039; <strong>Prediction failed:</strong> {msg}'
-        '<span class="ds-error-sub">Ensure model weights are loaded and the image is a valid paddy leaf photo.</span>'
+        f'&#9888;&#65039; <strong>{_t("common.error_title")}</strong> {msg}'
+        f'<span class="ds-error-sub">{_t("common.error_sub")}</span>'
         '</div>',
         unsafe_allow_html=True,
     )
 
 
 def ui_footer() -> None:
+    try:
+        from i18n import t as _t
+    except ImportError:
+        _t = lambda k, **kw: k
     st.markdown(
         '<div class="ds-footer">'
         '<div class="ds-footer-brand">'
         '<span style="font-size:.9rem;">&#127806;</span>'
         'AgriShield-TN'
         '<span style="width:3px;height:3px;border-radius:50%;background:#E2E8F0;display:inline-block;"></span>'
-        '<span style="font-size:.8rem;color:#64748B;font-weight:400;">Tamil Nadu Agri-AI</span>'
+        f'<span style="font-size:.8rem;color:#64748B;font-weight:400;">{_t("common.footer_tagline")}</span>'
         '</div>'
         '<div style="font-size:.8rem;color:#94A3B8;">'
         'ResNet-18 &nbsp;&middot;&nbsp; Grad-CAM &nbsp;&middot;&nbsp; '
         'Groq AI &nbsp;&middot;&nbsp; PyTorch &nbsp;&middot;&nbsp; Streamlit'
         '</div>'
-        '<div class="ds-footer-note">'
-        'For research &amp; demonstration only &nbsp;&middot;&nbsp; '
-        'Always consult a certified agronomist before treatment decisions'
-        '</div>'
+        f'<div class="ds-footer-note">{_t("common.footer_note")}</div>'
         '</div>',
         unsafe_allow_html=True,
     )
@@ -1131,26 +1325,33 @@ def ui_footer() -> None:
 # ─────────────────────────────────────────────────────────────────────────────
 
 _STEPS = [
-    ("&#128269;", "Scanning leaf patterns&hellip;",      "INIT"),
-    ("&#129516;", "Extracting feature vectors&hellip;",  "FEAT"),
-    ("&#9889;",   "Detecting anomalies&hellip;",          "ANOM"),
-    ("&#129302;", "Running CNN inference&hellip;",        "INFER"),
-    ("&#128293;", "Generating Grad-CAM heatmap&hellip;", "XAI"),
-    ("&#9989;",   "Finalising diagnosis&hellip;",         "DONE"),
+    ("&#128269;", "scan.s0", "INIT"),
+    ("&#129516;", "scan.s1", "FEAT"),
+    ("&#9889;",   "scan.s2", "ANOM"),
+    ("&#129302;", "scan.s3", "INFER"),
+    ("&#128293;", "scan.s4", "XAI"),
+    ("&#9989;",   "scan.s5", "DONE"),
 ]
 
 
 def draw_scan(slot, active: int, pct: int) -> None:
+    try:
+        from i18n import t as _t
+        progress_lbl = _t("scan.progress")
+    except ImportError:
+        _t = lambda k, **kw: k
+        progress_lbl = "PROGRESS"
     rows = ""
-    for i, (icon, label, tag) in enumerate(_STEPS):
-        if   i < active:  state, t, ico = "done",   f"0.{i+1}s", "&#10003;"
-        elif i == active: state, t, ico = "active", "...",         icon
-        else:             state, t, ico = "pending", "&mdash;",    icon
+    for i, (icon, i18n_key, tag) in enumerate(_STEPS):
+        label = _t(i18n_key)
+        if   i < active:  state, ts, ico = "done",    f"0.{i+1}s", "&#10003;"
+        elif i == active: state, ts, ico = "active",  "...",         icon
+        else:             state, ts, ico = "pending",  "&mdash;",    icon
         rows += (
             '<div class="ds-scan-step">'
             f'<div class="ds-step-ico {state}">{ico}</div>'
             f'<span class="ds-step-lbl {state}">[{tag}] {label}</span>'
-            f'<span class="ds-step-t {state}">{t}</span>'
+            f'<span class="ds-step-t {state}">{ts}</span>'
             '</div>'
         )
     slot.markdown(
@@ -1163,7 +1364,7 @@ def draw_scan(slot, active: int, pct: int) -> None:
         '</div>'
         + rows +
         '<div class="ds-scan-prog">'
-        f'<div class="ds-scan-prog-lbl"><span>PROGRESS</span><span>{pct}%</span></div>'
+        f'<div class="ds-scan-prog-lbl"><span>{progress_lbl}</span><span>{pct}%</span></div>'
         f'<div class="ds-scan-track"><div class="ds-scan-fill" style="width:{pct}%;"></div></div>'
         '</div>'
         '</div>',

@@ -8,7 +8,8 @@ for _p in [str(_APP_DIR.parent), str(_APP_DIR)]:
         sys.path.insert(0, _p)
 
 import streamlit as st
-from _shared import ui_footer
+from _shared import ui_footer, inject_sidebar_brand, inject_header
+from i18n import t
 
 st.session_state["_cur_page"] = "home"
 
@@ -16,9 +17,9 @@ st.session_state["_cur_page"] = "home"
 st.markdown(
     '<style>'
     '[data-testid="stSidebar"]{display:none !important;}'
-    '[data-testid="stSidebarCollapsedControl"]{display:none !important;}'
-    '[data-testid="collapsedControl"]{display:none !important;}'
-    '[data-testid="stHeader"]{display:none !important;}'
+    '[data-testid="stSidebarCollapsedControl"]{display:flex !important;}'
+    '[data-testid="collapsedControl"]{display:flex !important;}'
+    '[data-testid="stHeader"]{display:flex !important;height:0 !important;}' # Restore but keep tiny
     '[data-testid="stToolbar"]{display:none !important;}'
     '[data-testid="stDecoration"]{display:none !important;}'
     '[data-testid="stAppViewContainer"]{padding:0 !important;margin:0 !important;}'
@@ -57,7 +58,7 @@ st.markdown(
 
     '<div class="hero-badge">'
     '<span class="hero-badge-dot"></span>'
-    '<span class="hero-badge-text">AI&#8209;Powered &nbsp;&bull;&nbsp; Tamil Nadu Agri&#8209;AI</span>'
+    f'<span class="hero-badge-text">{t("home.badge")}</span>'
     '</div>'
 
     '<div class="hero-title">'
@@ -67,32 +68,32 @@ st.markdown(
     '<span class="ht-tn">&#8209;TN</span>'
     '</div>'
 
-    '<p class="hero-subtitle">AI Crop Health Assistant for Tamil Nadu Farmers</p>'
+    f'<p class="hero-subtitle">{t("home.subtitle")}</p>'
 
     '<div class="hero-flow">'
     '<div class="hero-flow-step">'
     '<div class="hero-flow-icon">&#128247;</div>'
-    '<div class="hero-flow-label">Detect</div>'
+    f'<div class="hero-flow-label">{t("home.detect")}</div>'
     '</div>'
     '<div class="hero-flow-arr">&#8594;</div>'
     '<div class="hero-flow-step">'
     '<div class="hero-flow-icon">&#129504;</div>'
-    '<div class="hero-flow-label">Analyze</div>'
+    f'<div class="hero-flow-label">{t("home.analyze")}</div>'
     '</div>'
     '<div class="hero-flow-arr">&#8594;</div>'
     '<div class="hero-flow-step">'
     '<div class="hero-flow-icon">&#128737;&#65039;</div>'
-    '<div class="hero-flow-label">Act</div>'
+    f'<div class="hero-flow-label">{t("home.act")}</div>'
     '</div>'
     '</div>'
 
     '<div class="hero-feats">'
-    '<div class="hero-feat hero-feat--g"><span class="hero-feat__icon">&#127806;</span><span class="hero-feat__text">10 Disease Classes</span></div>'
-    '<div class="hero-feat hero-feat--p"><span class="hero-feat__icon">&#129504;</span><span class="hero-feat__text">ResNet&#8209;18 CNN</span></div>'
-    '<div class="hero-feat hero-feat--h"><span class="hero-feat__icon">&#128293;</span><span class="hero-feat__text">Grad&#8209;CAM XAI</span></div>'
-    '<div class="hero-feat hero-feat--b"><span class="hero-feat__icon">&#127750;</span><span class="hero-feat__text">Live Weather Risk</span></div>'
-    '<div class="hero-feat hero-feat--d"><span class="hero-feat__icon">&#129302;</span><span class="hero-feat__text">Groq AI Advisory</span></div>'
-    '<div class="hero-feat hero-feat--a"><span class="hero-feat__icon">&#9889;</span><span class="hero-feat__text">&lt;2s Diagnosis</span></div>'
+    f'<div class="hero-feat hero-feat--g"><span class="hero-feat__icon">&#127806;</span><span class="hero-feat__text">10 {t("diagnose.classes_val")}</span></div>'
+    f'<div class="hero-feat hero-feat--p"><span class="hero-feat__icon">&#129504;</span><span class="hero-feat__text">{t("diagnose.model_name")}</span></div>'
+    f'<div class="hero-feat hero-feat--h"><span class="hero-feat__icon">&#128293;</span><span class="hero-feat__text">{t("diagnose.gradcam_title").replace("🖼️ ", "")}</span></div>'
+    f'<div class="hero-feat hero-feat--b"><span class="hero-feat__icon">&#127750;</span><span class="hero-feat__text">{t("diagnose.weather_title").replace("🌦 ", "")}</span></div>'
+    f'<div class="hero-feat hero-feat--d"><span class="hero-feat__icon">&#129302;</span><span class="hero-feat__text">{t("diagnose.source_groq")} {t("diagnose.expert_advisory").lower()}</span></div>'
+    f'<div class="hero-feat hero-feat--a"><span class="hero-feat__icon">&#9889;</span><span class="hero-feat__text">{t("common.instant")} {t("diagnose.detected_disease").lower()}</span></div>'
     '</div>'
 
     '</div>'  # close hero-inner — CTA buttons rendered below via st.button
@@ -117,29 +118,19 @@ st.markdown(
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown(
     '<div class="sec-hd">'
-    '<div class="sec-hd__eye">Core Capabilities</div>'
-    '<h2 class="sec-hd__title">Everything a farmer needs<br>to protect their crop</h2>'
-    '<p class="sec-hd__sub">From instant AI diagnosis to live weather risk &mdash; one tool, every answer.</p>'
+    f'<div class="sec-hd__eye">{t("home.capabilities_eye")}</div>'
+    f'<h2 class="sec-hd__title">{t("home.capabilities_h2").replace(chr(10), "<br>")}</h2>'
+    f'<p class="sec-hd__sub">{t("home.capabilities_sub")}</p>'
     '</div>',
     unsafe_allow_html=True,
 )
 
 _CAPS = [
-    ("cap-green",  "&#127806;", "Disease Detection",
-     "Classifies 10 paddy disease classes using a fine-tuned ResNet-18 CNN with severity grading from NONE to CRITICAL.",
-     "ResNet-18 &middot; 10 classes"),
-    ("cap-red",    "&#9889;",   "Immediate Actions",
-     "Priority-ordered action checklist specific to each disease &mdash; what to do today, this week, and to prevent recurrence.",
-     "Disease-specific &middot; 3&ndash;5 steps"),
-    ("cap-blue",   "&#127750;", "Weather Spread Risk",
-     "Live temperature, humidity and 3-day rain forecast from OpenMeteo mapped against disease spread conditions for 38 TN districts.",
-     "OpenMeteo &middot; 38 districts"),
-    ("cap-teal",   "&#129302;", "Groq AI Advisory",
-     "Structured expert guidance from Groq&rsquo;s Llama 3 &mdash; disease summary, cause, treatment, and prevention in plain farmer language.",
-     "Llama 3 &middot; &lt;3s response"),
-    ("cap-purple", "&#128293;", "Grad-CAM XAI",
-     "Pixel-level heatmap showing exactly which leaf regions drove the model&rsquo;s prediction &mdash; visual proof any farmer can verify.",
-     "Grad-CAM &middot; 224&times;224"),
+    ("cap-green",  "&#127806;", t("home.cap_disease"),      t("home.cap_disease_desc"),  t("home.cap_disease_tag")),
+    ("cap-red",    "&#9889;",   t("home.cap_actions"),      t("home.cap_actions_desc"),  t("home.cap_actions_tag")),
+    ("cap-blue",   "&#127750;", t("home.cap_weather"),      t("home.cap_weather_desc"),  t("home.cap_weather_tag")),
+    ("cap-teal",   "&#129302;", t("home.cap_groq"),         t("home.cap_groq_desc"),     t("home.cap_groq_tag")),
+    ("cap-purple", "&#128293;", t("home.cap_gradcam"),      t("home.cap_gradcam_desc"),  t("home.cap_gradcam_tag")),
 ]
 
 cols = st.columns(5, gap="small")
@@ -184,24 +175,17 @@ with illus_col:
 with text_col:
     st.markdown(
         '<div style="padding:28px 0 0;">'
-        '<div class="bff-eyebrow">Built for Real Farmers</div>'
-        '<h2 class="bff-title">Every farmer deserves<br>expert crop guidance</h2>'
-        '<p class="bff-sub">AgriShield-TN brings agricultural science directly to the field &mdash; '
-        'in seconds, on any smartphone, completely free.</p>'
+        f'<div class="bff-eyebrow">{t("home.built_eyebrow")}</div>'
+        f'<h2 class="bff-title">{t("home.built_h2").replace(chr(10), "<br>")}</h2>'
+        f'<p class="bff-sub">{t("home.built_sub")}</p>'
         '</div>',
         unsafe_allow_html=True,
     )
 
     _BENEFITS = [
-        ("&#127806;", "#f0fdf4", "#bbf7d0",
-         "Small &amp; Marginal Farmers",
-         "Get instant disease identification without waiting days for an agronomist visit. Know exactly what to spray, and when."),
-        ("&#128652;", "#eff6ff", "#bfdbfe",
-         "Agricultural Field Officers",
-         "Scale your expertise across thousands of farms simultaneously. Use AI as your second opinion on the ground."),
-        ("&#127891;", "#faf5ff", "#ddd6fe",
-         "Agri Students &amp; Researchers",
-         "Study real disease patterns with Grad-CAM visual explanations &mdash; see exactly which leaf features the AI uses."),
+        ("&#127806;", "#f0fdf4", "#bbf7d0", t("home.ben_small_title"),  t("home.ben_small_desc")),
+        ("&#128652;", "#eff6ff", "#bfdbfe", t("home.ben_officer_title"), t("home.ben_officer_desc")),
+        ("&#127891;", "#faf5ff", "#ddd6fe", t("home.ben_student_title"), t("home.ben_student_desc")),
     ]
 
     for icon, bg, border, title, desc in _BENEFITS:
@@ -224,40 +208,40 @@ st.markdown('<div class="spacer-lg"></div>', unsafe_allow_html=True)
 st.markdown(
     '<div class="hiw">'
     '<div class="hiw-heading">'
-    '<div class="hiw-eyebrow">How It Works</div>'
-    '<h2 class="hiw-title">From photo to action plan in 4 steps</h2>'
+    f'<div class="hiw-eyebrow">{t("home.hiw_eyebrow")}</div>'
+    f'<h2 class="hiw-title">{t("home.hiw_h2")}</h2>'
     '</div>'
     '<div class="hiw-steps">'
 
     '<div class="hiw-step">'
     '<div class="hiw-step__orb">&#128247;</div>'
-    '<div class="hiw-step__num">Step 01</div>'
-    '<div class="hiw-step__name">Upload Photo</div>'
-    '<div class="hiw-step__desc">Take a close-up photo of the affected paddy leaf with any smartphone and upload it.</div>'
+    f'<div class="hiw-step__num">{t("common.step")} 01</div>'
+    f'<div class="hiw-step__name">{t("home.hiw_s1_name")}</div>'
+    f'<div class="hiw-step__desc">{t("home.hiw_s1_desc")}</div>'
     '</div>'
     '<div class="hiw-arrow">&#8594;</div>'
 
     '<div class="hiw-step">'
     '<div class="hiw-step__orb">&#129504;</div>'
-    '<div class="hiw-step__num">Step 02</div>'
-    '<div class="hiw-step__name">AI Detection</div>'
-    '<div class="hiw-step__desc">ResNet-18 CNN classifies the disease from 10 classes with confidence score and severity grade.</div>'
+    f'<div class="hiw-step__num">{t("common.step")} 02</div>'
+    f'<div class="hiw-step__name">{t("home.hiw_s2_name")}</div>'
+    f'<div class="hiw-step__desc">{t("home.hiw_s2_desc")}</div>'
     '</div>'
     '<div class="hiw-arrow">&#8594;</div>'
 
     '<div class="hiw-step">'
     '<div class="hiw-step__orb">&#127750;</div>'
-    '<div class="hiw-step__num">Step 03</div>'
-    '<div class="hiw-step__name">Risk Analysis</div>'
-    '<div class="hiw-step__desc">Live weather data from your district is evaluated against disease spread conditions.</div>'
+    f'<div class="hiw-step__num">{t("common.step")} 03</div>'
+    f'<div class="hiw-step__name">{t("home.hiw_s3_name")}</div>'
+    f'<div class="hiw-step__desc">{t("home.hiw_s3_desc")}</div>'
     '</div>'
     '<div class="hiw-arrow">&#8594;</div>'
 
     '<div class="hiw-step">'
     '<div class="hiw-step__orb">&#9889;</div>'
-    '<div class="hiw-step__num">Step 04</div>'
-    '<div class="hiw-step__name">Action Plan</div>'
-    '<div class="hiw-step__desc">Receive an immediate checklist and full Groq AI advisory in plain farmer language.</div>'
+    f'<div class="hiw-step__num">{t("common.step")} 04</div>'
+    f'<div class="hiw-step__name">{t("home.hiw_s4_name")}</div>'
+    f'<div class="hiw-step__desc">{t("home.hiw_s4_desc")}</div>'
     '</div>'
 
     '</div>'
@@ -277,25 +261,25 @@ st.markdown(
     '<div class="impact-cell">'
     '<span class="impact-icon">&#8377;</span>'
     '<div class="impact-value">4,500Cr</div>'
-    '<div class="impact-label">Annual crop loss in Tamil Nadu</div>'
+    f'<div class="impact-label">{t("home.impact_loss")}</div>'
     '</div>'
 
     '<div class="impact-cell">'
     '<span class="impact-icon">&#128100;</span>'
     '<div class="impact-value">70%</div>'
-    '<div class="impact-label">Farmers are small or marginal holders</div>'
+    f'<div class="impact-label">{t("home.impact_farmers")}</div>'
     '</div>'
 
     '<div class="impact-cell">'
     '<span class="impact-icon">&#9889;</span>'
     '<div class="impact-value">&lt; 2s</div>'
-    '<div class="impact-label">Full AI diagnosis time from upload</div>'
+    f'<div class="impact-label">{t("home.impact_time")}</div>'
     '</div>'
 
     '<div class="impact-cell">'
     '<span class="impact-icon">&#128205;</span>'
     '<div class="impact-value">38</div>'
-    '<div class="impact-label">Tamil Nadu districts with live weather</div>'
+    f'<div class="impact-label">{t("home.impact_districts")}</div>'
     '</div>'
 
     '</div>'
@@ -310,9 +294,9 @@ st.markdown('<div class="spacer-lg"></div>', unsafe_allow_html=True)
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown(
     '<div class="sec-hd">'
-    '<div class="sec-hd__eye">Disease Intelligence</div>'
-    '<h2 class="sec-hd__title">Know the enemy before it strikes</h2>'
-    '<p class="sec-hd__sub">AgriShield-TN detects 10 major paddy diseases. Here are 3 of the most common threats in Tamil Nadu.</p>'
+    f'<div class="sec-hd__eye">{t("home.disease_eye")}</div>'
+    f'<h2 class="sec-hd__title">{t("home.disease_h2")}</h2>'
+    f'<p class="sec-hd__sub">{t("home.disease_sub")}</p>'
     '</div>',
     unsafe_allow_html=True,
 )
@@ -345,14 +329,14 @@ for col, (card_cls, icon, title, sev_cls, sev_lbl, desc, cond) in zip(dcols, _DI
             f'font-size:.76rem;color:#6b7280;line-height:1.5;margin-bottom:16px;">'
             f'&#127750; {cond}'
             f'</div>'
-            f'<div class="dprev-link">&#128218; View full details in Field Guide &#8594;</div>'
+            f'<div class="dprev-link">{t("home.view_field_link")}</div>'
             f'</div>',
             unsafe_allow_html=True,
         )
 
 _, see_all_col, _ = st.columns([3, 2, 3])
 with see_all_col:
-    if st.button("📖  Open Full Field Guide  →", use_container_width=True, key="dprev_cta"):
+    if st.button(t("home.see_field_guide"), use_container_width=True, key="dprev_cta"):
         st.switch_page("pages/6_Disease_Library.py")
 
 st.markdown('<div class="spacer-lg"></div>', unsafe_allow_html=True)
@@ -363,24 +347,24 @@ st.markdown('<div class="spacer-lg"></div>', unsafe_allow_html=True)
 st.markdown(
     '<div class="btm-cta-v2">'
     '<span class="btm-cta-v2__farmer">&#129489;&#8205;&#127806;</span>'
-    '<h2 class="btm-cta-v2__title">Ready to protect<br><span>your harvest?</span></h2>'
-    '<p class="btm-cta-v2__sub">Free &nbsp;&middot;&nbsp; Instant &nbsp;&middot;&nbsp; No sign-up required</p>'
+    f'<h2 class="btm-cta-v2__title">{t("home.cta_title").replace(chr(10), "<br><span>") + "</span>"}</h2>'
+    f'<p class="btm-cta-v2__sub">{t("home.cta_sub")}</p>'
     '</div>',
     unsafe_allow_html=True,
 )
 
 _, cta2_col, _ = st.columns([3, 2, 3])
 with cta2_col:
-    if st.button("🩺  Start Diagnosis  →", use_container_width=True, key="cta_bottom"):
+    if st.button(t("home.cta_button"), use_container_width=True, key="cta_bottom"):
         st.switch_page("pages/2_Analyze_Leaf.py")
 
 st.markdown(
     '<div class="btm-cta-v2__perks">'
-    '<span class="btm-cta-v2__perk">No account needed</span>'
+    f'<span class="btm-cta-v2__perk">{t("home.perk_no_account")}</span>'
     '<span style="color:rgba(255,255,255,.12);">&middot;</span>'
-    '<span class="btm-cta-v2__perk">Works on any device</span>'
+    f'<span class="btm-cta-v2__perk">{t("home.perk_any_device")}</span>'
     '<span style="color:rgba(255,255,255,.12);">&middot;</span>'
-    '<span class="btm-cta-v2__perk">Groq AI powered</span>'
+    f'<span class="btm-cta-v2__perk">{t("home.perk_groq")}</span>'
     '</div>',
     unsafe_allow_html=True,
 )
