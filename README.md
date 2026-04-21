@@ -1,5 +1,6 @@
+
 # 🌾 AgriShield-TN  
-### AI-Based Crop Health Diagnosis & Decision Support System
+### AI-Based Crop Health Diagnosis & Multilingual Decision Support System
 
 ---
 
@@ -12,9 +13,10 @@ Unlike basic image classification projects, this system focuses on:
 - Disease detection  
 - Explainability (why the model predicted)  
 - Risk awareness (weather-based extension)  
-- Actionable guidance (future AI advisory layer)
+- Actionable guidance (AI advisory layer)  
+- 🌍 **Multilingual accessibility for real-world farmers**
 
-The project is designed with a **real-world agricultural use case in mind**, specifically targeting **Tamil Nadu paddy farming conditions**.
+The project is built for **real agricultural use**, specifically targeting **Indian farming conditions**, with strong support for **regional languages**.
 
 ---
 
@@ -25,37 +27,148 @@ The primary objectives of this project are:
 - Detect paddy leaf diseases using deep learning  
 - Provide explainable predictions using Grad-CAM  
 - Improve trust in AI predictions  
-- Extend diagnosis with contextual information (metadata & weather)  
-- Move from simple classification → decision support system  
+- Extend diagnosis with contextual data (weather + metadata)  
+- Deliver AI insights in **native farmer languages**  
+- Transition from classifier → **decision support system**
+
+---
+
+## 🌍 Multilingual System (NEW 🚀)
+
+AgriShield-TN now supports:
+
+- 🇬🇧 English  
+- 🇮🇳 Tamil (தமிழ்)  
+- 🇮🇳 Hindi (हिन्दी)  
+
+### 🔥 Why this matters
+
+- Most farmers are **not comfortable with English**  
+- Language is a **major barrier to adoption**  
+- This makes the system **usable in real villages**
+
+---
+
+### ⚙️ Multilingual Implementation
+
+#### 1. Centralized i18n System
+- `app/i18n/translations.py` → 600+ translated strings  
+- `app/i18n/lang_utils.py` → translation utility  
+
+```python
+t("home.title")
+````
+
+✔ Handles:
+
+* Nested translations
+* Language switching
+* Automatic fallback
+
+---
+
+#### 2. Smart Fallback Mechanism
+
+* Missing translations → fallback to English
+* Prevents UI breakage
+
+---
+
+#### 3. UI Integration
+
+* Language selector (radio-based UI)
+* Applied across:
+
+  * Home
+  * Analyze Leaf
+  * Disease Library
+
+✔ Improved:
+
+* Visibility
+* Contrast
+* Accessibility
+
+---
+
+#### 4. Font & Script Support
+
+* Noto Sans Tamil
+* Noto Sans Devanagari
+
+✔ Ensures:
+
+* Correct rendering
+* Native readability
+
+---
+
+#### 5. Full App Localization
+
+| Page            | Status |
+| --------------- | ------ |
+| Home            | ✅      |
+| Analyze Leaf    | ✅      |
+| Disease Library | ✅      |
+
+---
+
+#### 6. AI Advisory in Local Languages 🤖
+
+* Groq API integrated with language context
+* AI responds in:
+
+  * Tamil
+  * Hindi
+  * English
+
+✔ Covers:
+
+* Disease explanation
+* Treatment steps
+* Prevention guidance
+
+---
+
+#### 7. Session-Based Language Persistence
+
+```python
+st.session_state
+```
+
+✔ Maintains language across pages
 
 ---
 
 ## ⚙️ Tech Stack
 
 ### AI / ML
-- Python
-- PyTorch
-- Torchvision
-- OpenCV
-- Albumentations
-- NumPy, Pandas
+
+* Python
+* PyTorch
+* Torchvision
+* OpenCV
+* Albumentations
+* NumPy, Pandas
 
 ### Explainability
-- Grad-CAM
-- Matplotlib
+
+* Grad-CAM
+* Matplotlib
 
 ### Frontend
-- Streamlit
+
+* Streamlit
+
+### APIs
+
+* Groq API (AI advisory)
+* Weather APIs
 
 ### Utilities
-- scikit-learn
-- tqdm
 
-
-
-### Key features
-- Weather APIs
-- Groq API (AI advisory)
+* scikit-learn
+* tqdm
 
 ---
 
@@ -64,54 +177,50 @@ The primary objectives of this project are:
 ```text
 Image Upload
    ↓
-Preprocessing (resize, normalize)
+Preprocessing
    ↓
 CNN Model (ResNet-18)
    ↓
-Disease Prediction + Confidence
+Disease Prediction
    ↓
-Grad-CAM Heatmap (Explainability)
+Grad-CAM Heatmap
    ↓
- Weather Risk Analysis
+Weather Risk Analysis
    ↓
- AI Advisory (Groq)
+AI Advisory (Groq)
    ↓
-Frontend Output
-````
+Multilingual Output (EN / TA / HI)
+```
 
 ---
 
 ## 🏗️ Technical Architecture
 
-The system follows a modular architecture:
-
 ### 1. Input Layer
 
 * Leaf image
-* Metadata (variety, age) *(optional)*
+* Metadata (optional)
 
 ### 2. Image Encoder
 
-* Pretrained **ResNet-18**
-* Extracts deep visual features
+* ResNet-18
 
 ### 3. Classification Head
 
-* Predicts disease class
+* Disease prediction
 
 ### 4. Explainability Layer
 
-* Grad-CAM highlights important regions
+* Grad-CAM
 
 ### 5. Metadata Encoder (Optional)
 
-* Encodes crop variety and age
-* Fuses with image features
+* Crop variety, age
 
-### 6. Key features
+### 6. Decision Support Layer
 
-* Weather-based risk modeling
-* AI advisory using LLMs
+* Weather risk analysis
+* AI advisory
 
 ---
 
@@ -121,44 +230,24 @@ The system follows a modular architecture:
 AgriShield-TN/
 │
 ├── app/
-│   └── streamlit_app.py
-│
-├── data/
-│   └── raw/
-│       ├── train_images/
-│       ├── test_images/
-│       ├── train.csv
-│       └── sample_submission.csv
+│   ├── streamlit_app.py
+│   ├── i18n/
+│   │   ├── translations.py
+│   │   └── lang_utils.py
+│   └── pages/
 │
 ├── src/
-│   ├── config/
-│   ├── datasets/
-│   │   ├── image_dataset.py
-│   │   ├── metadata_dataset.py
-│   │   ├── transforms.py
-│   │   └── test_dataset_loading.py
-│   │
 │   ├── models/
-│   │   ├── image_encoder.py
-│   │   ├── disease_classifier.py
-│   │   ├── metadata_encoder.py
-│   │   └── metadata_classifier.py
-│   │
+│   ├── datasets/
 │   ├── training/
-│   │   ├── train_classifier.py
-│   │   ├── train_metadata_classifier.py
-│   │   └── evaluate.py
-│   │
 │   ├── inference/
-│   │   ├── predict.py
-│   │   └── explain.py
-│   │
+│   ├── llm/
+│   │   └── agri_insight.py
 │   └── utils/
-│       └── visualization.py
 │
-├── checkpoints/
+├── data/
 ├── outputs/
-├── requirements.txt
+├── checkpoints/
 └── README.md
 ```
 
@@ -177,17 +266,21 @@ cd AgriShield-TN
 
 ### 2. Create Virtual Environment
 
-#### Windows (PowerShell)
+```bash
+python -m venv venv
+```
+
+**Activate:**
+
+PowerShell:
 
 ```powershell
-python -m venv venv
 .\venv\Scripts\Activate.ps1
 ```
 
-#### Windows (CMD)
+CMD:
 
 ```cmd
-python -m venv venv
 venv\Scripts\activate
 ```
 
@@ -203,17 +296,11 @@ pip install -r requirements.txt
 
 ### 4. Place Dataset
 
-Ensure dataset is placed correctly:
-
 ```text
 data/raw/
 ├── train.csv
 ├── train_images/
-│   ├── bacterial_leaf_blight/
-│   ├── blast/
-│   ├── brown_spot/
-│   └── ...
-└── test_images/
+├── test_images/
 ```
 
 ---
@@ -228,9 +315,9 @@ python -m src.datasets.test_dataset_loading
 
 ✔ Verifies:
 
-* image loading
-* label correctness
-* transformations working
+* Image loading
+* Label correctness
+* Transformations working
 
 ---
 
@@ -248,8 +335,8 @@ checkpoints/best_disease_classifier.pth
 
 ⏳ Note:
 
-* Training may take time (CPU)
-* First epoch is slower → normal behavior
+* Training takes time (CPU)
+* First epoch is slow → normal
 
 ---
 
@@ -262,7 +349,7 @@ python -m src.training.evaluate
 ✔ Generates:
 
 * Accuracy
-* Precision / Recall / F1-score
+* Precision / Recall / F1
 * Confusion Matrix
 
 ✔ Saved in:
@@ -277,19 +364,21 @@ outputs/
 
 ```bash
 streamlit run app/streamlit_app.py
-
 ```
+
 or
 
 ```bash
 python -m streamlit run app/streamlit_app.py
 ```
+
 ✔ Features:
 
-* Upload image
+* Image upload
 * Disease prediction
 * Confidence score
 * Grad-CAM heatmap
+* 🌍 Multilingual support
 
 ---
 
@@ -311,54 +400,54 @@ python -m src.training.train_metadata_classifier
 
 ### ✅ Completed
 
-* Dataset pipeline (image + metadata)
-* Image classification model (ResNet-18)
-* Training & evaluation pipeline
+* Full ML pipeline
 * Grad-CAM explainability
-* Basic Streamlit UI
-* Modular project structure
-* Groq AI advisory integration
-* Weather-based risk analysis
+* Streamlit UI
+* Weather integration
+* Groq AI advisory
+* 🌍 Multilingual system
 
 ---
 
 ### 🚧 In Progress
 
-* Advanced frontend redesign (product-level UI)
+* Advanced UI redesign
+* Mobile optimization
+
 ---
 
 ## ⚠️ Challenges Faced
 
-* Dataset structure mismatch (class-wise folders vs CSV)
-* File path issues (image_id handling)
-* Integrating Grad-CAM correctly
-* Slow CPU training performance
-* Virtual environment path issues (Streamlit launcher error)
-* Transitioning from “model project” → “product system”
+* Dataset structure mismatch
+* File path issues
+* Grad-CAM complexity
+* Streamlit UI limitations
+* Multilingual rendering issues
+* Low contrast UI problems
 
 ---
 
 ## 🔮 Future Scope
 
-* Disease severity estimation (percentage or segmentation)
-* Multi-language support (Tamil, Hindi)
-* Mobile-friendly interface
-* Voice interaction for farmers
-* Offline support for low connectivity
+* More languages (Telugu, Kannada, Marathi)
+* Voice interaction 🎤
+* Offline mode
+* Disease severity detection
+* Mobile app
 
 ---
 
 ## 💡 Key Takeaway
 
-This project evolves beyond a simple classifier into a:
+This project evolves into a:
 
-👉 **Crop Health Decision Support System**
-
-Combining:
-
-* Computer Vision
-* Explainable AI
-* Context Awareness
-* AI-driven guidance
+👉 **Multilingual Crop Health Decision Support System**
 
 ---
+
+## 🌟 Final Impact
+
+> Designed not just for developers,
+> but for **real farmers in real fields**
+
+
