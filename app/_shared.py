@@ -1203,14 +1203,27 @@ def inject_sidebar_brand() -> None:
                 if st.button(f"{icon}  {label}", key=f"_nav_{path}", use_container_width=True):
                     st.switch_page(path)
 
-        # ── Navigation Title ──────────────────────────────────────────────────
+        # ── Language selector ─────────────────────────────────────────────────
         st.markdown(
-            f'<div style="margin:16px 18px 8px;border-top:1px solid rgba(34,197,94,.1);padding-top:16px;">'
-            f'<div style="font-size:.57rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;'
-            f'color:rgba(255,255,255,.28);margin-bottom:12px;">AgriShield-TN</div>'
-            f'</div>',
+            '<div style="margin:16px 18px 8px;border-top:1px solid rgba(34,197,94,.1);padding-top:14px;">'
+            '<div style="font-size:.57rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;'
+            'color:rgba(255,255,255,.28);margin-bottom:10px;">Language</div>'
+            '</div>',
             unsafe_allow_html=True,
         )
+        _lang_display = {"en": "English", "ta": "தமிழ்", "hi": "हिन्दी"}
+        _cur_lang = _gl()
+        _chosen_lang = st.radio(
+            "lang_selector",
+            options=list(_lang_display.keys()),
+            format_func=lambda x: _lang_display[x],
+            index=list(_lang_display.keys()).index(_cur_lang),
+            label_visibility="collapsed",
+            key="_sidebar_lang_radio",
+        )
+        if _chosen_lang != _cur_lang:
+            st.session_state["lang"] = _chosen_lang
+            st.rerun()
 
         # ── Sidebar footer ────────────────────────────────────────────────────
         st.markdown(
