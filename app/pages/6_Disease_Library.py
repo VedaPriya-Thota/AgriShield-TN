@@ -113,6 +113,7 @@ DISEASES = [
         "severity": "CRITICAL", "sev_class": "sev-critical",
         "sev_color": "#dc2626", "sev_bg": "#fee2e2", "sev_border": "#fecaca",
         "accent": "#dc2626",
+        "unsplash_id": "1560493236-bb5cdcfe5da8",
         "card_gradient": "linear-gradient(150deg,#0c1f0c 0%,#193219 55%,rgba(220,38,38,.35) 100%)",
         "detail_gradient": "linear-gradient(135deg,#0c1f0c,#1a3a1a)",
         "pathogen": "Magnaporthe oryzae (fungus)",
@@ -135,6 +136,7 @@ DISEASES = [
         "severity": "HIGH", "sev_class": "sev-high",
         "sev_color": "#d97706", "sev_bg": "#fef3c7", "sev_border": "#fde68a",
         "accent": "#d97706",
+        "unsplash_id": "1574943320219-553eb213f72d",
         "card_gradient": "linear-gradient(150deg,#1a2e0a 0%,#2a4a10 55%,rgba(217,119,6,.3) 100%)",
         "detail_gradient": "linear-gradient(135deg,#1a2e0a,#2a4a10)",
         "pathogen": "Xanthomonas oryzae pv. oryzae",
@@ -156,6 +158,7 @@ DISEASES = [
         "severity": "MODERATE", "sev_class": "sev-moderate",
         "sev_color": "#ea580c", "sev_bg": "#fff7ed", "sev_border": "#fed7aa",
         "accent": "#ea580c",
+        "unsplash_id": "1500382017468-9049fed747ef",
         "card_gradient": "linear-gradient(150deg,#161206 0%,#2a2010 55%,rgba(234,88,12,.3) 100%)",
         "detail_gradient": "linear-gradient(135deg,#161206,#2a2010)",
         "pathogen": "Xanthomonas oryzae pv. oryzicola",
@@ -177,6 +180,7 @@ DISEASES = [
         "severity": "HIGH", "sev_class": "sev-high",
         "sev_color": "#92400e", "sev_bg": "#fef3c7", "sev_border": "#fde68a",
         "accent": "#92400e",
+        "unsplash_id": "1592982538153-3a28d4e4e7e1",
         "card_gradient": "linear-gradient(150deg,#1a1006 0%,#2a1a08 55%,rgba(146,64,14,.35) 100%)",
         "detail_gradient": "linear-gradient(135deg,#1a1006,#2a1a08)",
         "pathogen": "Burkholderia glumae (bacterium)",
@@ -198,6 +202,7 @@ DISEASES = [
         "severity": "MODERATE", "sev_class": "sev-moderate",
         "sev_color": "#78350f", "sev_bg": "#fdf6ec", "sev_border": "#fcd9a8",
         "accent": "#78350f",
+        "unsplash_id": "1518495973542-4542adad0130",
         "card_gradient": "linear-gradient(150deg,#120a04 0%,#1e1206 55%,rgba(120,53,15,.35) 100%)",
         "detail_gradient": "linear-gradient(135deg,#120a04,#1e1206)",
         "pathogen": "Bipolaris oryzae (fungus)",
@@ -219,6 +224,7 @@ DISEASES = [
         "severity": "HIGH", "sev_class": "sev-high",
         "sev_color": "#374151", "sev_bg": "#f9fafb", "sev_border": "#e5e7eb",
         "accent": "#374151",
+        "unsplash_id": "1581092921461-eab10380ed66",
         "card_gradient": "linear-gradient(150deg,#0e1016 0%,#1c1e24 55%,rgba(55,65,81,.45) 100%)",
         "detail_gradient": "linear-gradient(135deg,#0e1016,#1c1e24)",
         "pathogen": "Rice stem borer larvae (Scirpophaga spp.)",
@@ -240,6 +246,7 @@ DISEASES = [
         "severity": "LOW", "sev_class": "sev-low",
         "sev_color": "#0d9488", "sev_bg": "#f0fdfa", "sev_border": "#99f6e4",
         "accent": "#0d9488",
+        "unsplash_id": "1518611012118-696072aa579a",
         "card_gradient": "linear-gradient(150deg,#041410 0%,#082820 55%,rgba(13,148,136,.3) 100%)",
         "detail_gradient": "linear-gradient(135deg,#041410,#082820)",
         "pathogen": "Sclerophthora macrospora (oomycete)",
@@ -261,6 +268,7 @@ DISEASES = [
         "severity": "MODERATE", "sev_class": "sev-moderate",
         "sev_color": "#7c3aed", "sev_bg": "#faf5ff", "sev_border": "#ede9fe",
         "accent": "#7c3aed",
+        "unsplash_id": "1495555775-c21e03d4d6fa",
         "card_gradient": "linear-gradient(150deg,#100a1e 0%,#1e1232 55%,rgba(124,58,237,.3) 100%)",
         "detail_gradient": "linear-gradient(135deg,#100a1e,#1e1232)",
         "pathogen": "Rice hispa beetle — Dicladispa armigera (insect)",
@@ -282,6 +290,7 @@ DISEASES = [
         "severity": "CRITICAL", "sev_class": "sev-critical",
         "sev_color": "#6d28d9", "sev_bg": "#faf5ff", "sev_border": "#c4b5fd",
         "accent": "#6d28d9",
+        "unsplash_id": "1444930694458-01babdd684e7",
         "card_gradient": "linear-gradient(150deg,#0e0618 0%,#1c0e30 55%,rgba(109,40,217,.3) 100%)",
         "detail_gradient": "linear-gradient(135deg,#0e0618,#1c0e30)",
         "pathogen": "Rice Tungro Bacilliform Virus (RTBV) + RTSV",
@@ -303,6 +312,7 @@ DISEASES = [
         "severity": "NONE", "sev_class": "sev-none",
         "sev_color": "#16a34a", "sev_bg": "#f0fdf4", "sev_border": "#bbf7d0",
         "accent": "#16a34a",
+        "unsplash_id": "1534208750935-d3523516e85a",
         "card_gradient": "linear-gradient(150deg,#062010 0%,#103820 55%,rgba(22,163,74,.3) 100%)",
         "detail_gradient": "linear-gradient(135deg,#062010,#103820)",
         "pathogen": "No pathogen detected",
@@ -340,10 +350,15 @@ with hdr_left:
         '</div>',
         unsafe_allow_html=True,
     )
-    # Tips banner
+    # Tips banner — real disease leaf photos
+    _TIP_PHOTOS = [
+        "1560493236-bb5cdcfe5da8",   # blast lesions
+        "1574943320219-553eb213f72d", # bacterial blight
+        "1518495973542-4542adad0130", # brown spot
+    ]
     leaf_imgs = ''.join([
-        f'<div class="dl-tip-img" style="background:linear-gradient(135deg,{g1},{g2});"></div>'
-        for g1, g2 in [("#0f2010","#1a3a1a"),("#1a1206","#2a2010"),("#0c1020","#1a2030")]
+        f'<div class="dl-tip-img" style="background-image:url(https://images.unsplash.com/photo-{pid}?w=120&q=70&auto=format&fit=crop);background-size:cover;background-position:center;"></div>'
+        for pid in _TIP_PHOTOS
     ])
     st.markdown(
         '<div class="dl-tips">'
@@ -357,12 +372,25 @@ with hdr_left:
 
 with hdr_right:
     st.markdown(
+        '<style>'
+        '@keyframes sunGlow{0%,100%{opacity:.85;transform:scale(1);}50%{opacity:1;transform:scale(1.12);}}'
+        '</style>'
         '<div style="padding:1.5rem 0 0;">'
-        '<div class="dl-farmer-box">'
-        '<div style="position:absolute;bottom:0;left:0;right:0;height:40px;'
-        'background:linear-gradient(to top,rgba(187,247,208,.5),transparent);"></div>'
-        '<span class="dl-farmer-plant">&#127806;</span>'
-        '<span class="dl-farmer-fig">&#129489;&#8205;&#127807;</span>'
+        '<div style="border-radius:18px;overflow:hidden;min-height:145px;position:relative;">'
+        # Real farmer photo background
+        '<img src="https://images.unsplash.com/photo-1566702693566-f3a2ac30282c?w=400&q=80&auto=format&fit=crop" '
+        'style="width:100%;height:160px;object-fit:cover;object-position:center 30%;display:block;" />'
+        # Overlay with text
+        '<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(5,46,22,.88) 0%,rgba(5,46,22,.35) 55%,transparent 100%);">'
+        '</div>'
+        '<div style="position:absolute;bottom:12px;left:14px;right:14px;z-index:2;">'
+        '<div style="font-size:.65rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:3px;">&#127806; AgriShield-TN</div>'
+        '<div style="font-size:.82rem;font-weight:700;color:#fff;line-height:1.35;">AI-powered disease<br>detection for farmers</div>'
+        '<div style="font-size:.68rem;color:rgba(255,255,255,.6);font-family:&quot;Noto Sans Tamil&quot;,sans-serif;margin-top:3px;">விவசாயிகளுக்கான AI நோய் கண்டறிதல்</div>'
+        '</div>'
+        # Sun badge top-right
+        '<span style="position:absolute;top:10px;right:12px;font-size:1.4rem;z-index:2;'
+        'animation:sunGlow 3s ease-in-out infinite;filter:drop-shadow(0 0 6px rgba(251,191,36,.7));">&#9728;&#65039;</span>'
         '</div>'
         '</div>',
         unsafe_allow_html=True,
@@ -404,14 +432,28 @@ with cards_col:
                 sev_lbl_color = d["sev_color"]
                 sev_lbl_bg   = d["sev_bg"]
 
+                _uns_id  = d.get("unsplash_id", "")
+                _bg_url  = f"https://images.unsplash.com/photo-{_uns_id}?w=400&q=75&auto=format&fit=crop" if _uns_id else ""
+                _bg_style = (
+                    f"background-image:url({_bg_url}),{d['card_gradient']};"
+                    "background-size:cover,cover;background-position:center,center;"
+                ) if _bg_url else f"background:{d['card_gradient']};"
+
                 st.markdown(
                     f'<div class="dl-card {active_class}">'
 
-                    # Image zone with leaf gradient
-                    f'<div class="dl-card-img" style="background:{d["card_gradient"]};">'
-                    f'<div class="dl-card-sev-badge {d["sev_class"]}">{t("severity." + d["severity"])}</div>'
+                    # Image zone — photo + overlay + big icon
+                    f'<div class="dl-card-img" style="{_bg_style}height:130px;position:relative;">'
+                    # dark overlay for readability
+                    f'<div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.15) 0%,rgba(0,0,0,.6) 100%);border-radius:0;"></div>'
+                    # big disease icon centered
+                    f'<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);'
+                    f'font-size:2.4rem;line-height:1;filter:drop-shadow(0 2px 8px rgba(0,0,0,.7));z-index:1;">'
+                    f'{d["icon"]}</div>'
+                    # severity badge top-right
+                    f'<div class="dl-card-sev-badge {d["sev_class"]}" style="z-index:2;">{t("severity." + d["severity"])}</div>'
                     f'<div class="dl-card-critical-label" '
-                    f'style="background:{sev_lbl_bg};color:{sev_lbl_color};">'
+                    f'style="background:{sev_lbl_bg};color:{sev_lbl_color};z-index:2;position:relative;">'
                     f'{t("severity." + d["severity"]).capitalize()}</div>'
                     f'</div>'
 
@@ -430,7 +472,7 @@ with cards_col:
 # ── RIGHT: detail panel ───────────────────────────────────────────────────────
 with detail_col:
     st.markdown(
-        f'<div class="dl-sec-label">{t("disease_lib.all_classes")}</div>',
+        f'<div class="dl-sec-label">Disease Details &middot; {selected["name"]}</div>',
         unsafe_allow_html=True,
     )
 

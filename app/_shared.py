@@ -126,26 +126,65 @@ html, body,
   max-width: 1140px !important;
 }
 
-/* ── Header & Chrome ─────────────────────────────────────────────────── */
+/* ── Header: transparent background, natural height so expand button works ── */
 [data-testid="stHeader"] {
-  background: transparent !important;
-  color: var(--text-900) !important;
-  height: 48px !important;
-}
-/* Re-enable the built-in sidebar toggle arrow if collapsed */
-[data-testid="stSidebarCollapseButton"] button {
-  color: #22c55e !important;
-  background: rgba(34,197,94,.1) !important;
-  border: 1px solid rgba(34,197,94,.2) !important;
-  top: 12px !important;
+  background    : transparent !important;
+  box-shadow    : none !important;
+  border-bottom : none !important;
 }
 
-[data-testid="stToolbar"],
+/* ── Hide nav dots, toolbar, decoration — leave expand/collapse buttons ── */
+[data-testid="stTopNavigation"],
+[data-testid="stTopNavigation"] *,
+[data-testid="stNavBar"],
+[data-testid="stNavBarItem"],
+[data-testid="stPageNavItem"],
+nav[data-testid="stTopNavigation"],
+section[data-testid="stSidebarNav"],
 [data-testid="stDecoration"],
+[data-testid="stToolbar"],
 [data-testid="stStatusWidget"],
+[role="navigation"],
+[class*="st-emotion-cache"][role="navigation"] { display: none !important; }
+/* Only hide stPageLink inside Streamlit's OWN nav containers, not our header */
+[data-testid="stTopNavigation"] [data-testid="stPageLink"],
+[data-testid="stNavBar"] [data-testid="stPageLink"],
+[data-testid="stSidebarNav"] [data-testid="stPageLink"] { display: none !important; }
+
+/* ── Sidebar collapse button (inside the open sidebar) ──────────────── */
+[data-testid="stSidebarCollapseButton"] {
+  visibility     : visible !important;
+  display        : flex !important;
+  opacity        : 1 !important;
+  pointer-events : auto !important;
+}
+[data-testid="stSidebarCollapseButton"] button {
+  background    : rgba(22,163,74,.15) !important;
+  border        : 1px solid rgba(22,163,74,.35) !important;
+  border-radius : 8px !important;
+  color         : #22c55e !important;
+}
+
+/* ── Sidebar expand button (renders in header when sidebar is collapsed) ── */
+[data-testid="stSidebarCollapsedControl"],
+button[data-testid="collapsedControl"] {
+  visibility     : visible !important;
+  display        : flex !important;
+  opacity        : 1 !important;
+  pointer-events : auto !important;
+}
+[data-testid="stSidebarCollapsedControl"] button,
+button[data-testid="collapsedControl"] {
+  background    : rgba(22,163,74,.18) !important;
+  border        : 1.5px solid rgba(22,163,74,.45) !important;
+  border-radius : 8px !important;
+  color         : #22c55e !important;
+  width         : 36px !important;
+  height        : 36px !important;
+}
+
 [data-testid="stSidebarNavItems"],
-[data-testid="stSidebarNavSeparator"],
-[data-testid="stPageLink"] { display: none !important; }
+[data-testid="stSidebarNavSeparator"] { display: none !important; }
 
 /* ── Scrollbar ───────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar       { width: 4px; background: transparent; }
@@ -238,11 +277,11 @@ div[data-testid="stSidebarUserContent"] [data-testid="stRadio"] > div {
   gap: 4px !important;
 }
 div[data-testid="stSidebarUserContent"] [data-testid="stRadio"] label {
-  background: rgba(255,255,255,0.03) !important;
-  border: 1px solid rgba(255,255,255,0.05) !important;
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
   border-radius: 8px !important;
   padding: 8px 12px !important;
-  color: rgba(255,255,255,0.5) !important;
+  color: rgba(255,255,255,0.88) !important;
   transition: all 0.2s ease !important;
   font-size: 0.85rem !important;
 }
@@ -265,70 +304,107 @@ div[data-testid="stSidebarUserContent"] [data-testid="stRadio"] label:has(input:
 }
 
 /* ── Main Area (Top Header) Radio Selector ────────────────────────────── */
-.top-lang-wrapper [data-testid="stRadio"] > div {
-  flex-direction: row !important;
-  flex-wrap: wrap !important;
-  gap: 24px !important; /* Increased spacing between options */
-  justify-content: flex-end !important;
-  padding-top: 8px !important;
+
+/* Container: soft green-tinted background for clarity */
+.top-lang-wrapper {
+  background: rgba(46,125,50,0.06) !important;
+  border-radius: 12px !important;
+  padding: 6px 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
 }
 
+/* Row layout with spacing */
+.top-lang-wrapper [data-testid="stRadio"] > div,
+.top-lang-wrapper [data-testid="stRadio"] [role="radiogroup"] {
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: 8px !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+}
+
+/* Each option pill */
 .top-lang-wrapper [data-testid="stRadio"] label {
-  background: transparent !important;
-  border: none !important;
-  padding: 4px 8px !important;
+  background: rgba(255,255,255,0.85) !important;
+  border: 1.5px solid #d1d5db !important;
+  border-radius: 8px !important;
+  padding: 5px 14px !important;
   min-height: auto !important;
   display: flex !important;
   align-items: center !important;
-  color: #1B5E20 !important; /* High-contrast dark green for unselected */
-  font-size: 1.05rem !important; /* Slightly larger text */
-  font-weight: 400 !important;
+  gap: 6px !important;
   cursor: pointer !important;
-  transition: color 0.2s ease !important;
-  box-shadow: none !important;
+  transition: background 0.18s ease, border-color 0.18s ease !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
 }
 
-.top-lang-wrapper [data-testid="stRadio"] label:hover {
-  background: rgba(46,125,50,0.05) !important;
-  color: #2E7D32 !important;
+/* Unselected label text — dark, high-contrast */
+.top-lang-wrapper [data-testid="stRadio"] label p,
+.top-lang-wrapper [data-testid="stRadio"] label div[data-testid="stMarkdownContainer"] p,
+.top-lang-wrapper [data-testid="stRadio"] label span,
+.top-lang-wrapper [data-testid="stRadio"] label * {
+  color: #111827 !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.4 !important;
+  font-family: 'Inter', 'Noto Sans Tamil', 'Noto Sans Devanagari', sans-serif !important;
 }
 
-/* Ensure dots are visible and correctly colored */
+/* Unselected dot */
 .top-lang-wrapper [data-testid="stRadio"] label div[data-baseweb="radio"] {
   border-width: 2px !important;
-  border-color: #1B5E20 !important; /* Visible dark green border for unselected dot */
+  border-color: #4B5563 !important;
+  flex-shrink: 0 !important;
 }
 
+/* Hover state */
+.top-lang-wrapper [data-testid="stRadio"] label:hover {
+  background: rgba(46,125,50,0.10) !important;
+  border-color: rgba(46,125,50,0.3) !important;
+}
+.top-lang-wrapper [data-testid="stRadio"] label:hover p,
+.top-lang-wrapper [data-testid="stRadio"] label:hover div[data-testid="stMarkdownContainer"] p,
+.top-lang-wrapper [data-testid="stRadio"] label:hover * {
+  color: #1B4332 !important;
+}
+
+/* Selected option — green fill */
 .top-lang-wrapper [data-testid="stRadio"] label:has(input:checked) {
-  color: #2E7D32 !important; /* Vibrant green for selected text */
+  background: #16a34a !important;
+  border-color: #15803d !important;
+  box-shadow: 0 2px 8px rgba(22,163,74,0.35) !important;
+}
+.top-lang-wrapper [data-testid="stRadio"] label:has(input:checked) p,
+.top-lang-wrapper [data-testid="stRadio"] label:has(input:checked) div[data-testid="stMarkdownContainer"] p,
+.top-lang-wrapper [data-testid="stRadio"] label:has(input:checked) * {
+  color: #ffffff !important;
+  font-weight: 700 !important;
 }
 
+/* Selected dot */
 .top-lang-wrapper [data-testid="stRadio"] label:has(input:checked) div[data-baseweb="radio"] {
   border-color: #2E7D32 !important;
 }
-
-/* Selected dot inner circle */
 .top-lang-wrapper [data-testid="stRadio"] label div[data-baseweb="radio"] div:nth-child(2) {
   background: #2E7D32 !important;
 }
 
+/* Fallback: any radio in stMain gets dark text */
+div[data-testid="stMain"] [data-testid="stRadio"] label p,
 div[data-testid="stMain"] [data-testid="stRadio"] label div[data-testid="stMarkdownContainer"] p {
-  color: #1F2937 !important; /* Dark neutral grey for high contrast unselected text */
+  color: #1B4332 !important;
   margin: 0 !important;
   padding: 0 !important;
   font-weight: 500 !important;
-  font-size: 1.05rem !important;
+  font-size: 15px !important;
 }
 
-/* Bold selected active label text */
-.top-lang-wrapper [data-testid="stRadio"] label:has(input:checked) p {
-  color: #2E7D32 !important; /* Vibrant green for selected text */
-  font-weight: 900 !important;
-}
-
-/* Ensure the radio group itself doesn't add odd spacing/dots */
+/* Tight group spacing */
 div[data-testid="stMain"] [data-testid="stRadio"] [role="radiogroup"] {
-  gap: 12px !important;
+  gap: 8px !important;
 }
 div[data-testid="stMain"] [data-testid="stRadio"] [role="radiogroup"] > div {
   margin-right: 0 !important;
@@ -501,15 +577,15 @@ div[data-testid="stButton"] > button:active {
   background-image   : url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80');
   background-size    : cover;
   background-position: center 55%;
-  filter             : blur(1.5px) brightness(.38) saturate(1.35);
-  transform          : scale(1.06);
+  filter             : brightness(.58) saturate(1.5);
+  transform          : scale(1.04);
 }
 
-/* Layer 2 – dark-green overlay */
+/* Layer 2 – dark-green overlay (lighter so field shows through) */
 .hero-overlay {
   position  : absolute; inset: 0;
   background: linear-gradient(155deg,
-    rgba(2,8,4,.9) 0%, rgba(4,14,7,.8) 50%, rgba(6,20,10,.72) 100%);
+    rgba(2,14,6,.72) 0%, rgba(3,18,8,.60) 45%, rgba(5,22,10,.50) 100%);
 }
 
 /* Layer 3 – central radial glow */
@@ -942,19 +1018,153 @@ div[data-testid="stButton"] > button:disabled {
 .diag-param-val  { font-size:1.65rem; font-weight:900; color:#111827; line-height:1.1; }
 .diag-param-lbl  { font-size:.68rem; color:#6b7280; font-weight:600; margin-top:5px; letter-spacing:.2px; }
 
+/* ── Diagnose hero V2 (2-column with photo) ─────────────────────────────── */
+@keyframes farmerSlideIn { from{opacity:0;transform:translateX(36px)} to{opacity:1;transform:translateX(0)} }
+@keyframes welcomeFadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+@keyframes riceWave { 0%,100%{transform:rotate(-3deg) translateY(0)} 50%{transform:rotate(3deg) translateY(-4px)} }
+
+.diag-welcome { background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 60%,#bbf7d0 100%); border:1.5px solid #86efac; border-radius:24px; display:flex; align-items:stretch; min-height:190px; margin-bottom:20px; overflow:hidden; position:relative; box-shadow:0 4px 24px rgba(22,163,74,.13); }
+.diag-welcome::before { content:"🌾  🌾  🌾  🌾  🌾  🌾  🌾  🌾  🌾  🌾"; position:absolute; bottom:6px; left:0; right:0; font-size:1.1rem; opacity:.12; letter-spacing:10px; text-align:center; pointer-events:none; }
+.diag-welcome-text { flex:1; padding:26px 28px 22px; display:flex; flex-direction:column; justify-content:center; z-index:1; animation:welcomeFadeUp .5s ease both; }
+.diag-welcome-badge { font-size:.58rem; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:#16a34a; margin-bottom:10px; display:flex; align-items:center; gap:5px; }
+.diag-welcome-badge-dot { width:6px; height:6px; border-radius:50%; background:#16a34a; display:inline-block; animation:pulse 2s ease-in-out infinite; }
+.diag-welcome-greeting { font-size:1.8rem; font-weight:900; color:#111827; line-height:1.1; margin-bottom:5px; }
+.diag-welcome-sub { font-size:.88rem; font-weight:500; color:#374151; margin-bottom:5px; line-height:1.4; }
+.diag-welcome-ta { font-size:.75rem; color:#4b5563; font-family:"Noto Sans Tamil",sans-serif; line-height:1.5; }
+.diag-welcome-rice { margin-top:12px; font-size:1.1rem; letter-spacing:4px; }
+.diag-welcome-rice span { display:inline-block; animation:riceWave 2.5s ease-in-out infinite; }
+.diag-welcome-rice span:nth-child(2) { animation-delay:.3s; }
+.diag-welcome-rice span:nth-child(3) { animation-delay:.6s; }
+.diag-welcome-rice span:nth-child(4) { animation-delay:.9s; }
+.diag-welcome-farmer { flex:0 0 200px; display:flex; align-items:flex-end; justify-content:center; padding:0 8px 0; position:relative; z-index:1; }
+.diag-welcome-farmer-img { width:190px; height:190px; object-fit:contain; animation:farmerSlideIn .65s ease both, farmerBob 3.2s .65s ease-in-out infinite; filter:drop-shadow(0 6px 18px rgba(22,163,74,.22)); }
+
+.diag-hero-v2 { background:#052e16; border-radius:20px; overflow:hidden; display:flex; min-height:140px; margin-bottom:18px; position:relative; box-shadow:0 8px 32px rgba(5,46,22,.35); }
+.diag-hero-v2-left { flex:0 0 60%; padding:26px 28px; display:flex; flex-direction:column; justify-content:center; gap:6px; z-index:1; }
+.diag-hero-v2-badge { font-size:.58rem; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:rgba(34,197,94,.8); margin-bottom:4px; }
+.diag-hero-v2-title { font-size:1.45rem; font-weight:900; color:#fff; letter-spacing:-.5px; line-height:1.15; }
+.diag-hero-v2-sub { font-size:.65rem; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,.5); }
+.diag-hero-v2-ta { font-size:.72rem; color:rgba(255,255,255,.4); font-family:"Noto Sans Tamil",sans-serif; }
+.diag-hero-v2-right { flex:1; background-image:url('https://images.unsplash.com/photo-1589923188651-268a99638e78?w=600&q=80&auto=format&fit=crop'); background-size:cover; background-position:center; position:relative; }
+.diag-hero-v2-right::before { content:""; position:absolute; inset:0; background:linear-gradient(to right,#052e16 0%,rgba(5,46,22,.3) 55%,transparent 100%); }
+
+/* ── Step flow strip ─────────────────────────────────────────────────────── */
+.diag-steps-strip { display:flex; align-items:center; gap:0; background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:12px 20px; margin-bottom:18px; }
+.diag-step-item { display:flex; align-items:center; gap:10px; flex:1; }
+.diag-step-circle { width:32px; height:32px; border-radius:50%; background:#e5e7eb; color:#6b7280; font-size:.8rem; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.diag-step-text { font-size:.72rem; color:#6b7280; line-height:1.4; font-family:"Noto Sans Tamil",sans-serif; }
+.diag-step-text small { font-size:.6rem; color:#9ca3af; font-family:"Inter",sans-serif; display:block; }
+.diag-step-item--active .diag-step-circle { background:#16a34a; color:#fff; box-shadow:0 0 0 4px rgba(22,163,74,.2); }
+.diag-step-item--active .diag-step-text { color:#111827; font-weight:600; }
+.diag-step-connector { flex:0 0 28px; height:2px; background:#e5e7eb; margin:0 4px; }
+
+/* ── Upload card ─────────────────────────────────────────────────────────── */
+.diag-upload-card {
+  border: 2.5px dashed #bbf7d0;
+  border-radius: 18px;
+  padding: 0;
+  background: linear-gradient(145deg, #fafffd, #f0fdf4);
+  min-height: 240px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .25s, box-shadow .25s;
+}
+.diag-upload-card:hover {
+  border-color: #4ade80;
+  box-shadow: 0 4px 20px rgba(34,197,94,.18);
+}
+.diag-upload-card--filled {
+  border-style: solid; border-color: #22c55e;
+  background: #f0fdf4;
+}
+.diag-upload-placeholder {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:28px 20px 8px;
+  pointer-events:none;
+}
+.diag-upload-big-icon {
+  font-size:3.2rem;
+  filter:drop-shadow(0 4px 10px rgba(22,163,74,.3));
+  margin-bottom:10px;
+  animation:pulseRing 3s ease-in-out infinite;
+}
+.diag-upload-hint-en {
+  font-size:.88rem; font-weight:700; color:#374151; text-align:center; line-height:1.4;
+}
+.diag-upload-hint-ta {
+  font-size:.78rem; color:#6b7280; font-family:"Noto Sans Tamil",sans-serif;
+  text-align:center; margin-top:5px; line-height:1.5;
+}
+.diag-upload-formats {
+  font-size:.62rem; color:#9ca3af; letter-spacing:1.5px; font-weight:700;
+  text-transform:uppercase; margin-top:8px;
+  background:#f3f4f6; border-radius:999px; padding:3px 12px;
+}
+.diag-preview-wrap { padding:8px; }
+.diag-preview-badge {
+  font-size:.7rem; font-weight:700; color:#16a34a;
+  background:#f0fdf4; border:1px solid #bbf7d0;
+  border-radius:999px; padding:3px 12px;
+  margin:6px 4px 4px; display:inline-block;
+}
+
+/* ── Native file uploader dropzone styling ───────────────────────────────── */
+.diag-upload-card [data-testid="stFileUploaderDropzone"] { background:linear-gradient(145deg,#fafffd,#f0fdf4) !important; border:2.5px dashed #bbf7d0 !important; border-radius:14px !important; min-height:180px !important; }
+.diag-upload-card [data-testid="stFileUploaderDropzone"]:hover { border-color:#4ade80 !important; background:#f0fdf4 !important; }
+
+/* ── Example leaf photos strip ───────────────────────────────────────────── */
+.diag-examples-strip { margin-top:10px; }
+.diag-ex-label { font-size:.65rem; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.8px; margin-bottom:6px; }
+.diag-ex-photos { display:flex; gap:8px; }
+.diag-ex-photo { flex:1; height:70px; border-radius:10px; background-size:cover; background-position:center; position:relative; overflow:hidden; }
+.diag-ex-badge { position:absolute; bottom:5px; left:50%; transform:translateX(-50%); font-size:.55rem; font-weight:800; border-radius:999px; padding:2px 8px; white-space:nowrap; }
+.diag-ex-badge--bad  { background:#fecaca; color:#dc2626; }
+.diag-ex-badge--good { background:#bbf7d0; color:#15803d; }
+
+/* ── Field photo header (right panel) ────────────────────────────────────── */
+.diag-field-header { height:80px; border-radius:14px; background-size:cover; background-position:center; position:relative; overflow:hidden; margin-bottom:10px; }
+.diag-field-header-overlay { position:absolute; bottom:0; left:0; right:0; background:linear-gradient(to top,rgba(5,46,22,.8),transparent); padding:6px 12px; font-size:.6rem; font-weight:700; color:rgba(255,255,255,.85); letter-spacing:.5px; }
+
+/* ── Status card ─────────────────────────────────────────────────────────── */
+.diag-status-card {
+  background:#fff; border:1.5px solid #e5e7eb; border-radius:16px;
+  padding:22px 14px; text-align:center;
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+  margin-bottom:14px;
+}
+.diag-status-card--ready {
+  background:#f0fdf4; border-color:#bbf7d0;
+}
+.diag-status-ta {
+  font-size:.7rem; color:#9ca3af; font-family:"Noto Sans Tamil",sans-serif;
+  margin-top:2px;
+}
+.diag-status-card--ready .diag-status-ta { color:#16a34a; }
+
+/* ── Details card ────────────────────────────────────────────────────────── */
+.diag-det-card {
+  background:#fff; border:1.5px solid #e5e7eb; border-radius:16px;
+  padding:14px 14px 4px; margin-bottom:12px;
+}
+.diag-det-label {
+  font-size:.75rem; font-weight:700; color:#374151; margin-bottom:8px;
+  display:flex; align-items:center; gap:4px;
+}
+.diag-det-ta { font-size:.68rem; color:#9ca3af; font-family:"Noto Sans Tamil",sans-serif; }
+
 /* ─────────────────────────────────────────────────────────────────────────── */
 /*  HOME — FARMER ILLUSTRATION PANEL                                            */
 /* ─────────────────────────────────────────────────────────────────────────── */
 .fp-wrap {
-  background:linear-gradient(180deg,#020e05 0%,#041808 18%,#082e10 38%,#0e4c1c 58%,#186628 76%,#1e8030 90%,#24913a 100%);
+  background:
+    linear-gradient(180deg,rgba(2,14,5,.55) 0%,rgba(4,24,8,.45) 30%,rgba(8,46,16,.4) 60%,rgba(14,76,28,.55) 80%,rgba(24,102,40,.7) 100%),
+    url('https://images.unsplash.com/photo-1599790977917-b63cf93b7e59?w=800&q=75&auto=format&fit=crop') center/cover no-repeat;
   border-radius:24px; min-height:400px; position:relative; overflow:hidden;
   display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
 }
 .fp-wrap::before {
   content:''; position:absolute; inset:0; z-index:1;
-  background-image:
-    repeating-linear-gradient(90deg,rgba(34,197,94,.03) 0,rgba(34,197,94,.03) 1px,transparent 1px,transparent 44px),
-    repeating-linear-gradient(0deg,rgba(34,197,94,.03) 0,rgba(34,197,94,.03) 1px,transparent 1px,transparent 44px);
+  background: linear-gradient(to top, rgba(5,46,22,.65) 0%, transparent 55%);
 }
 .fp-moon {
   position:absolute; top:24px; left:50%; transform:translateX(-50%);
@@ -999,6 +1209,23 @@ div[data-testid="stButton"] > button:disabled {
 
 /* ─────────────────────────────────────────────────────────────────────────── */
 /*  HOME — "BUILT FOR FARMERS" SECTION                                          */
+/* ── Home crop photo gallery strip ──────────────────────────────────────── */
+.home-crop-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px;
+  margin: 0 0 8px;
+}
+.home-crop-photo {
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1.5px solid #e5e7eb;
+  box-shadow: 0 2px 10px rgba(0,0,0,.06);
+  transition: transform .2s, box-shadow .2s;
+}
+.home-crop-photo:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.1); }
+.home-crop-photo-label { padding: 8px 10px 10px; background: #fff; }
+
 /* ─────────────────────────────────────────────────────────────────────────── */
 .bff-eyebrow { font-size:.68rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#16a34a; margin-bottom:10px; }
 .bff-title { font-size:clamp(1.5rem,3vw,2.1rem); font-weight:800; color:#111827; letter-spacing:-.8px; line-height:1.2; margin:0 0 12px; }
@@ -1122,17 +1349,754 @@ div[data-testid="stButton"] > button:disabled {
   z-index: 100;
   height: 48px;
 }
-.top-nav-bg {
-  padding: 0 1rem;
-  background: rgba(247,249,247,.8);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--border-soft);
+.top-nav-bg { display: none; }
+.hnav-scope { display: none; }
+.hnav-rule  { display: none; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FIXED HORIZONTAL NAVBAR  (single-row st.columns approach)
+   Sentinel: .hnav-root inside brand column → targets stHorizontalBlock parent
+   ═══════════════════════════════════════════════════════════════════════════ */
+@keyframes hnavSlideDown {
+  from { opacity: 0; transform: translateY(-64px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes hnavLinkGlow {
+  0%,100% { box-shadow: 0 0 0 rgba(34,197,94,0); }
+  50%      { box-shadow: 0 0 12px rgba(34,197,94,.4); }
+}
+
+/* ── The columns row becomes the fixed navbar ─────────────────────────────── */
+.hnav-root { display: none !important; }
+
+[data-testid="stHorizontalBlock"]:has(.hnav-root) {
+  position         : fixed !important;
+  top              : 0 !important;
+  left             : 0 !important;
+  right            : 0 !important;
+  z-index          : 9000 !important;
+  height           : 64px !important;
+  background       : rgba(5, 30, 14, 0.96) !important;
+  backdrop-filter  : blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  border-bottom    : 1px solid rgba(34,197,94,.2) !important;
+  box-shadow       : 0 4px 28px rgba(0,0,0,.35) !important;
+  animation        : hnavSlideDown .4s cubic-bezier(.22,.61,.36,1) both !important;
+  padding          : 0 32px !important;
+  align-items      : center !important;
+  gap              : 4px !important;
+}
+
+/* Strip all inner padding / borders from every column wrapper inside navbar */
+[data-testid="stHorizontalBlock"]:has(.hnav-root)
+  > [data-testid="stColumn"] {
+  display         : flex !important;
+  align-items     : center !important;
+  padding         : 0 !important;
+  gap             : 0 !important;
+}
+[data-testid="stHorizontalBlock"]:has(.hnav-root)
+  [data-testid="stVerticalBlock"],
+[data-testid="stHorizontalBlock"]:has(.hnav-root)
+  [data-testid="stVerticalBlockBorderWrapper"] {
+  padding : 0 !important;
+  gap     : 0 !important;
+  border  : none !important;
+  width   : 100% !important;
+}
+
+/* ── Brand ──────────────────────────────────────────────────────────────── */
+.hnav-brand {
+  display         : flex;
+  align-items     : center;
+  gap             : 10px;
+  text-decoration : none;
+  white-space     : nowrap;
+}
+.hnav-brand-logo { font-size: 1.3rem; line-height: 1; }
+.hnav-brand-text { display: flex; flex-direction: column; line-height: 1; }
+.hnav-brand-name { font-size: .88rem; font-weight: 800; color: #fff; letter-spacing: -.3px; }
+.hnav-tn         { color: #22c55e; }
+.hnav-brand-sub  { font-size: .54rem; color: rgba(255,255,255,.38); letter-spacing: .3px; margin-top: 1px; }
+
+/* ── Nav buttons (st.button inside nav columns 2-5) ─────────────────────── */
+
+/* Make stHeader pointer-events:none so it never intercepts navbar clicks */
+[data-testid="stHeader"] { pointer-events: none !important; }
+[data-testid="stHeader"] * { pointer-events: none !important; }
+
+/* Strip Streamlit's default button chrome inside the navbar */
+[data-testid="stHorizontalBlock"]:has(.hnav-root)
+  > [data-testid="stColumn"]:not(:first-child):not(:last-child)
+  [data-testid="stBaseButton-secondary"],
+[data-testid="stHorizontalBlock"]:has(.hnav-root)
+  > [data-testid="stColumn"]:not(:first-child):not(:last-child)
+  [data-testid="stButton"] {
+  width: 100% !important;
+}
+
+[data-testid="stHorizontalBlock"]:has(.hnav-root)
+  > [data-testid="stColumn"]:not(:first-child):not(:last-child)
+  button {
+  background      : transparent !important;
+  border          : 1px solid transparent !important;
+  border-radius   : 9px !important;
+  padding         : 7px 14px !important;
+  color           : rgba(255,255,255,.72) !important;
+  font-size       : .8rem !important;
+  font-weight     : 600 !important;
+  width           : 100% !important;
+  min-height      : 36px !important;
+  white-space     : nowrap !important;
+  box-shadow      : none !important;
+  cursor          : pointer !important;
+  transition      : background .17s, border-color .17s, color .17s, transform .14s !important;
+  line-height     : 1 !important;
+}
+[data-testid="stHorizontalBlock"]:has(.hnav-root)
+  > [data-testid="stColumn"]:not(:first-child):not(:last-child)
+  button:hover {
+  background   : rgba(34,197,94,.15) !important;
+  border-color : rgba(34,197,94,.45) !important;
+  color        : #4ade80             !important;
+  transform    : scale(1.04)         !important;
+}
+[data-testid="stHorizontalBlock"]:has(.hnav-root)
+  > [data-testid="stColumn"]:not(:first-child):not(:last-child)
+  button:active { transform: scale(0.97) !important; }
+
+/* Active page pill — driven by data-page attr on .hnav-cur sentinel */
+[data-testid="stHorizontalBlock"]:has(.hnav-cur[data-page="home"])
+  > [data-testid="stColumn"]:nth-child(2) button,
+[data-testid="stHorizontalBlock"]:has(.hnav-cur[data-page="diagnose"])
+  > [data-testid="stColumn"]:nth-child(3) button,
+[data-testid="stHorizontalBlock"]:has(.hnav-cur[data-page="action_plan"])
+  > [data-testid="stColumn"]:nth-child(4) button,
+[data-testid="stHorizontalBlock"]:has(.hnav-cur[data-page="field_guide"])
+  > [data-testid="stColumn"]:nth-child(5) button {
+  background   : rgba(34,197,94,.22) !important;
+  border-color : rgba(34,197,94,.65) !important;
+  color        : #4ade80             !important;
+  animation    : hnavLinkGlow 2.8s ease-in-out infinite !important;
+}
+
+/* ── Language radio (last column) ──────────────────────────────────────── */
+[data-testid="stHorizontalBlock"]:has(.hnav-root)
+  > [data-testid="stColumn"]:last-child {
+  justify-content : flex-end !important;
+  flex-shrink     : 0 !important;
+}
+[data-testid="stHorizontalBlock"]:has(.hnav-root)
+  > [data-testid="stColumn"]:last-child [data-testid="stRadio"] > div {
+  flex-direction : row    !important;
+  flex-wrap      : nowrap !important;
+  gap            : 4px    !important;
+}
+[data-testid="stHorizontalBlock"]:has(.hnav-root)
+  > [data-testid="stColumn"]:last-child [data-testid="stRadio"] label {
+  background    : rgba(255,255,255,.07) !important;
+  border        : 1px solid rgba(255,255,255,.16) !important;
+  border-radius : 8px  !important;
+  padding       : 5px 12px !important;
+  min-height    : 0    !important;
+  cursor        : pointer !important;
+  transition    : background .15s, border-color .15s !important;
+}
+[data-testid="stHorizontalBlock"]:has(.hnav-root)
+  > [data-testid="stColumn"]:last-child [data-testid="stRadio"] label * {
+  color       : rgba(255,255,255,.82) !important;
+  font-size   : .74rem !important;
+  font-weight : 600    !important;
+}
+[data-testid="stHorizontalBlock"]:has(.hnav-root)
+  > [data-testid="stColumn"]:last-child [data-testid="stRadio"] label
+  div[data-baseweb="radio"] { display: none !important; }
+[data-testid="stHorizontalBlock"]:has(.hnav-root)
+  > [data-testid="stColumn"]:last-child [data-testid="stRadio"] label:has(input:checked) {
+  background   : rgba(34,197,94,.28) !important;
+  border-color : rgba(34,197,94,.8)  !important;
+}
+[data-testid="stHorizontalBlock"]:has(.hnav-root)
+  > [data-testid="stColumn"]:last-child [data-testid="stRadio"] label:has(input:checked) * {
+  color       : #4ade80 !important;
+  font-weight : 700     !important;
+}
+
+/* ── Push page content below 64px navbar ─────────────────────────────── */
+[data-testid="stMainBlockContainer"] { padding-top: 76px; }
+
+/* ── Sidebar language radio ─────────────────────────────────────────────── */
+.sb-lang-wrap { padding: 0 18px; }
+.sb-lang-wrap [data-testid="stRadio"] > div { flex-direction: column !important; gap: 2px !important; }
+.sb-lang-wrap [data-testid="stRadio"] label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  color: rgba(255,255,255,.8) !important;
+  font-size: .85rem !important;
+  padding: 7px 12px !important;
+  border-radius: 10px !important;
+  border: 1px solid transparent !important;
+  transition: all .15s ease;
+  cursor: pointer !important;
+}
+.sb-lang-wrap [data-testid="stRadio"] label p,
+.sb-lang-wrap [data-testid="stRadio"] label span {
+  color: rgba(255,255,255,.8) !important;
+  font-size: .85rem !important;
+  font-weight: 500 !important;
+}
+.sb-lang-wrap [data-testid="stRadio"] label > div:first-child {
+  display: flex !important;
+  flex-shrink: 0 !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.sb-lang-wrap [data-testid="stRadio"] label > div:first-child div[data-baseweb="radio"] {
+  border-color: rgba(34,197,94,.55) !important;
+  width: 16px !important;
+  height: 16px !important;
+}
+.sb-lang-wrap [data-testid="stRadio"] label:hover {
+  background: rgba(34,197,94,.12) !important;
+  border-color: rgba(34,197,94,.25) !important;
+}
+.sb-lang-wrap [data-testid="stRadio"] label:hover p,
+.sb-lang-wrap [data-testid="stRadio"] label:hover span { color: #fff !important; }
+.sb-lang-wrap [data-testid="stRadio"] label:has(input:checked) {
+  background: rgba(34,197,94,.18) !important;
+  border-color: rgba(34,197,94,.45) !important;
+}
+.sb-lang-wrap [data-testid="stRadio"] label:has(input:checked) p,
+.sb-lang-wrap [data-testid="stRadio"] label:has(input:checked) span {
+  color: #22c55e !important;
+  font-weight: 700 !important;
+}
+.sb-lang-wrap [data-testid="stRadio"] label:has(input:checked) div[data-baseweb="radio"] {
+  border-color: #22c55e !important;
+}
+.sb-lang-wrap [data-testid="stRadio"] label div[data-baseweb="radio"] div:nth-child(2) {
+  background: #22c55e !important;
+}
+
+/* ── What To Do Now visual action cards ─────────────────────────────────── */
+.wtdn-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin: 12px 0;
+}
+.wtdn-card {
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  min-height: 195px;
   display: flex;
+  flex-direction: column;
   justify-content: flex-end;
+  padding: 12px;
+  background-size: cover;
+  background-position: center;
+  cursor: default;
+  box-shadow: 0 4px 14px rgba(0,0,0,.18);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.wtdn-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.25);
+}
+.wtdn-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,.08) 0%, rgba(0,0,0,.72) 100%);
+  border-radius: 16px;
+}
+.wtdn-card-icon {
+  font-size: 2.6rem;
+  line-height: 1;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -68%);
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,.6));
+  z-index: 1;
+}
+.wtdn-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: .56rem;
+  font-weight: 800;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  z-index: 1;
+}
+.wtdn-badge--today    { background: #dc2626; color: #fff; }
+.wtdn-badge--week     { background: #d97706; color: #fff; }
+.wtdn-badge--wet      { background: #2563eb; color: #fff; }
+.wtdn-badge--daily    { background: #16a34a; color: #fff; }
+.wtdn-badge--directed { background: #7c3aed; color: #fff; }
+.wtdn-badge--now      { background: #dc2626; color: #fff; }
+.wtdn-card-title {
+  font-size: .82rem;
+  font-weight: 800;
+  color: #fff;
+  position: relative;
+  z-index: 1;
+  line-height: 1.25;
+  margin-bottom: 3px;
+  text-shadow: 0 1px 4px rgba(0,0,0,.6);
+}
+.wtdn-card-bilingual {
+  font-size: .7rem;
+  color: rgba(255,255,255,.82);
+  position: relative;
+  z-index: 1;
+  line-height: 1.45;
+  font-family: "Noto Sans Tamil", sans-serif;
+  text-shadow: 0 1px 3px rgba(0,0,0,.5);
+}
+
+/* ── Why It Happened banner ─────────────────────────────────────────────── */
+.wtdn-why-banner {
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border: 1.5px solid #fde68a;
+  border-radius: 14px;
+  padding: 16px 20px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin: 14px 0 0;
+}
+.wtdn-why-icon { font-size: 2rem; flex-shrink: 0; margin-top: 2px; }
+.wtdn-why-title {
+  font-size: .64rem;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #b45309;
+  margin-bottom: 5px;
+}
+.wtdn-why-text {
+  font-size: .875rem;
+  color: #374151;
+  font-weight: 500;
+  line-height: 1.65;
+}
+.wtdn-why-ta {
+  font-size: .77rem;
+  color: #78716c;
+  font-family: "Noto Sans Tamil", sans-serif;
+  margin-top: 6px;
+  line-height: 1.55;
+  border-top: 1px solid #fde68a;
+  padding-top: 6px;
+}
+
+/* ── Treatment icon pills ────────────────────────────────────────────────── */
+.wtdn-pill-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #e5e7eb;
+}
+.wtdn-pill {
+  display: flex;
   align-items: center;
-  margin-bottom: 2rem;
-  margin-top: -1rem;
+  gap: 6px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  padding: 6px 14px 6px 8px;
+  font-size: .74rem;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+}
+.wtdn-pill-icon { font-size: 1.05rem; }
+.wtdn-pill-lbl-ta {
+  font-size: .65rem;
+  color: #6b7280;
+  font-family: "Noto Sans Tamil", sans-serif;
+  margin-left: 3px;
+}
+
+/* ── Dashboard cards ─────────────────────────────────────────────────────── */
+.dash-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 18px 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.05);
+  height: 100%;
+  min-height: 200px;
+}
+.dash-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.dash-card-icon { font-size: 1.5rem; flex-shrink: 0; }
+.dash-card-title {
+  font-size: .65rem;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #374151;
+  line-height: 1.2;
+}
+.dash-wx-cell {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.dash-wx-lbl {
+  font-size: .58rem;
+  color: #9ca3af;
+  font-weight: 600;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.dash-wx-val {
+  font-size: .95rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+/* ── What To Do Now page ─────────────────────────────────────────────────── */
+.wtdn-page-hero {
+  background: linear-gradient(135deg, #052e16 0%, #14532d 55%, #1a6b38 100%);
+  border-radius: 20px;
+  padding: 24px 32px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 28px rgba(5,46,22,.4);
+}
+.wtdn-page-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200&q=60&auto=format&fit=crop") center/cover no-repeat;
+  opacity: .15;
+  pointer-events: none;
+}
+.wtdn-page-hero-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+.wtdn-page-hero-title {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -.5px;
+  text-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+.wtdn-page-hero-sep {
+  font-size: 1.6rem;
+  color: rgba(255,255,255,.4);
+}
+.wtdn-page-hero-ta {
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(255,255,255,.8);
+  font-family: "Noto Sans Tamil", sans-serif;
+}
+.wtdn-page-hero-sub {
+  font-size: .72rem;
+  color: rgba(255,255,255,.5);
+  margin-top: 6px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Large action cards (What To Do Now page) ────────────────────────────── */
+.wtdn-cards-scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 4px 2px 14px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(34,197,94,.3) transparent;
+}
+.wtdn-cards-scroll::-webkit-scrollbar { height: 4px; }
+.wtdn-cards-scroll::-webkit-scrollbar-thumb { background: rgba(34,197,94,.3); border-radius: 999px; }
+
+.wtdn-action-card-lg {
+  min-width: 210px;
+  max-width: 230px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1.5px solid #e5e7eb;
+  box-shadow: 0 4px 16px rgba(0,0,0,.08);
+  background: #fff;
+  transition: transform .2s, box-shadow .2s;
+}
+.wtdn-action-card-lg:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 28px rgba(0,0,0,.13);
+}
+.wtdn-action-card-img {
+  height: 200px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+.wtdn-action-card-img::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,.1) 0%, rgba(0,0,0,.55) 100%);
+}
+.wtdn-action-card-icon-lg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+  font-size: 2.8rem;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,.5));
+}
+.wtdn-action-card-body {
+  padding: 14px 14px 16px;
+  background: #fff;
+}
+.wtdn-action-card-en {
+  font-size: .82rem;
+  font-weight: 900;
+  color: #111827;
+  text-transform: uppercase;
+  line-height: 1.2;
+  margin-bottom: 5px;
+  letter-spacing: .3px;
+}
+.wtdn-action-card-ta {
+  font-size: .75rem;
+  color: #374151;
+  font-family: "Noto Sans Tamil", sans-serif;
+  line-height: 1.4;
+}
+
+/* ── Advisory sidebar ────────────────────────────────────────────────────── */
+.wtdn-adv-sidebar {
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 18px 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.05);
+}
+.wtdn-adv-sidebar-hd {
+  font-size: .6rem;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: #0d9488;
+  margin-bottom: 14px;
+}
+.wtdn-adv-pills-hd {
+  font-size: .7rem;
+  font-weight: 700;
+  color: #374151;
+  margin: 14px 0 10px;
+  border-top: 1px solid #f3f4f6;
+  padding-top: 12px;
+}
+.wtdn-adv-pills-wrap { display: flex; flex-direction: column; gap: 8px; }
+.wtdn-adv-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
+  padding: 10px 12px;
+}
+.wtdn-adv-pill-icon { font-size: 1.5rem; flex-shrink: 0; }
+.wtdn-adv-pill-en { font-size: .78rem; font-weight: 700; color: #111827; line-height: 1.2; }
+.wtdn-adv-pill-ta { font-size: .65rem; color: #6b7280; font-family: "Noto Sans Tamil",sans-serif; }
+
+@keyframes sadBounce { 0%,100%{transform:translateY(0) rotate(-5deg)} 50%{transform:translateY(-8px) rotate(5deg)} }
+
+.sg-banner { background:linear-gradient(135deg,#f0fdf4,#ecfdf5); border:1.5px solid #bbf7d0; border-radius:20px; padding:20px 28px; display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; overflow:hidden; animation:fadeUp .45s ease both; }
+.sg-text { flex:1; }
+.sg-title { font-size:1.45rem; font-weight:900; color:#111827; line-height:1.2; }
+.sg-sub { font-size:.9rem; color:#4b5563; margin-top:5px; }
+.sg-farmer { width:120px; height:120px; object-fit:contain; animation:farmerBob 3s ease-in-out infinite; flex-shrink:0; }
+.sg-farmer-emoji { font-size:5rem; animation:farmerBob 3s ease-in-out infinite; flex-shrink:0; }
+
+.story-card { background:#fff; border:1.5px solid #e5e7eb; border-radius:20px; padding:22px 24px; margin-bottom:16px; display:flex; align-items:flex-start; gap:20px; }
+.story-card--d1 { animation:fadeUp .5s .1s ease both; }
+.story-card--d2 { animation:fadeUp .5s .2s ease both; }
+.sc-illus { flex:0 0 108px; }
+.sc-illus-circle { width:108px; height:108px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:2.8rem; }
+.sc-illus-plants { width:108px; min-height:88px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:2rem; line-height:1.5; padding:8px; text-align:center; }
+.sc-body { flex:1; min-width:0; }
+.sc-title { font-size:1.05rem; font-weight:800; color:#111827; margin-bottom:5px; }
+.sc-sub { font-size:.84rem; color:#6b7280; margin-bottom:12px; line-height:1.5; }
+.sc-risk { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:12px; margin-bottom:10px; flex-wrap:wrap; }
+.sc-risk--high { background:#fef2f2; border:1.5px solid #fecaca; }
+.sc-risk--mod  { background:#fffbeb; border:1.5px solid #fde68a; }
+.sc-risk--low  { background:#f0fdf4; border:1.5px solid #bbf7d0; }
+.sc-risk-badge { font-size:.7rem; font-weight:800; padding:3px 10px; border-radius:999px; white-space:nowrap; }
+.sc-risk-badge--high { background:#dc2626; color:#fff; }
+.sc-risk-badge--mod  { background:#d97706; color:#fff; }
+.sc-risk-badge--low  { background:#16a34a; color:#fff; }
+.sc-risk-text { font-size:.82rem; color:#374151; font-weight:500; line-height:1.4; flex:1; }
+.sc-sad-leaf { font-size:2.6rem; animation:sadBounce 2.2s ease-in-out infinite; flex-shrink:0; align-self:center; }
+.sc-wx-row { display:flex; gap:10px; margin-top:12px; }
+.sc-wx-card { flex:1; background:#f8fafc; border:1px solid #e5e7eb; border-radius:12px; padding:10px 14px; display:flex; align-items:center; gap:10px; }
+.sc-wx-icon { font-size:1.6rem; line-height:1; }
+.sc-wx-lbl { font-size:.6rem; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.5px; }
+.sc-wx-val { font-size:.9rem; font-weight:800; color:#111827; }
+
+.sa-section-hd { font-size:1.05rem; font-weight:800; color:#111827; margin:20px 0 4px; }
+.sa-section-sub { font-size:.84rem; color:#6b7280; margin-bottom:14px; }
+.sa-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px; }
+.sa-card { background:#fff; border:1.5px solid #e5e7eb; border-radius:16px; overflow:hidden; cursor:pointer; transition:transform .22s,box-shadow .22s,border-color .22s; opacity:0; animation:fadeUp .5s ease forwards; }
+.sa-card:hover { transform:translateY(-5px); box-shadow:0 12px 32px rgba(0,0,0,.1); border-color:#4ade80; }
+.sa-card:nth-child(1){animation-delay:.1s} .sa-card:nth-child(2){animation-delay:.2s} .sa-card:nth-child(3){animation-delay:.3s} .sa-card:nth-child(4){animation-delay:.4s}
+.sa-header { display:flex; align-items:center; gap:8px; padding:10px 12px 0; }
+.sa-num { width:24px; height:24px; border-radius:50%; background:#16a34a; color:#fff; font-size:.7rem; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.sa-label { font-size:.77rem; font-weight:700; color:#111827; line-height:1.3; }
+.sa-illus { height:100px; margin:8px 10px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:3rem; position:relative; overflow:hidden; }
+.sa-check { position:absolute; bottom:8px; left:8px; width:26px; height:26px; border-radius:50%; background:#16a34a; color:#fff; font-size:.75rem; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(22,163,74,.45); }
+
+.sw-section { border-radius:20px; padding:20px 24px; margin-bottom:16px; display:flex; align-items:center; gap:20px; animation:fadeUp .5s .35s ease both; }
+.sw-section--good { background:linear-gradient(135deg,#fefce8,#fef9c3); border:1.5px solid #fde68a; }
+.sw-section--bad  { background:linear-gradient(135deg,#fef2f2,#fee2e2); border:1.5px solid #fecaca; }
+.sw-section--mod  { background:linear-gradient(135deg,#fffbeb,#fef3c7); border:1.5px solid #fde68a; }
+.sw-section--unk  { background:#f8fafc; border:1.5px solid #e5e7eb; }
+.sw-icon { font-size:4rem; flex-shrink:0; }
+.sw-icon--sun   { animation:fpSunGlow 3s ease-in-out infinite; }
+.sw-icon--cloud { animation:float 3s ease-in-out infinite; }
+.sw-content { flex:1; }
+.sw-title { font-size:1rem; font-weight:800; color:#111827; margin-bottom:5px; }
+.sw-msg { font-size:.88rem; color:#374151; line-height:1.5; margin-bottom:10px; }
+.sw-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.85); border:1px solid rgba(0,0,0,.08); border-radius:999px; padding:5px 14px; font-size:.8rem; font-weight:700; color:#374151; }
+
+.story-tip { background:linear-gradient(135deg,#f0fdf4,#dcfce7); border:1.5px solid #86efac; border-radius:18px; padding:16px 22px; display:flex; align-items:center; gap:16px; animation:fadeUp .5s .45s ease both; margin-bottom:4px; }
+.st-tip-icon { font-size:1.2rem; flex-shrink:0; }
+.st-tip-text { font-size:.9rem; font-weight:600; color:#166534; flex:1; line-height:1.4; }
+.st-tip-farmer { font-size:2.8rem; animation:farmerBob 2.5s ease-in-out infinite; flex-shrink:0; }
+
+/* ── Expanders ──────────────────────────────────────────────────────────── */
+[data-testid="stExpander"] {
+  border: 1.5px solid #e5e7eb !important;
+  border-radius: 14px !important;
+  overflow: hidden !important;
+  background: #fff !important;
+  margin-bottom: 8px !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,.04) !important;
+}
+[data-testid="stExpander"] details > summary {
+  padding: 14px 18px !important;
+  background: #f8fafb !important;
+  font-weight: 600 !important;
+  font-size: .9rem !important;
+  color: #374151 !important;
+  cursor: pointer !important;
+  transition: background .15s, color .15s !important;
+}
+[data-testid="stExpander"] details > summary:hover {
+  background: #f0fdf4 !important;
+  color: #15803d !important;
+}
+[data-testid="stExpander"] details[open] > summary {
+  background: #f0fdf4 !important;
+  color: #15803d !important;
+  border-bottom: 1px solid #e5e7eb !important;
+}
+[data-testid="stExpanderDetails"] {
+  padding: 16px 18px !important;
+}
+
+/* ── Select box ─────────────────────────────────────────────────────────── */
+[data-testid="stSelectbox"] [data-baseweb="select"] > div {
+  border-radius: 10px !important;
+  border: 1.5px solid #e5e7eb !important;
+  background: #fff !important;
+  min-height: 42px !important;
+  transition: border-color .18s, box-shadow .18s !important;
+}
+[data-testid="stSelectbox"] [data-baseweb="select"] > div:hover {
+  border-color: #4ade80 !important;
+}
+[data-testid="stSelectbox"] [data-baseweb="select"]:focus-within > div {
+  border-color: #16a34a !important;
+  box-shadow: 0 0 0 3px rgba(22,163,74,.12) !important;
+}
+
+/* ── Disease Library: fuse card visually with its View Details button ───── */
+[data-testid="stColumn"]:has(.dl-card) .dl-card {
+  border-radius: 14px 14px 0 0 !important;
+  border-bottom: none !important;
+  margin-bottom: 0 !important;
+}
+[data-testid="stColumn"]:has(.dl-card) [data-testid="stButton"] {
+  margin-top: 0 !important;
+}
+[data-testid="stColumn"]:has(.dl-card) [data-testid="stButton"] > button {
+  border-radius: 0 0 14px 14px !important;
+  border: 1.5px solid #e5e7eb !important;
+  border-top: none !important;
+  background: #f8fafb !important;
+  color: #374151 !important;
+  font-size: .78rem !important;
+  font-weight: 700 !important;
+  letter-spacing: .2px !important;
+  box-shadow: none !important;
+  padding: 10px 16px !important;
+  transition: background .18s, color .18s, border-color .18s !important;
+  transform: none !important;
+}
+[data-testid="stColumn"]:has(.dl-card) [data-testid="stButton"] > button:hover {
+  background: #16a34a !important;
+  border-color: #16a34a !important;
+  color: #fff !important;
+  transform: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+[data-testid="stColumn"]:has(.dl-card.active) [data-testid="stButton"] > button {
+  background: #f0fdf4 !important;
+  color: #15803d !important;
+  border-color: #bbf7d0 !important;
+}
+
+/* ── Advisory pill hover ─────────────────────────────────────────────────── */
+.wtdn-adv-pill {
+  transition: background .18s, border-color .18s, transform .14s;
+}
+.wtdn-adv-pill:hover {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  transform: translateX(3px);
+}
+
+/* ── Action card hover glow ──────────────────────────────────────────────── */
+.sa-card:hover .sa-illus {
+  filter: brightness(1.06);
+}
+
+/* ── Story card entrance shadow ──────────────────────────────────────────── */
+.story-card {
+  box-shadow: 0 2px 12px rgba(0,0,0,.04);
+  transition: box-shadow .22s, transform .22s;
+}
+.story-card:hover {
+  box-shadow: 0 6px 24px rgba(0,0,0,.08);
+  transform: translateY(-2px);
 }
 """
 
@@ -1145,6 +2109,7 @@ def inject_css() -> None:
 _NAV = [
     ("home",        "🏠", "nav.home",        "pages/1_Home.py"),
     ("diagnose",    "🩺", "nav.diagnose",    "pages/2_Analyze_Leaf.py"),
+    ("action_plan", "⚡", "nav.action_plan", "pages/3_What_To_Do.py"),
     ("field_guide", "📖", "nav.field_guide", "pages/6_Disease_Library.py"),
 ]
 
@@ -1205,24 +2170,26 @@ def inject_sidebar_brand() -> None:
 
         # ── Language selector ─────────────────────────────────────────────────
         st.markdown(
-            '<div style="margin:16px 18px 8px;border-top:1px solid rgba(34,197,94,.1);padding-top:14px;">'
+            '<div style="margin:20px 18px 6px;border-top:1px solid rgba(34,197,94,.1);padding-top:16px;">'
             '<div style="font-size:.57rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;'
-            'color:rgba(255,255,255,.28);margin-bottom:10px;">Language</div>'
+            'color:rgba(255,255,255,.28);margin-bottom:10px;">&#127758; Language</div>'
             '</div>',
             unsafe_allow_html=True,
         )
-        _lang_display = {"en": "English", "ta": "தமிழ்", "hi": "हिन्दी"}
+        _lang_display = {"en": "🇬🇧 English", "ta": "🇮🇳 தமிழ்", "hi": "🇮🇳 हिन्दी"}
         _cur_lang = _gl()
-        _chosen_lang = st.radio(
-            "lang_selector",
+        st.markdown('<div class="sb-lang-wrap">', unsafe_allow_html=True)
+        _sb_lang = st.radio(
+            "sb_lang",
             options=list(_lang_display.keys()),
             format_func=lambda x: _lang_display[x],
             index=list(_lang_display.keys()).index(_cur_lang),
             label_visibility="collapsed",
-            key="_sidebar_lang_radio",
+            key="_sb_lang_radio",
         )
-        if _chosen_lang != _cur_lang:
-            st.session_state["lang"] = _chosen_lang
+        st.markdown('</div>', unsafe_allow_html=True)
+        if _sb_lang != _cur_lang:
+            st.session_state["lang"] = _sb_lang
             st.rerun()
 
         # ── Sidebar footer ────────────────────────────────────────────────────
@@ -1261,38 +2228,92 @@ def ui_divider() -> None:
 
 
 def inject_header() -> None:
-    """Renders an always-visible top header with the language switcher."""
+    """Fixed horizontal top navbar: brand | page nav | language switcher.
+
+    Navigation uses st.button + st.switch_page so clicks work correctly
+    even when the row is CSS position:fixed outside Streamlit's scroll flow.
+
+    Active-page detection uses st.context.url_pathname (Streamlit ≥ 1.37)
+    with a session-state fallback so the correct pill is always highlighted.
+    """
     try:
-        from i18n import get_lang as _gl
+        from i18n import get_lang as _gl, t as _t
     except ImportError:
         _gl = lambda: "en"
+        _t = lambda k, **kw: k
 
-    _lang_display = {"en": "English", "ta": "தமிழ்", "hi": "हिन्दी"}
     _cur_lang = _gl()
+    _LANG_OPTS = {"en": "EN", "ta": "தமிழ்", "hi": "हिन्दी"}
 
-    # We use a columns layout at the top of the page area
-    # This renders in the main block container
-    c1, c2 = st.columns([1, 1])
+    # Detect active page from URL first; fall back to session state
+    _URL_MAP = {
+        "/":            "home",
+        "/diagnose":    "diagnose",
+        "/action-plan": "action_plan",
+        "/field-guide": "field_guide",
+        # file-name fallbacks Streamlit sometimes uses
+        "/1_home":             "home",
+        "/2_analyze_leaf":     "diagnose",
+        "/3_what_to_do":       "action_plan",
+        "/6_disease_library":  "field_guide",
+    }
+    try:
+        _cur_page = _URL_MAP.get(
+            getattr(st.context, "url_pathname", None) or "",
+            st.session_state.get("_cur_page", "home"),
+        )
+    except Exception:
+        _cur_page = st.session_state.get("_cur_page", "home")
 
-    with c2:
-        # Align selection to the right
-        st.markdown('<div class="top-lang-wrapper">', unsafe_allow_html=True)
-        _chosen_lang = st.radio(
-            "top_lang_selector",
-            options=list(_lang_display.keys()),
-            format_func=lambda x: _lang_display[x],
-            index=list(_lang_display.keys()).index(_cur_lang),
+    # Single row: brand | Home | Diagnose | Action Plan | Field Guide | lang
+    _cb, _c1, _c2, _c3, _c4, _cl = st.columns([2, 1, 1, 1, 1, 2], gap="small")
+
+    with _cb:
+        # .hnav-root  → CSS selects this stHorizontalBlock and position:fixed it
+        # .hnav-cur   → CSS uses data-page attr to highlight the active button
+        st.markdown(
+            f'<div class="hnav-root"></div>'
+            f'<div class="hnav-cur" data-page="{_cur_page}"></div>'
+            '<div class="hnav-brand">'
+            '  <span class="hnav-brand-logo">🌾</span>'
+            '  <div class="hnav-brand-text">'
+            '    <span class="hnav-brand-name">'
+            '      AgriShield<span class="hnav-tn">-TN</span>'
+            '    </span>'
+            '    <span class="hnav-brand-sub">AI Crop Doctor</span>'
+            '  </div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+
+    _nav_btns = [
+        ("home",        _c1, "🏠", "nav.home",        "pages/1_Home.py"),
+        ("diagnose",    _c2, "🩺", "nav.diagnose",    "pages/2_Analyze_Leaf.py"),
+        ("action_plan", _c3, "⚡", "nav.action_plan", "pages/3_What_To_Do.py"),
+        ("field_guide", _c4, "📖", "nav.field_guide", "pages/6_Disease_Library.py"),
+    ]
+    for _key, _col, _icon, _lk, _path in _nav_btns:
+        with _col:
+            if st.button(
+                f"{_icon} {_t(_lk)}",
+                key=f"_hnav_{_key}",
+                use_container_width=True,
+            ):
+                st.switch_page(_path)
+
+    with _cl:
+        _chosen = st.radio(
+            "Language",
+            options=list(_LANG_OPTS.keys()),
+            format_func=lambda x: _LANG_OPTS[x],
+            index=list(_LANG_OPTS.keys()).index(_cur_lang),
             label_visibility="collapsed",
             horizontal=True,
             key="_top_lang_radio",
         )
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    if _chosen_lang != _cur_lang:
-        st.session_state["lang"] = _chosen_lang
-        st.rerun()
-
-    st.markdown('<div class="top-nav-bg"></div>', unsafe_allow_html=True)
+        if _chosen != _cur_lang:
+            st.session_state["lang"] = _chosen
+            st.rerun()
 
 
 

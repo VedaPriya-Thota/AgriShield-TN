@@ -17,11 +17,6 @@ st.session_state["_cur_page"] = "home"
 st.markdown(
     '<style>'
     '[data-testid="stSidebar"]{display:none !important;}'
-    '[data-testid="stSidebarCollapsedControl"]{display:flex !important;}'
-    '[data-testid="collapsedControl"]{display:flex !important;}'
-    '[data-testid="stHeader"]{display:flex !important;height:0 !important;}' # Restore but keep tiny
-    '[data-testid="stToolbar"]{display:none !important;}'
-    '[data-testid="stDecoration"]{display:none !important;}'
     '[data-testid="stAppViewContainer"]{padding:0 !important;margin:0 !important;}'
     '[data-testid="stMain"]{padding:0 !important;margin:0 !important;}'
     '[data-testid="stMainBlockContainer"]{padding:0 !important;max-width:100% !important;}'
@@ -63,8 +58,8 @@ st.markdown(
 
     '<div class="hero-title">'
     '<span class="ht-agri">Agri</span>'
-    '<span class="ht-shield">&#128737;&#65039;</span>'
-    '<span class="ht-ield">eld</span>'
+    '<span class="ht-shield">&#127806;</span>'
+    '<span class="ht-ield">Shield</span>'
     '<span class="ht-tn">&#8209;TN</span>'
     '</div>'
 
@@ -88,7 +83,7 @@ st.markdown(
     '</div>'
 
     '<div class="hero-feats">'
-    f'<div class="hero-feat hero-feat--g"><span class="hero-feat__icon">&#127806;</span><span class="hero-feat__text">10 {t("diagnose.classes_val")}</span></div>'
+    f'<div class="hero-feat hero-feat--g"><span class="hero-feat__icon">&#127806;</span><span class="hero-feat__text">10 Paddy Diseases</span></div>'
     f'<div class="hero-feat hero-feat--p"><span class="hero-feat__icon">&#129504;</span><span class="hero-feat__text">{t("diagnose.model_name")}</span></div>'
     f'<div class="hero-feat hero-feat--h"><span class="hero-feat__icon">&#128293;</span><span class="hero-feat__text">{t("diagnose.gradcam_title").replace("🖼️ ", "")}</span></div>'
     f'<div class="hero-feat hero-feat--b"><span class="hero-feat__icon">&#127750;</span><span class="hero-feat__text">{t("diagnose.weather_title").replace("🌦 ", "")}</span></div>'
@@ -146,6 +141,35 @@ for col, (color, icon, title, desc, tag) in zip(cols, _CAPS):
             unsafe_allow_html=True,
         )
 
+st.markdown('<div class="spacer-lg"></div>', unsafe_allow_html=True)
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  2b. CROP PHOTO GALLERY STRIP
+# ─────────────────────────────────────────────────────────────────────────────
+_CROP_PHOTOS = [
+    ("1560493236-bb5cdcfe5da8",   "Blast",              "CRITICAL", "#dc2626"),
+    ("1574943320219-553eb213f72d","Bacterial Blight",   "HIGH",     "#d97706"),
+    ("1518495973542-4542adad0130","Brown Spot",         "MODERATE", "#ea580c"),
+    ("1500382017468-9049fed747ef","Healthy Paddy",      "HEALTHY",  "#16a34a"),
+    ("1599790977917-b63cf93b7e59","Tamil Nadu Farms",   "FIELD",    "#0d9488"),
+    ("1566702693566-f3a2ac30282c","Rice Harvest",       "SEASON",   "#7c3aed"),
+]
+_gallery_html = "".join(
+    f'<div class="home-crop-photo">'
+    f'<img src="https://images.unsplash.com/photo-{pid}?w=280&q=75&auto=format&fit=crop" '
+    f'style="width:100%;height:160px;object-fit:cover;object-position:center;display:block;border-radius:14px;" />'
+    f'<div class="home-crop-photo-label">'
+    f'<span style="background:{col};color:#fff;font-size:.55rem;font-weight:800;letter-spacing:.8px;'
+    f'border-radius:999px;padding:2px 8px;text-transform:uppercase;">{sev}</span>'
+    f'<div style="font-size:.75rem;font-weight:700;color:#111827;margin-top:4px;">{name}</div>'
+    f'</div>'
+    f'</div>'
+    for pid, name, sev, col in _CROP_PHOTOS
+)
+st.markdown(
+    f'<div class="home-crop-gallery">{_gallery_html}</div>',
+    unsafe_allow_html=True,
+)
 st.markdown('<div class="spacer-lg"></div>', unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────

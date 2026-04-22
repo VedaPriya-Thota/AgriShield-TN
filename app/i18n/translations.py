@@ -29,6 +29,7 @@ TRANSLATIONS: dict = {
         "nav": {
             "home":        "Home",
             "diagnose":    "Diagnose",
+            "action_plan": "Action Plan",
             "field_guide": "Field Guide",
             "navigation":  "Navigation",
             "lang_label":  "Language",
@@ -225,6 +226,7 @@ TRANSLATIONS: dict = {
         "nav": {
             "home":        "முகப்பு",
             "diagnose":    "நோய் கண்டறிவு",
+            "action_plan": "செயல் திட்டம்",
             "field_guide": "நோய் கையேடு",
             "navigation":  "வழிசெலுத்தல்",
             "lang_label":  "மொழி",
@@ -421,6 +423,7 @@ TRANSLATIONS: dict = {
         "nav": {
             "home":        "होम",
             "diagnose":    "रोग पहचान",
+            "action_plan": "कार्य योजना",
             "field_guide": "रोग मार्गदर्शिका",
             "navigation":  "नेविगेशन",
             "lang_label":  "भाषा",

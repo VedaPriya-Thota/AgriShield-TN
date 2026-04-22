@@ -21,20 +21,21 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-from _shared import inject_css, inject_sidebar_brand  # noqa: E402
+from _shared import inject_css, inject_sidebar_brand, inject_header  # noqa: E402
 
 inject_css()
 
-# st.navigation MUST be called before inject_sidebar_brand so that st.page_link
-# can resolve each page's url_pathname from the pages manager.
+# st.navigation MUST be called before any st.page_link call so pages are registered.
 pg = st.navigation(
     [
         st.Page("pages/1_Home.py",            title="Home",        icon="🏠", default=True),
         st.Page("pages/2_Analyze_Leaf.py",    title="Diagnose",    icon="🩺"),
+        st.Page("pages/3_What_To_Do.py",      title="Action Plan", icon="⚡"),
         st.Page("pages/6_Disease_Library.py", title="Field Guide", icon="📖"),
     ],
     position="hidden",
 )
 
-inject_sidebar_brand()  # page_link calls now succeed — pages are registered
+inject_header()         # after st.navigation() — st.page_link now resolves url_pathname
+inject_sidebar_brand()
 pg.run()
