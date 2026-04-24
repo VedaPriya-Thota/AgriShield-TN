@@ -8,7 +8,7 @@ for _p in [str(_APP_DIR.parent), str(_APP_DIR)]:
         sys.path.insert(0, _p)
 
 import streamlit as st
-from _shared import ui_footer
+from _shared import ui_footer, inject_header, inject_sidebar_brand
 from i18n import t
 
 st.session_state["_cur_page"] = "action_plan"
@@ -23,7 +23,7 @@ if "diag_insight" not in st.session_state:
         '</div>',
         unsafe_allow_html=True,
     )
-    if st.button("&#129302; Go to Diagnose", use_container_width=False, key="goto_diag"):
+    if st.button("🤖 Go to Diagnose", use_container_width=False, key="goto_diag"):
         st.switch_page("pages/2_Analyze_Leaf.py")
     st.stop()
 
@@ -47,7 +47,7 @@ st.markdown(
 
 _bc1, _bc2 = st.columns([1, 6])
 with _bc1:
-    if st.button("&#8592; Diagnose", use_container_width=True, key="back_to_diag"):
+    if st.button("← Diagnose", use_container_width=True, key="back_to_diag"):
         st.switch_page("pages/2_Analyze_Leaf.py")
 
 # ── Action map ────────────────────────────────────────────────────────────────

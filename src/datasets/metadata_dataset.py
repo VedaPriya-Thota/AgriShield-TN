@@ -51,13 +51,17 @@ class PaddyMetadataDataset(PaddyImageDataset):
         age_mean: Optional[float] = None,
         age_std: Optional[float] = None,
     ):
+        # Call parent __init__ to load CSV, validate columns, and build the data frame
         super().__init__(csv_path=csv_path, image_dir=image_dir, transform=transform)
 
         # ── Variety vocabulary ────────────────────────────────────────────────
+        # Build an integer index for every unique variety string so the
+        # metadata encoder can use an nn.Embedding layer on them.
         self.data[VARIETY_COL] = (
             self.data[VARIETY_COL].fillna("unknown").astype(str).str.strip()
         )
         unique_varieties = sorted(self.data[VARIETY_COL].unique().tolist())
+        # Maps "ADT45" → 0, "TRY2" → 1, etc. (sorted for determinism)
         self.variety_to_idx: Dict[str, int] = {
             v: i for i, v in enumerate(unique_varieties)
         }
@@ -69,8 +73,11 @@ class PaddyMetadataDataset(PaddyImageDataset):
         # Callers should pass training-split stats to val/test datasets so that
         # the same transform is applied consistently (prevents leakage).
         raw_ages = self.data[AGE_COL].fillna(0.0).astype(float)
+
+        # Use provided stats if given (for val/test); otherwise compute from this split
         self.age_mean: float = float(age_mean) if age_mean is not None else float(raw_ages.mean())
         computed_std = float(raw_ages.std()) if age_std is None else float(age_std)
+        # Guard against division by zero when all ages are identical
         self.age_std: float = computed_std if computed_std > 1e-6 else 1.0
 
     # ── Public properties ──────────────────────────────────────────────────────
@@ -87,7 +94,7 @@ class PaddyMetadataDataset(PaddyImageDataset):
         return (age - self.age_mean) / self.age_std
 
     def _variety_idx(self, variety_str: str) -> int:
-        """Return the integer index for a variety string (fallback: 0)."""
+        """Return the integer index for a variety string (fallback: 0 for unknown varieties)."""
         return self.variety_to_idx.get(variety_str, 0)
 
     # ── Dataset protocol ───────────────────────────────────────────────────────
@@ -104,20 +111,22 @@ class PaddyMetadataDataset(PaddyImageDataset):
         label        : LongTensor  []   – disease class index
         metadata     : dict             – auxiliary info (id, path, raw values…)
         """
+        # Get image, label, and raw metadata from the parent dataset
         image, label_tensor, base_meta = super().__getitem__(idx)
 
+        # Encode the two metadata fields into tensors
         variety_str = base_meta["variety"]
-        v_idx = self._variety_idx(variety_str)
-        age_norm = self._normalize_age(base_meta["age"])
+        v_idx    = self._variety_idx(variety_str)      # integer index for embedding lookup
+        age_norm = self._normalize_age(base_meta["age"])  # z-score normalised float
 
         # Enrich metadata dict with encoded values for downstream inspection
-        base_meta["variety_idx"] = v_idx
+        base_meta["variety_idx"]    = v_idx
         base_meta["age_normalized"] = age_norm
 
         return (
             image,
-            torch.tensor(v_idx,    dtype=torch.long),
-            torch.tensor(age_norm, dtype=torch.float32),
+            torch.tensor(v_idx,    dtype=torch.long),    # for nn.Embedding
+            torch.tensor(age_norm, dtype=torch.float32),  # for age MLP
             label_tensor,
             base_meta,
         )
