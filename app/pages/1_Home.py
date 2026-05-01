@@ -13,17 +13,17 @@ from i18n import t
 
 st.session_state["_cur_page"] = "home"
 
-# Full-screen landing — hide sidebar, strip ALL container padding/gaps
+# Full-screen landing — strip ALL container padding/gaps
+# Sidebar hide is handled globally in _shared.py (with mobile override allowing collapse button)
 st.markdown(
     '<style>'
-    '[data-testid="stSidebar"]{display:none !important;}'
     '[data-testid="stAppViewContainer"]{padding:0 !important;margin:0 !important;}'
     '[data-testid="stMain"]{padding:0 !important;margin:0 !important;}'
     '[data-testid="stMainBlockContainer"]{padding:0 !important;max-width:100% !important;}'
     '[data-testid="block-container"]{padding:0 !important;max-width:100% !important;}'
     '[data-testid="stVerticalBlock"]{gap:0 !important;padding:0 !important;}'
     '[data-testid="stVerticalBlockBorderWrapper"]{padding:0 !important;}'
-    '.hero{margin:0 !important;height:100vh !important;}'
+    '.hero{margin:0 !important;min-height:100svh !important;}'
     '</style>',
     unsafe_allow_html=True,
 )

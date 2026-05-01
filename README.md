@@ -1,50 +1,58 @@
+<div align="center">
 
-# AgriShield-TN
-### AI-Powered Crop Health Diagnosis & Multilingual Decision Support System
+# 🌾 AgriShield-TN
+
+### AI-Powered Paddy Disease Diagnosis for Tamil Nadu Farmers
+
+[![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?style=flat&logo=python&logoColor=white)](https://python.org)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.56-FF4B4B?style=flat&logo=streamlit&logoColor=white)](https://streamlit.io)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.11-EE4C2C?style=flat&logo=pytorch&logoColor=white)](https://pytorch.org)
+[![Groq](https://img.shields.io/badge/Groq-LLaMA%203-F55036?style=flat)](https://console.groq.com)
+[![License](https://img.shields.io/badge/License-MIT-22c55e?style=flat)](LICENSE)
+
+*Upload a leaf photo → get a disease name, Grad-CAM heatmap, weather risk, and AI advisory in English, Tamil, or Hindi — in under 2 seconds.*
+
+</div>
 
 ---
 
-## Overview
+## What It Does
 
-AgriShield-TN is an AI-powered crop health system for paddy (rice) farmers in Tamil Nadu, India. A farmer uploads a leaf photo and receives a disease name, confidence score, visual Grad-CAM heatmap, weather-based risk assessment, and multilingual AI advisory — all served through a Streamlit web app.
+A farmer photographs a paddy leaf on their phone. AgriShield-TN identifies the disease, highlights the infected region on the image, pulls live weather data for their district, and generates treatment advice in their language — all without needing a trained agronomist on-site.
 
-**Core vision:** Bridge the gap between agricultural AI and actual farmer adoption via instant, explainable, multilingual crop health diagnostics.
-
----
-
-## System Architecture
-
-```
-Farmer uploads JPG/PNG
-       ↓
-Resize to 224×224 · ImageNet normalize
-       ↓
-ResNet-18 → FC(256) → FC(10) → softmax probabilities
-       ↓
-Top prediction + confidence score + Top-3 alternatives
-       ↓
-Grad-CAM: heatmap on last residual block → overlay on image
-       ↓
-Weather risk: OpenMeteo API for selected TN district → disease-specific rules
-       ↓
-Groq llama-3.1-8b-instant: structured advice (summary / cause / action / prevention)
-       ↓  (fallback: static KB if API fails)
-Streamlit renders results in user's chosen language (EN / Tamil / Hindi)
-```
+| Step | What happens |
+|---|---|
+| 📷 **Upload** | JPG/PNG of a paddy leaf |
+| 🧠 **Classify** | ResNet-18 identifies 1 of 10 disease classes with confidence score |
+| 🔥 **Explain** | Grad-CAM heatmap shows *where* on the leaf the model focused |
+| 🌦 **Risk** | Live weather for the farmer's district flags HIGH/MEDIUM/LOW spread risk |
+| 💬 **Advise** | Groq LLaMA 3 generates treatment + prevention steps in EN / தமிழ் / हिन्दी |
 
 ---
 
 ## Features
 
-| Feature | Details |
+- **10 disease classes** — Blast, Brown Spot, Bacterial Leaf Blight, Tungro, Hispa, and 5 more
+- **Grad-CAM explainability** — pixel-level heatmap overlaid on the original leaf image
+- **Live weather integration** — OpenMeteo API covering all 38 Tamil Nadu districts
+- **Multilingual AI advisory** — Groq LLaMA 3.1 responds in the user's chosen language
+- **Voice I/O** — gTTS text-to-speech output + Groq Whisper voice input for district selection
+- **Offline fallback** — static knowledge base for all 10 diseases × 3 languages when API is down
+- **Fully responsive UI** — works on desktop, tablet, and mobile browsers
+- **Dark/light theme** — toggleable, persisted in localStorage
+
+---
+
+## Pages
+
+| Page | Description |
 |---|---|
-| Disease detection | 10 paddy disease classes, ResNet-18 backbone |
-| Explainability | Grad-CAM heatmap with urgency labels (CRITICAL / HIGH / MODERATE / LOW) |
-| Weather risk | Real-time + 3-day forecast for 38 Tamil Nadu districts |
-| AI advisory | Groq LLM generates treatment/prevention steps in user's language |
-| Multilingual | English, Tamil (தமிழ்), Hindi (हिन्दी) — 600+ translation strings |
-| Voice | gTTS text-to-speech output + Groq Whisper voice input |
-| Offline fallback | Static knowledge base for all 10 diseases × 3 languages when API unavailable |
+| **Home** | Cinematic hero with animated rice field, feature cards, impact stats |
+| **Diagnose** | Upload leaf → run full analysis pipeline |
+| **Action Plan** | Illustrated treatment cards auto-generated from diagnosis |
+| **Field Guide** | Encyclopedia for all 10 disease classes |
+| **How It Works** | Step-by-step pipeline explanation |
+| **Impact & Future** | Statistics and product roadmap |
 
 ---
 
@@ -52,70 +60,151 @@ Streamlit renders results in user's chosen language (EN / Tamil / Hindi)
 
 | Layer | Tools |
 |---|---|
-| Deep learning | PyTorch, Torchvision (ResNet-18) |
-| Data / augmentation | Albumentations, OpenCV, NumPy, Pandas |
-| Explainability | Grad-CAM (custom hooks on ResNet-18 Layer4) |
-| Frontend | Streamlit, custom CSS design system |
-| LLM advisory | Groq API (`llama-3.1-8b-instant`, temp=0.4) |
-| Voice STT | Groq Whisper (`whisper-large-v3-turbo`) |
+| Deep learning | PyTorch · Torchvision (ResNet-18) |
+| Explainability | Grad-CAM (hooks on ResNet-18 Layer4) |
+| Frontend | Streamlit · Custom CSS design system |
+| LLM advisory | Groq API — `llama-3.1-8b-instant` |
+| Voice STT | Groq Whisper — `whisper-large-v3-turbo` |
 | Voice TTS | gTTS (Google Text-to-Speech) |
 | Weather | OpenMeteo API (free, no key required) |
-| Training utilities | scikit-learn, tqdm |
+| Data / augmentation | Albumentations · OpenCV · Pandas |
+| Training utilities | scikit-learn · tqdm |
 
 ---
 
-## Disease Classes (10 total)
+## Quick Start
 
-| # | Class |
-|---|---|
-| 1 | `bacterial_leaf_blight` |
-| 2 | `bacterial_leaf_streak` |
-| 3 | `bacterial_panicle_blight` |
-| 4 | `blast` |
-| 5 | `brown_spot` |
-| 6 | `dead_heart` |
-| 7 | `downy_mildew` |
-| 8 | `hispa` |
-| 9 | `normal` |
-| 10 | `tungro` |
+### 1. Clone the repo
+
+```bash
+git clone https://github.com/your-username/AgriShield-TN.git
+cd AgriShield-TN
+```
+
+### 2. Create a virtual environment
+
+```bash
+python -m venv venv
+```
+
+```bash
+# Windows (PowerShell)
+.\venv\Scripts\Activate.ps1
+
+# Windows (CMD)
+venv\Scripts\activate
+
+# macOS / Linux
+source venv/bin/activate
+```
+
+### 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Add your Groq API key
+
+Create a `.env` file in the project root:
+
+```
+GROQ_API_KEY=your_groq_api_key_here
+```
+
+Get a free key at [console.groq.com](https://console.groq.com).
+
+### 5. Place the dataset *(training only — not needed to run the app)*
+
+```
+data/raw/
+├── train.csv
+├── train_images/
+└── test_images/
+```
+
+### 6. Run the app
+
+```bash
+# Recommended — uses venv Streamlit automatically
+python run_app.py
+
+# Or directly
+streamlit run app/streamlit_app.py
+```
+
+Open `http://localhost:8501` in your browser.
 
 ---
 
 ## Model Architecture
 
-### Image Classifier (deployed in UI)
+### Image Classifier (deployed in the UI)
+
 ```
-Input image (224 × 224 × 3)
-       ↓
-ResNet-18 backbone (ImageNet pretrained) → 512-dim feature vector
-       ↓
+Input image  (224 × 224 × 3)
+      ↓
+ResNet-18 backbone — ImageNet pretrained  →  512-dim feature vector
+      ↓
 Linear(512 → 256) → ReLU → Dropout(0.3)
-       ↓
-Linear(256 → 10) → logits → softmax
+      ↓
+Linear(256 → 10)  → logits → softmax
 ```
+
 Checkpoint: `checkpoints/best_disease_classifier.pth` (44 MB)
 
-### Metadata Fusion Classifier (built, not yet wired to UI)
-```
-Image features (512) ─────────────────────┐
-                                           ├─ Concat → BatchNorm(544)
-Variety embedding (16) ─┐                 │
-                         ├─ MLP → (32) ───┘
-Age MLP (16) ───────────┘
-
-→ Linear(256) → ReLU → Dropout
-→ Linear(128) → ReLU → Dropout
-→ Linear(10)  → logits
-```
-
 ### Grad-CAM
-- Target layer: last residual block of ResNet-18
-- Output: pixel-level heatmap overlaid on original image
-- Confidence tiers: High ≥70% · Medium 40–70% · Low <40%
+
+- **Target layer:** last residual block of ResNet-18
+- **Output:** pixel-level heatmap blended onto the original image
+- **Confidence tiers:** High ≥ 70% · Medium 40–70% · Low < 40%
+- **Urgency labels:** CRITICAL · HIGH · MODERATE · LOW
+
+### Metadata Fusion Classifier *(built, not yet wired to UI)*
+
+```
+Image features (512) ────────────────────┐
+                                         ├─ Concat → BatchNorm(544)
+Variety embedding (16) ─┐               │
+                         ├─ MLP → (32) ─┘
+Age MLP (16) ───────────┘
+      ↓
+Linear(256) → ReLU → Dropout
+Linear(128) → ReLU → Dropout
+Linear(10)  → logits
+```
 
 ---
 
-## Training Configuration
+## Disease Classes
+
+| # | Class | # | Class |
+|---|---|---|---|
+| 1 | Bacterial Leaf Blight | 6 | Dead Heart |
+| 2 | Bacterial Leaf Streak | 7 | Downy Mildew |
+| 3 | Bacterial Panicle Blight | 8 | Hispa |
+| 4 | Blast | 9 | Normal (healthy) |
+| 5 | Brown Spot | 10 | Tungro |
+
+---
+
+## Training
+
+```bash
+# Verify the dataset loads correctly
+python -m src.datasets.test_dataset_loading
+
+# Train the image classifier (saves to checkpoints/)
+python -m src.training.train_classifier
+
+# Evaluate and export metrics to outputs/
+python -m src.training.evaluate
+
+# Train the metadata fusion classifier (optional)
+python -m src.training.train_metadata_classifier
+```
+
+### Training configuration
 
 | Parameter | Value |
 |---|---|
@@ -124,12 +213,12 @@ Age MLP (16) ───────────┘
 | Learning rate | 1e-4 |
 | Optimizer | Adam |
 | Epochs | 10 |
+| Train / Val split | 80 / 20 (stratified) |
 | Loss | CrossEntropyLoss |
-| Train/Val split | 80 / 20 (stratified) |
 | Device | Auto CUDA / CPU |
 
-**Augmentations (training):** HorizontalFlip, VerticalFlip, Rotate(±20°), RandomBrightnessContrast  
-**Normalization:** ImageNet mean=[0.485, 0.456, 0.406] · std=[0.229, 0.224, 0.225]
+**Augmentations:** HorizontalFlip · VerticalFlip · Rotate ±20° · RandomBrightnessContrast  
+**Normalization:** ImageNet — mean `[0.485, 0.456, 0.406]` · std `[0.229, 0.224, 0.225]`
 
 ---
 
@@ -140,19 +229,8 @@ Age MLP (16) ───────────┘
 | Training images | 10,407 |
 | Test images | 3,469 |
 | Classes | 10 |
-| Metadata columns | `image_id`, `label`, `variety` (e.g. ADT45), `age` (days after transplanting) |
-| Folder layout | `train_images/<disease_class>/<image_id>.jpg` |
-
----
-
-## External APIs
-
-| API | Purpose | Auth |
-|---|---|---|
-| Groq `llama-3.1-8b-instant` | Advisory text (EN / Tamil / Hindi) | `GROQ_API_KEY` in `.env` |
-| Groq `whisper-large-v3-turbo` | Voice-to-text transcription | Same key |
-| OpenMeteo | Real-time weather + 3-day forecast | None (free) |
-| gTTS | Text-to-speech synthesis | None (free) |
+| Metadata | `image_id`, `label`, `variety` (e.g. ADT45), `age` (days after transplanting) |
+| Layout | `train_images/<disease_class>/<image_id>.jpg` |
 
 ---
 
@@ -165,11 +243,10 @@ Age MLP (16) ───────────┘
 | Hindi | `hi` | हिन्दी |
 
 - 600+ translation keys in `app/i18n/translations.py`
-- Structure: `TRANSLATIONS[lang_code][section][key]`
-- Lookup: `t("section.key")` falls back to English if key missing
+- `t("section.key")` lookup with automatic English fallback
 - Language persisted in `st.session_state` across all pages
-- Fonts: Noto Sans Tamil + Noto Sans Devanagari loaded via CSS
-- Groq responds in the user's selected language for AI advisory
+- Fonts: Noto Sans Tamil + Noto Sans Devanagari via CSS
+- Groq responds in the selected language for AI advisory
 
 ---
 
@@ -177,177 +254,58 @@ Age MLP (16) ───────────┘
 
 ```
 AgriShield-TN/
-├── app/                              ← Streamlit frontend
-│   ├── streamlit_app.py              ← Entry point, multi-page nav
-│   ├── _shared.py                    ← Full CSS design system + UI components (800+ lines)
+├── app/                          # Streamlit frontend
+│   ├── streamlit_app.py          # Entry point, multi-page nav
+│   ├── _shared.py                # CSS design system + UI helpers
 │   ├── pages/
-│   │   ├── 1_Home.py                 ← Hero landing page with farmer animations
-│   │   ├── 2_Analyze_Leaf.py         ← Main diagnosis interface
-│   │   ├── 3_What_To_Do.py           ← Disease-specific action plan
-│   │   ├── 3_How_It_Works.py         ← System explainer
-│   │   ├── 4_Impact.py               ← Statistics & impact metrics
-│   │   ├── 5_Future_Scope.py         ← Roadmap
-│   │   └── 6_Disease_Library.py      ← Disease encyclopedia
+│   │   ├── 1_Home.py             # Hero landing page
+│   │   ├── 2_Analyze_Leaf.py     # Main diagnosis interface
+│   │   ├── 3_What_To_Do.py       # Action plan
+│   │   ├── 3_How_It_Works.py     # Pipeline explainer
+│   │   ├── 4_Impact.py           # Impact metrics
+│   │   ├── 5_Future_Scope.py     # Roadmap
+│   │   └── 6_Disease_Library.py  # Disease encyclopedia
 │   ├── i18n/
-│   │   ├── translations.py           ← 600+ strings (EN / Tamil / Hindi)
-│   │   └── lang_utils.py             ← t() lookup, fallback logic, session lang
+│   │   ├── translations.py       # 600+ strings — EN / Tamil / Hindi
+│   │   └── lang_utils.py         # t() lookup + session language
 │   └── utils/
-│       └── voice_utils.py            ← gTTS TTS + Groq Whisper STT
+│       └── voice_utils.py        # gTTS TTS + Groq Whisper STT
 │
-├── src/                              ← Core ML pipeline
-│   ├── config/
-│   │   └── config.py                 ← IMAGE_SIZE=224, BATCH=16, LR=1e-4, 10 classes
-│   ├── datasets/
-│   │   ├── image_dataset.py          ← PyTorch Dataset (class-folder layout)
-│   │   ├── metadata_dataset.py       ← Dataset with variety + age columns
-│   │   ├── transforms.py             ← Albumentations augmentations
-│   │   └── test_dataset_loading.py   ← Dataset validation script
-│   ├── models/
-│   │   ├── disease_classifier.py     ← ResNet-18 → FC(256) → FC(10)
-│   │   ├── image_encoder.py          ← ResNet-18 backbone (512-dim output)
-│   │   ├── metadata_encoder.py       ← Variety embedding + Age MLP (32-dim)
-│   │   └── metadata_classifier.py    ← Fused image + metadata classifier
-│   ├── training/
-│   │   ├── train_classifier.py       ← 10-epoch training loop, Adam, checkpoint save
-│   │   ├── train_metadata_classifier.py
-│   │   └── evaluate.py               ← Accuracy, F1, confusion matrix → JSON
-│   ├── inference/
-│   │   ├── predict.py                ← Single / batch image inference
-│   │   └── explain.py                ← Grad-CAM + ExplanationResult dataclass
-│   ├── llm/
-│   │   ├── groq_client.py            ← Groq API wrapper + Whisper transcription
-│   │   └── agri_insight.py           ← LLM prompting + static fallback KB
-│   └── utils/
-│       ├── weather.py                ← OpenMeteo API + 38 TN district coordinates
-│       ├── metrics.py                ← Precision / recall / F1 / confusion matrix
-│       └── visualization.py          ← Top-k prediction formatters
+├── src/                          # ML pipeline
+│   ├── config/config.py          # Image size, classes, paths
+│   ├── datasets/                 # PyTorch datasets + transforms
+│   ├── models/                   # ResNet-18 classifier + metadata fusion
+│   ├── training/                 # Training loop + evaluation
+│   ├── inference/                # predict.py + Grad-CAM explain.py
+│   ├── llm/                      # Groq client + advisory generator
+│   └── utils/                    # Weather API, metrics, visualization
 │
-├── data/
-│   └── raw/
-│       ├── train.csv                 ← 10,407 rows: image_id, label, variety, age
-│       ├── train_images/             ← One folder per disease class
-│       └── test_images/
-│
-├── checkpoints/
-│   └── best_disease_classifier.pth   ← 44 MB trained ResNet-18
-│
-├── outputs/
-│   ├── evaluation_metrics.json
-│   └── classification_report.json
-│
-├── .streamlit/
-│   └── config.toml                   ← Dark green Streamlit theme
-├── .env                              ← GROQ_API_KEY
+├── data/raw/                     # train.csv + train_images/ (not in git)
+├── checkpoints/                  # best_disease_classifier.pth (not in git)
+├── outputs/                      # evaluation_metrics.json
+├── .env                          # GROQ_API_KEY (not in git)
 ├── requirements.txt
-└── run_app.py                        ← Launcher that uses venv Streamlit
+└── run_app.py                    # Launcher script
 ```
 
 ---
 
-## Setup
+## External APIs
 
-### 1. Clone
-
-```bash
-git clone <your-repo-url>
-cd AgriShield-TN
-```
-
-### 2. Create & activate virtual environment
-
-```bash
-python -m venv venv
-```
-
-PowerShell:
-```powershell
-.\venv\Scripts\Activate.ps1
-```
-
-CMD / bash:
-```bash
-venv\Scripts\activate        # Windows CMD
-source venv/bin/activate      # Linux/macOS
-```
-
-### 3. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Set API key
-
-Create `.env` in the project root:
-```
-GROQ_API_KEY=your_groq_api_key_here
-```
-
-Get a free key at [console.groq.com](https://console.groq.com).
-
-### 5. Place dataset
-
-```
-data/raw/
-├── train.csv
-├── train_images/
-└── test_images/
-```
-
----
-
-## Running the App
-
-```bash
-# Recommended — uses venv Streamlit automatically
-python run_app.py
-
-# Or directly
-streamlit run app/streamlit_app.py
-
-# Or with explicit venv binary
-.\venv\Scripts\streamlit.exe run app/streamlit_app.py
-```
-
----
-
-## Training & Evaluation
-
-```bash
-# Verify dataset loads correctly
-python -m src.datasets.test_dataset_loading
-
-# Train model (saves to checkpoints/best_disease_classifier.pth)
-python -m src.training.train_classifier
-
-# Evaluate trained model (outputs to outputs/)
-python -m src.training.evaluate
-
-# Train metadata fusion model (optional)
-python -m src.training.train_metadata_classifier
-```
-
----
-
-## Frontend Pages
-
-| Page | Description |
-|---|---|
-| `1_Home.py` | Hero landing page — animated farmer, feature cards, impact stats |
-| `2_Analyze_Leaf.py` | Main UI — upload, district select, Grad-CAM, AI advisory, voice |
-| `3_What_To_Do.py` | Action plan with illustrated treatment cards |
-| `3_How_It_Works.py` | Step-by-step system explainer |
-| `4_Impact.py` | Statistics and impact metrics |
-| `5_Future_Scope.py` | Product roadmap |
-| `6_Disease_Library.py` | Encyclopedia for all 10 disease classes |
+| API | Purpose | Key required |
+|---|---|---|
+| Groq `llama-3.1-8b-instant` | Advisory text in EN / Tamil / Hindi | Yes — `GROQ_API_KEY` |
+| Groq `whisper-large-v3-turbo` | Voice-to-text transcription | Same key |
+| OpenMeteo | Real-time weather + 3-day forecast | No |
+| gTTS | Text-to-speech synthesis | No |
 
 ---
 
 ## Future Scope
 
-- More regional languages (Telugu, Kannada, Marathi)
-- Voice-first interaction for low-literacy users
-- Metadata fusion classifier wired to UI (variety + crop age improves accuracy)
-- Offline/PWA mode for areas with poor connectivity
-- Disease severity scoring (mild / moderate / severe)
-- Mobile app with camera integration
+- **More languages** — Telugu, Kannada, Marathi
+- **Metadata fusion in UI** — wire variety + crop age into predictions for higher accuracy
+- **Mobile PWA** — installable offline-capable app for low-connectivity areas
+- **Voice-first mode** — full interaction via speech for low-literacy users
+- **District disease map** — heatmap of active outbreaks across Tamil Nadu
+- **Multi-crop support** — extend beyond paddy to wheat, maize, sugarcane

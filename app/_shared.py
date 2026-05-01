@@ -1320,37 +1320,44 @@ div[data-testid="stButton"] > button:disabled {
   width: 100% !important;
 }
 
+/* ── INACTIVE nav buttons — plain text links, zero button appearance ─────── */
 [data-testid="stHorizontalBlock"]:has(.hnav-root)
   > [data-testid="stColumn"]:not(:first-child):not(:last-child)
   button {
-  background      : transparent !important;
-  border          : 1px solid transparent !important;
-  border-radius   : 9px !important;
-  padding         : 7px 14px !important;
-  color           : rgba(255,255,255,.72) !important;
-  font-size       : .8rem !important;
-  font-weight     : 600 !important;
-  width           : 100% !important;
-  min-height      : 36px !important;
-  white-space     : nowrap !important;
-  box-shadow      : none !important;
-  cursor          : pointer !important;
-  transition      : background .17s, border-color .17s, color .17s, transform .14s !important;
-  line-height     : 1 !important;
+  background    : transparent !important;
+  border        : none !important;          /* no border — not a button visually */
+  border-radius : 10px !important;
+  padding       : 7px 14px !important;
+  color         : rgba(255,255,255,.38) !important;  /* clearly de-emphasised */
+  font-size     : .8rem !important;
+  font-weight   : 500 !important;
+  width         : 100% !important;
+  min-height    : 36px !important;
+  white-space   : nowrap !important;
+  box-shadow    : none !important;
+  cursor        : pointer !important;
+  line-height   : 1 !important;
+  transition    : background .16s ease, color .16s ease !important;
+  animation     : none !important;
 }
+
+/* Hover on INACTIVE: brighten text + tiny background — shows it's a link */
 [data-testid="stHorizontalBlock"]:has(.hnav-root)
   > [data-testid="stColumn"]:not(:first-child):not(:last-child)
   button:hover {
-  background   : rgba(34,197,94,.15) !important;
-  border-color : rgba(34,197,94,.45) !important;
-  color        : #4ade80             !important;
-  transform    : scale(1.04)         !important;
+  background : rgba(255,255,255,.08) !important;
+  color      : rgba(255,255,255,.80) !important;
+  box-shadow : none !important;
+  border     : none !important;
 }
 [data-testid="stHorizontalBlock"]:has(.hnav-root)
   > [data-testid="stColumn"]:not(:first-child):not(:last-child)
-  button:active { transform: scale(0.97) !important; }
+  button:active {
+  background : rgba(255,255,255,.04) !important;
+  color      : rgba(255,255,255,.55) !important;
+}
 
-/* Active page pill — driven by data-page attr on .hnav-cur sentinel */
+/* ── ACTIVE page button — solid filled, impossible to confuse ─────────── */
 [data-testid="stHorizontalBlock"]:has(.hnav-cur[data-page="home"])
   > [data-testid="stColumn"]:nth-child(2) button,
 [data-testid="stHorizontalBlock"]:has(.hnav-cur[data-page="diagnose"])
@@ -1359,10 +1366,30 @@ div[data-testid="stButton"] > button:disabled {
   > [data-testid="stColumn"]:nth-child(4) button,
 [data-testid="stHorizontalBlock"]:has(.hnav-cur[data-page="field_guide"])
   > [data-testid="stColumn"]:nth-child(5) button {
-  background   : rgba(34,197,94,.22) !important;
-  border-color : rgba(34,197,94,.65) !important;
-  color        : #4ade80             !important;
-  animation    : hnavLinkGlow 2.8s ease-in-out infinite !important;
+  background      : linear-gradient(135deg, #22c55e 0%, #15803d 100%) !important;
+  border-color    : transparent !important;
+  color           : #ffffff !important;
+  font-weight     : 700 !important;
+  box-shadow      : 0 2px 14px rgba(22,163,74,.55) !important;
+  cursor          : default !important;          /* already on this page */
+  pointer-events  : none !important;             /* block re-click */
+  animation       : none !important;             /* no glow — clean state */
+  opacity         : 1 !important;
+}
+/* Block hover/active style changes on the active button */
+[data-testid="stHorizontalBlock"]:has(.hnav-cur[data-page="home"])
+  > [data-testid="stColumn"]:nth-child(2) button:hover,
+[data-testid="stHorizontalBlock"]:has(.hnav-cur[data-page="diagnose"])
+  > [data-testid="stColumn"]:nth-child(3) button:hover,
+[data-testid="stHorizontalBlock"]:has(.hnav-cur[data-page="action_plan"])
+  > [data-testid="stColumn"]:nth-child(4) button:hover,
+[data-testid="stHorizontalBlock"]:has(.hnav-cur[data-page="field_guide"])
+  > [data-testid="stColumn"]:nth-child(5) button:hover {
+  background   : linear-gradient(135deg, #22c55e 0%, #15803d 100%) !important;
+  border-color : transparent !important;
+  color        : #ffffff !important;
+  box-shadow   : 0 2px 14px rgba(22,163,74,.55) !important;
+  transform    : none !important;
 }
 
 /* ── Language radio (last column) ──────────────────────────────────────── */
@@ -1462,6 +1489,46 @@ div[data-testid="stButton"] > button:disabled {
 }
 .sb-lang-wrap [data-testid="stRadio"] label div[data-baseweb="radio"] div:nth-child(2) {
   background: #22c55e !important;
+}
+
+/* ── Sidebar nav: active item (current page) ────────────────────────────── */
+.sb-nav-active {
+  display         : flex;
+  align-items     : center;
+  gap             : 10px;
+  background      : linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+  color           : #ffffff;
+  font-size       : .875rem;
+  font-weight     : 700;
+  padding         : 10px 16px;
+  border-radius   : 10px;
+  margin          : 2px 18px;
+  box-shadow      : 0 2px 12px rgba(22,163,74,.45);
+  cursor          : default;
+  pointer-events  : none;
+  letter-spacing  : .1px;
+}
+
+/* ── Sidebar nav: inactive buttons — plain text links, no border ────────── */
+[data-testid="stSidebar"] [data-testid="stButton"] > button {
+  background    : transparent !important;
+  border        : none !important;
+  border-radius : 10px !important;
+  color         : rgba(255,255,255,.38) !important;
+  font-size     : .875rem !important;
+  font-weight   : 500 !important;
+  padding       : 10px 16px !important;
+  margin        : 2px 4px !important;
+  width         : calc(100% - 8px) !important;
+  text-align    : left !important;
+  box-shadow    : none !important;
+  transition    : background .16s ease, color .16s ease !important;
+}
+[data-testid="stSidebar"] [data-testid="stButton"] > button:hover {
+  background   : rgba(255,255,255,.07) !important;
+  border       : none !important;
+  color        : rgba(255,255,255,.80) !important;
+  box-shadow   : none !important;
 }
 
 /* ── What To Do Now visual action cards ─────────────────────────────────── */
@@ -2595,10 +2662,352 @@ html[data-theme="dark"] .wtdn-why-banner  { background: rgba(217,119,6,.12) !imp
 html[data-theme="dark"] .wtdn-why-title   { color: #fcd34d !important; }
 html[data-theme="dark"] .wtdn-why-text    { color: #e8f5e9 !important; }
 html[data-theme="dark"] .wtdn-why-ta      { color: rgba(253,211,77,.6) !important; border-top-color: rgba(217,119,6,.2) !important; }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   FULLY FLUID RESPONSIVE  ──  every resize step is covered
+   Breakpoints (smallest wins, cascade down):
+     ≤ 1440px  small desktop / laptop
+     ≤ 1280px  compact desktop
+     ≤ 1100px  narrow desktop / large tablet landscape
+     ≤ 1024px  tablet landscape / shared grid collapses
+     ≤ 900px   tablet portrait — columns wrap 2-per-row
+     ≤ 768px   tablet portrait upper — navbar & hero adjustments
+     ≤ 640px   mobile — full stack, scrollable navbar, sidebar shown
+     ≤ 420px   small phone — micro adjustments
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── ≤ 1440px  small desktop / 13-inch laptop ──────────────────────────── */
+@media (max-width: 1440px) {
+  [data-testid="block-container"] { padding: 0 clamp(1rem, 4vw, 3rem) 4rem !important; }
+  .hero-feats { flex-wrap: wrap !important; justify-content: center !important; gap: 8px !important; }
+}
+
+/* ── ≤ 1280px  compact desktop ─────────────────────────────────────────── */
+@media (max-width: 1280px) {
+  /* Navbar: tighten padding and button size */
+  [data-testid="stHorizontalBlock"]:has(.hnav-root) {
+    padding: 0 24px !important;
+    gap: 2px !important;
+  }
+  [data-testid="stHorizontalBlock"]:has(.hnav-root)
+    > [data-testid="stColumn"]:not(:first-child):not(:last-child)
+    button {
+    font-size: .78rem !important;
+    padding: 7px 11px !important;
+  }
+  /* Hero: feats already wrapping — limit inner padding */
+  .hero-inner { padding: 40px 28px 220px !important; }
+  .hero-feat  { min-width: 86px !important; }
+}
+
+/* ── ≤ 1100px  narrow desktop / large tablet landscape ─────────────────── */
+@media (max-width: 1100px) {
+  /* Navbar: more compact, hide language — sidebar covers it */
+  [data-testid="stHorizontalBlock"]:has(.hnav-root) {
+    padding: 0 18px !important;
+    gap: 1px !important;
+  }
+  [data-testid="stHorizontalBlock"]:has(.hnav-root)
+    > [data-testid="stColumn"]:not(:first-child):not(:last-child)
+    button {
+    font-size: .73rem !important;
+    padding: 6px 9px !important;
+  }
+  [data-testid="stHorizontalBlock"]:has(.hnav-root)
+    > [data-testid="stColumn"]:last-child { display: none !important; }
+
+  /* Block container */
+  [data-testid="block-container"] { padding: 0 1.5rem 3.5rem !important; }
+
+  /* Hero feats: 3 per row */
+  .hero-feats {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+  }
+  .hero-feat { min-width: unset !important; }
+}
+
+/* ── ≤ 1024px  tablet landscape + all smaller — shared grid collapses ─── */
+@media (max-width: 1024px) {
+  /* How It Works: 7-cell linear grid → 2×2 */
+  .hiw-steps { grid-template-columns: 1fr 1fr !important; gap: 28px !important; }
+  .hiw-arrow { display: none !important; }
+  .hiw       { padding: 40px 28px 48px !important; }
+
+  /* Impact strip: 4 cols → 2×2 */
+  .impact-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .impact-cell {
+    border-right: none !important;
+    border-bottom: 1px solid rgba(34,197,94,.12) !important;
+  }
+  .impact-cell:nth-last-child(-n+2) { border-bottom: none !important; }
+
+  /* Stats grid: 4 cols → 2×2 */
+  .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 16px !important; }
+  .stat-cell {
+    border-left: none !important;
+    border-top: 1px solid #bbf7d0 !important;
+    padding-top: 14px !important;
+  }
+  .stat-cell:nth-child(-n+2) { border-top: none !important; }
+
+  /* Future scope / disease library grid: 4 → 2×2 */
+  .sa-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Hero adjustments */
+  .hero-inner { padding: 36px 24px 210px !important; }
+  .hero-title { font-size: clamp(2.4rem, 5vw, 4.2rem) !important; }
+}
+
+/* ── ≤ 900px  tablet portrait — Streamlit columns wrap 2-per-row ────────── */
+@media (max-width: 900px) {
+  /* Navbar: hide theme toggle too */
+  [data-testid="stHorizontalBlock"]:has(.hnav-root)
+    > [data-testid="stColumn"]:nth-child(6) { display: none !important; }
+  [data-testid="stHorizontalBlock"]:has(.hnav-root)
+    > [data-testid="stColumn"]:not(:first-child):not(:last-child)
+    button {
+    font-size: .7rem !important;
+    padding: 6px 8px !important;
+  }
+
+  /* Streamlit columns: allow wrapping, each takes at least half the row */
+  [data-testid="stHorizontalBlock"]:not(:has(.hnav-root)) {
+    flex-wrap: wrap !important;
+  }
+  [data-testid="stHorizontalBlock"]:not(:has(.hnav-root)) > [data-testid="stColumn"] {
+    flex: 1 1 220px !important;
+    min-width: 220px !important;
+  }
+
+  /* Hero: feats go 3-col grid */
+  .hero-inner { padding: 30px 20px 200px !important; }
+  .hero-feats {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 7px !important;
+  }
+  .hero-feat { min-width: unset !important; }
+
+  /* Spacers */
+  .spacer-md { height: 48px !important; }
+  .spacer-lg { height: 60px !important; }
+
+  /* Content padding */
+  [data-testid="block-container"] { padding: 0 1.25rem 3rem !important; }
+}
+
+/* ── ≤ 768px  tablet portrait upper — hero & section adjustments ─────── */
+@media (max-width: 768px) {
+  /* Navbar: brand loses tagline */
+  .hnav-brand-sub { display: none !important; }
+
+  /* Hero */
+  .hero-inner { padding: 28px 18px 190px !important; }
+  .hero-title  { font-size: clamp(2.1rem, 6.5vw, 3.4rem) !important; letter-spacing: -1.5px !important; }
+  .hero-subtitle { font-size: .88rem !important; }
+  .hero-flow-icon { width: 50px !important; height: 50px !important; font-size: 1.3rem !important; }
+  .hero-flow-arr  { padding: 0 8px 20px !important; }
+
+  /* Section headings */
+  .sec-hd__title { font-size: clamp(1.5rem, 4vw, 2rem) !important; }
+
+  /* HIW padding tighter */
+  .hiw { padding: 32px 20px 36px !important; }
+
+  /* Impact strip cells */
+  .impact-cell  { padding: 30px 14px !important; }
+  .impact-value { font-size: 1.9rem !important; }
+
+  /* Bottom CTA */
+  .btm-cta { padding: 56px 20px 20px !important; }
+
+  /* Spacers */
+  .spacer-sm { height: 24px !important; }
+  .spacer-md { height: 40px !important; }
+  .spacer-lg { height: 52px !important; }
+}
+
+/* ── ≤ 640px  mobile — full stack, scrollable navbar, sidebar shown ────── */
+@media (max-width: 640px) {
+  /* ── Global spacing ── */
+  [data-testid="block-container"] { padding: 0 0.75rem 2rem !important; }
+  [data-testid="stMainBlockContainer"] { padding-top: 64px !important; }
+
+  /* ── Navbar: horizontally scrollable, no line-wrap ── */
+  [data-testid="stHorizontalBlock"]:has(.hnav-root) {
+    padding: 0 8px !important;
+    gap: 0 !important;
+    height: 54px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    flex-wrap: nowrap !important;
+  }
+  [data-testid="stHorizontalBlock"]:has(.hnav-root)::-webkit-scrollbar { display: none !important; }
+  [data-testid="stHorizontalBlock"]:has(.hnav-root) > [data-testid="stColumn"] {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+  /* Compact brand */
+  .hnav-brand-sub  { display: none !important; }
+  .hnav-brand-name { font-size: .75rem !important; }
+  /* Compact nav buttons */
+  [data-testid="stHorizontalBlock"]:has(.hnav-root)
+    > [data-testid="stColumn"]:not(:first-child):not(:last-child)
+    button {
+    font-size: .6rem !important;
+    padding: 5px 7px !important;
+    min-height: 28px !important;
+    white-space: nowrap !important;
+    border-radius: 7px !important;
+  }
+  /* Hide theme + language from navbar (sidebar has both) */
+  [data-testid="stHorizontalBlock"]:has(.hnav-root) > [data-testid="stColumn"]:nth-child(6),
+  [data-testid="stHorizontalBlock"]:has(.hnav-root) > [data-testid="stColumn"]:last-child {
+    display: none !important;
+  }
+
+  /* ── Show sidebar collapse button so user can open it for lang/theme ── */
+  [data-testid="stSidebar"] {
+    display: flex !important;
+    width: auto !important;
+    min-width: 0 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+  [data-testid="stSidebarCollapsedControl"],
+  button[data-testid="collapsedControl"] {
+    display: flex !important;
+    width: auto !important;
+    min-width: 0 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+  [data-testid="stAppViewContainer"] > section[data-testid="stMain"] {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* ── Force ALL Streamlit columns to stack vertically ── */
+  [data-testid="stHorizontalBlock"]:not(:has(.hnav-root)) { flex-wrap: wrap !important; }
+  [data-testid="stHorizontalBlock"]:not(:has(.hnav-root)) > [data-testid="stColumn"] {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  /* ── Hero ── */
+  .hero { height: auto !important; min-height: 100svh !important; }
+  .hero-inner { padding: 22px 14px 165px !important; }
+  .hero-title  {
+    font-size: clamp(1.85rem, 8vw, 2.7rem) !important;
+    letter-spacing: -1.1px !important;
+    margin-bottom: 6px !important;
+  }
+  .hero-subtitle { font-size: .8rem !important; margin-bottom: 12px !important; }
+  .hero-flow { gap: 0 !important; margin-bottom: 12px !important; }
+  .hero-flow-icon { width: 42px !important; height: 42px !important; font-size: 1rem !important; }
+  .hero-flow-arr  { padding: 0 4px 20px !important; font-size: .9rem !important; }
+  .hero-flow-label { font-size: .58rem !important; }
+  .hero-feats {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 5px !important;
+  }
+  .hero-feat       { min-width: unset !important; padding: 6px 4px !important; border-radius: 9px !important; }
+  .hero-feat__icon { font-size: 1rem !important; }
+  .hero-feat__text { font-size: .5rem !important; }
+  .hero-cta-row {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+  .hero-cta-btn { width: 90% !important; max-width: 300px !important; justify-content: center !important; }
+  .hero-field-row { bottom: 60px !important; }
+  .hstalk { font-size: 1rem !important; }
+  .hero-farmers { bottom: 64px !important; }
+  .hf-1 { font-size: 1.9rem !important; }
+  .hf-2 { font-size: 1.4rem !important; }
+
+  /* ── Grids (already 2×2 from ≤1024 block, keep tighter padding) ── */
+  .hiw  { padding: 26px 12px 30px !important; border-radius: 14px !important; }
+  .hiw-steps { gap: 16px !important; }
+  .impact-cell  { padding: 22px 10px !important; }
+  .impact-value { font-size: 1.65rem !important; }
+  .impact-icon  { font-size: 1.5rem !important; margin-bottom: 6px !important; }
+  .stats-grid   { gap: 10px !important; }
+  .sa-grid      { gap: 10px !important; }
+
+  /* ── Sections ── */
+  .sec-hd { margin-bottom: 18px !important; }
+  .sec-hd__title { font-size: clamp(1.25rem, 5vw, 1.6rem) !important; }
+  .cap-card { padding: 18px 14px 16px !important; }
+  .btm-cta  { padding: 40px 12px 12px !important; }
+  .btm-cta__title { font-size: clamp(1.35rem, 6vw, 1.85rem) !important; }
+  .diag-welcome { padding: 18px 12px 14px !important; }
+  .dprev-card   { padding: 16px 12px !important; }
+
+  /* ── Spacers ── */
+  .spacer-sm { height: 16px !important; }
+  .spacer-md { height: 28px !important; }
+  .spacer-lg { height: 40px !important; }
+
+  /* ── Footer ── */
+  .ds-footer {
+    padding: 22px 12px !important;
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 10px !important;
+  }
+
+  /* ── Misc components ── */
+  .ds-scan        { padding: 14px 10px !important; }
+  .bff-benefit    { padding: 14px 12px !important; gap: 10px !important; }
+  .bff-benefit-icon { width: 38px !important; height: 38px !important; font-size: 1.1rem !important; }
+  .sw-section     { flex-direction: column !important; text-align: center !important; padding: 14px !important; gap: 10px !important; }
+  .sw-icon        { font-size: 2.5rem !important; }
+  .wtdn-actions-scroll { flex-direction: column !important; gap: 10px !important; }
+  .wtdn-action-card-lg { min-width: unset !important; width: 100% !important; }
+  .home-crop-gallery   { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+/* ── ≤ 420px  small phone — micro adjustments ───────────────────────────── */
+@media (max-width: 420px) {
+  /* Hero: even smaller title on tiny phones */
+  .hero-title { font-size: clamp(1.6rem, 9vw, 2.2rem) !important; letter-spacing: -.8px !important; }
+  .hero-inner { padding: 18px 10px 155px !important; }
+  .hero-flow-icon { width: 36px !important; height: 36px !important; font-size: .9rem !important; }
+
+  /* Navbar buttons: icon + first word only */
+  [data-testid="stHorizontalBlock"]:has(.hnav-root)
+    > [data-testid="stColumn"]:not(:first-child):not(:last-child)
+    button {
+    font-size: .55rem !important;
+    padding: 4px 5px !important;
+  }
+
+  /* Content area */
+  [data-testid="block-container"] { padding: 0 0.5rem 1.5rem !important; }
+
+  /* Grids → single column on tiny phones */
+  .sa-grid    { grid-template-columns: 1fr !important; }
+  .stats-grid { grid-template-columns: 1fr 1fr !important; }
+  .home-crop-gallery { grid-template-columns: 1fr 1fr !important; }
+}
 """
 
 
 def inject_css() -> None:
+    # Viewport meta tag ensures browsers don't fake-zoom on mobile devices
+    st.markdown(
+        '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">',
+        unsafe_allow_html=True,
+    )
     st.markdown(f"<style>{_CSS}</style>", unsafe_allow_html=True)
 
 
