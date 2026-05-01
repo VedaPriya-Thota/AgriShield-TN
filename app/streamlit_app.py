@@ -18,10 +18,10 @@ st.set_page_config(
     page_title="AgriShield-TN · Paddy Disease AI",
     page_icon="🌾",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
-from _shared import inject_css, inject_sidebar_brand, inject_header  # noqa: E402
+from _shared import inject_css, inject_sidebar_brand, inject_header, inject_theme  # noqa: E402
 
 inject_css()
 
@@ -37,5 +37,6 @@ pg = st.navigation(
 )
 
 inject_header()         # after st.navigation() — st.page_link now resolves url_pathname
+inject_theme()
 inject_sidebar_brand()
 pg.run()

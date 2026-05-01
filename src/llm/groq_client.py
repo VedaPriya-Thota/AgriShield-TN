@@ -101,3 +101,36 @@ def call_groq(
 def is_groq_available() -> bool:
     """Quick check — returns True only if a working client can be created."""
     return _get_client() is not None
+
+
+def transcribe_audio(audio_bytes: bytes, language: Optional[str] = None) -> Optional[str]:
+    """
+    Transcribe audio bytes using Groq Whisper.
+
+    Args:
+        audio_bytes: Raw audio data (WAV/MP3/WebM accepted by Whisper)
+        language: BCP-47 language hint e.g. "en", "ta", "hi" (optional)
+
+    Returns:
+        Transcribed text string, or None on failure.
+    """
+    client = _get_client()
+    if client is None:
+        return None
+
+    try:
+        kwargs = {
+            "file": ("audio.wav", audio_bytes),
+            "model": "whisper-large-v3-turbo",
+            "response_format": "text",
+        }
+        if language:
+            kwargs["language"] = language
+
+        result = client.audio.transcriptions.create(**kwargs)
+        if isinstance(result, str):
+            return result.strip() or None
+        return getattr(result, "text", str(result)).strip() or None
+    except Exception as exc:
+        logger.error("Groq transcription failed: %s", exc)
+        return None

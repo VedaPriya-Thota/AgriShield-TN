@@ -147,12 +147,12 @@ st.markdown('<div class="spacer-lg"></div>', unsafe_allow_html=True)
 #  2b. CROP PHOTO GALLERY STRIP
 # ─────────────────────────────────────────────────────────────────────────────
 _CROP_PHOTOS = [
-    ("1560493236-bb5cdcfe5da8",   "Blast",              "CRITICAL", "#dc2626"),
+    ("1587131782738-de30ea91a542","Blast",              "CRITICAL", "#dc2626"),
     ("1574943320219-553eb213f72d","Bacterial Blight",   "HIGH",     "#d97706"),
-    ("1518495973542-4542adad0130","Brown Spot",         "MODERATE", "#ea580c"),
+    ("1536054009244-c43bb5f1c1ac","Brown Spot",         "MODERATE", "#ea580c"),
     ("1500382017468-9049fed747ef","Healthy Paddy",      "HEALTHY",  "#16a34a"),
-    ("1599790977917-b63cf93b7e59","Tamil Nadu Farms",   "FIELD",    "#0d9488"),
-    ("1566702693566-f3a2ac30282c","Rice Harvest",       "SEASON",   "#7c3aed"),
+    ("1559827260-dc66d52bef19",   "Tamil Nadu Farms",   "FIELD",    "#0d9488"),
+    ("1622383563227-04401ab4e5ea","Rice Harvest",       "SEASON",   "#7c3aed"),
 ]
 _gallery_html = "".join(
     f'<div class="home-crop-photo">'

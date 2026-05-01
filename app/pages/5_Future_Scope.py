@@ -8,7 +8,9 @@ for _p in [str(_APP_DIR.parent), str(_APP_DIR)]:
         sys.path.insert(0, _p)
 
 import streamlit as st
-from _shared import ui_divider, ui_footer
+from _shared import ui_divider, ui_footer, inject_header, inject_sidebar_brand
+
+st.session_state["_cur_page"] = "home"
 
 # ── Page header ───────────────────────────────────────────────────────────────
 st.markdown(

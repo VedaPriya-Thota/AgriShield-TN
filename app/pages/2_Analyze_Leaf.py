@@ -21,6 +21,8 @@ from src.inference.predict import predict_image
 from src.inference.explain import generate_gradcam
 from src.utils.visualization import get_top_k_predictions, format_class_name
 from src.utils.weather import get_weather_risk, DISTRICTS
+from src.utils.story_mapper import build_story, FarmerStory
+from src.utils.visual_mapper import build_visual_state, VisualState
 from src.llm.agri_insight import generate_agri_insight, AgriInsight
 
 # ── Session state ─────────────────────────────────────────────────────────────
@@ -28,6 +30,41 @@ if "run_analysis" not in st.session_state:
     st.session_state["run_analysis"] = False
 if "last_file_name" not in st.session_state:
     st.session_state["last_file_name"] = None
+if "voice_district" not in st.session_state:
+    st.session_state["voice_district"] = None
+if "voice_qa_question" not in st.session_state:
+    st.session_state["voice_qa_question"] = None
+if "voice_qa_answer" not in st.session_state:
+    st.session_state["voice_qa_answer"] = None
+
+
+@st.cache_data(ttl=600)
+def _get_live_weather(district: str) -> dict:
+    """Fetch live weather for district (cached 10 min to avoid API spam)."""
+    from src.utils.weather import get_weather_risk
+    return get_weather_risk(district, "normal")
+
+
+@st.cache_data(ttl=86400, show_spinner=False)
+def _gen_farmer_img(mood: str) -> "str | None":
+    """AI-generated farmer illustration, cached 24 h (disk + memory)."""
+    from src.utils.image_gen import generate_farmer_image
+    return generate_farmer_image(mood)
+
+
+@st.cache_data(ttl=86400, show_spinner=False)
+def _gen_crop_img(crop_state: str) -> "str | None":
+    """AI-generated crop state illustration, cached 24 h."""
+    from src.utils.image_gen import generate_crop_image
+    return generate_crop_image(crop_state)
+
+
+@st.cache_data(ttl=86400, show_spinner=False)
+def _gen_wx_img(weather_state: str) -> "str | None":
+    """AI-generated weather scene illustration, cached 24 h."""
+    from src.utils.image_gen import generate_weather_image
+    return generate_weather_image(weather_state)
+
 
 # ── Load farmer illustration (once, at page load) ─────────────────────────────
 _farmer_path = _APP_DIR / "assets" / "farmer_ai.png"
@@ -62,20 +99,24 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# ── Step flow strip ───────────────────────────────────────────────────────────
+# ── Step flow strip — active step tracks upload state ────────────────────────
+_has_upload = bool(st.session_state.get("_has_upload"))
+_step1_cls = "diag-step-item diag-step-item--done" if _has_upload else "diag-step-item diag-step-item--active"
+_step2_cls = "diag-step-item diag-step-item--active" if _has_upload else "diag-step-item"
+_step3_cls = "diag-step-item"
 st.markdown(
-    '<div class="diag-steps-strip">'
-    '<div class="diag-step-item diag-step-item--active">'
+    f'<div class="diag-steps-strip">'
+    f'<div class="{_step1_cls}">'
     '<div class="diag-step-circle">1</div>'
     '<div class="diag-step-text">இலை படம்<br><small>Upload Leaf</small></div>'
     '</div>'
     '<div class="diag-step-connector"></div>'
-    '<div class="diag-step-item">'
+    f'<div class="{_step2_cls}">'
     '<div class="diag-step-circle">2</div>'
     '<div class="diag-step-text">மாவட்டம்<br><small>Select District</small></div>'
     '</div>'
     '<div class="diag-step-connector"></div>'
-    '<div class="diag-step-item">'
+    f'<div class="{_step3_cls}">'
     '<div class="diag-step-circle">3</div>'
     '<div class="diag-step-text">பகுப்பாய்வு<br><small>Get Diagnosis</small></div>'
     '</div>'
@@ -115,9 +156,9 @@ with col_up:
         '<div class="diag-examples-strip">'
         '<div class="diag-ex-label">&#128247; Example leaf photos</div>'
         '<div class="diag-ex-photos">'
-        '<div class="diag-ex-photo" style="background-image:url(https://images.unsplash.com/photo-1560493236-bb5cdcfe5da8?w=120&q=70&fit=crop)">'
+        '<div class="diag-ex-photo" style="background-image:url(https://images.unsplash.com/photo-1587131782738-de30ea91a542?w=120&q=70&fit=crop)">'
         '<span class="diag-ex-badge diag-ex-badge--bad">Diseased</span></div>'
-        '<div class="diag-ex-photo" style="background-image:url(https://images.unsplash.com/photo-1518495973542-4542adad0130?w=120&q=70&fit=crop)">'
+        '<div class="diag-ex-photo" style="background-image:url(https://images.unsplash.com/photo-1536054009244-c43bb5f1c1ac?w=120&q=70&fit=crop)">'
         '<span class="diag-ex-badge diag-ex-badge--bad">Affected</span></div>'
         '<div class="diag-ex-photo" style="background-image:url(https://images.unsplash.com/photo-1534208750935-d3523516e85a?w=120&q=70&fit=crop)">'
         '<span class="diag-ex-badge diag-ex-badge--good">Healthy</span></div>'
@@ -181,6 +222,7 @@ with col_det:
         index=0,
         label_visibility="collapsed",
         help=t("diagnose.tip"),
+        key="district_sel",
     )
     st.markdown(
         '<div class="diag-info-box">'
@@ -192,12 +234,111 @@ with col_det:
         unsafe_allow_html=True,
     )
 
+    # ── Live weather card — 4 states: no district / loading / failure / success ──
+    if district == t("diagnose.select_district"):
+        # State: no district selected yet
+        st.markdown(
+            '<div class="wx-mini-card">'
+            '<div class="wx-mini-hd">&#127806; Live Weather for Your District</div>'
+            '<div class="wx-mini-body">'
+            '<div class="wx-mini-msg" style="color:#6b7280;font-style:italic;">'
+            '&#128205; Select your district above to see live weather and spread risk.'
+            '</div></div></div>',
+            unsafe_allow_html=True,
+        )
+    else:
+        _wx_mini = _get_live_weather(district)
+        if _wx_mini.get("available") and isinstance(_wx_mini.get("temp"), (int, float)):
+            # State: success — show live weather with farmer headline
+            _wm_icon     = _wx_mini.get("condition_icon", "&#127780;&#65039;")
+            _wm_headline = _wx_mini.get("farmer_headline", "Weather data loaded")
+            _wind_pill   = (
+                f'<span class="wx-mini-pill">&#128168; {round(_wx_mini["wind_kmh"])} km/h wind</span>'
+                if isinstance(_wx_mini.get("wind_kmh"), (int, float)) and _wx_mini["wind_kmh"] > 0
+                else ""
+            )
+            st.markdown(
+                f'<div class="wx-mini-card">'
+                f'<div class="wx-mini-hd">{_wm_icon} Live Weather &middot; {district}</div>'
+                f'<div class="wx-mini-body">'
+                f'<div class="wx-mini-row">'
+                f'<span class="wx-mini-temp-val">{_wx_mini["temp"]:.0f}&#176;C</span>'
+                f'<span class="wx-mini-temp-rng"> &#8595;{_wx_mini["temp_min"]:.0f}&#176;'
+                f' &#8593;{_wx_mini["temp_max"]:.0f}&#176;</span>'
+                f'</div>'
+                f'<div class="wx-mini-pills">'
+                f'<span class="wx-mini-pill">&#128167; {int(_wx_mini["humidity"])}% humidity</span>'
+                f'<span class="wx-mini-pill">&#127783; {_wx_mini["rain_3day"]:.0f}mm / 3d</span>'
+                f'{_wind_pill}'
+                f'</div>'
+                f'<div class="wx-mini-msg">{_wm_headline}</div>'
+                f'</div></div>',
+                unsafe_allow_html=True,
+            )
+        else:
+            # State: API failure
+            st.markdown(
+                '<div class="wx-mini-card">'
+                '<div class="wx-mini-hd">&#127780;&#65039; Weather Unavailable</div>'
+                '<div class="wx-mini-body">'
+                '<div class="wx-mini-msg" style="color:#9ca3af;">'
+                'Could not load live weather &mdash; check your connection and try again.'
+                '</div></div></div>',
+                unsafe_allow_html=True,
+            )
+
+    # ── Voice input for district only ─────────────────────────────────────────
+    st.markdown(
+        '<div class="voice-input-panel">'
+        '<div class="voice-panel-hd">&#128205; Say District Name'
+        '<span class="voice-panel-ta"> · மாவட்டம் பெயர் சொல்லுங்கள்</span>'
+        '</div>'
+        '<div style="font-size:.7rem;color:#6b7280;margin-bottom:6px;">'
+        'E.g. speak <strong>"Chennai"</strong>, <strong>"Madurai"</strong>, <strong>"Coimbatore"</strong>…'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+    _voice_audio = st.audio_input(
+        "Say district name",
+        label_visibility="collapsed",
+        key="voice_district_audio",
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    if _voice_audio is not None:
+        with st.spinner("Listening..."):
+            try:
+                from utils.voice_utils import transcribe_audio as _va_transcribe
+                _transcript = _va_transcribe(_voice_audio.read(), lang_key=get_lang())
+            except Exception:
+                _transcript = None
+        if _transcript and _transcript not in ("Transcription failed", "Could not understand audio"):
+            _lower_t = _transcript.lower()
+            _matched_d = next(
+                (d for d in DISTRICTS if d.lower() in _lower_t or _lower_t in d.lower()),
+                None,
+            )
+            if _matched_d:
+                st.session_state["district_sel"] = _matched_d
+                st.rerun()
+            else:
+                st.markdown(
+                    f'<div class="voice-transcript">&#128266; Heard: "{_transcript}"</div>',
+                    unsafe_allow_html=True,
+                )
+                st.caption("District not found. Use the Ask AI section below for questions.")
+        elif _transcript is not None:
+            st.warning("Could not transcribe. Please try again.")
+
     # CTA inside the right column
+    _district_selected = district != t("diagnose.select_district")
+    _can_run = uploaded_file is not None and _district_selected
+
     st.markdown('<div class="diag-cta-wrap">', unsafe_allow_html=True)
     clicked = st.button(
         t("diagnose.start_button"),
         use_container_width=True,
-        disabled=(uploaded_file is None),
+        disabled=not _can_run,
         key="start_diag_btn",
     )
     st.markdown('</div>', unsafe_allow_html=True)
@@ -205,33 +346,111 @@ with col_det:
         st.session_state["run_analysis"] = True
         st.rerun()
 
-    if uploaded_file is None:
+    if not _can_run:
+        if uploaded_file is None and not _district_selected:
+            _hint = t("diagnose.upload_to_enable")
+        elif uploaded_file is None:
+            _hint = t("diagnose.upload_to_enable")
+        else:
+            _hint = "&#128205; Please select your district to enable diagnosis"
         st.markdown(
-            '<div style="text-align:center;font-size:.77rem;color:#9ca3af;margin-top:4px;">'
-            f'{t("diagnose.upload_to_enable")}</div>',
+            f'<div style="text-align:center;font-size:.77rem;color:#9ca3af;margin-top:4px;">'
+            f'{_hint}</div>',
             unsafe_allow_html=True,
         )
 
-# ── Diagnostic parameters strip ───────────────────────────────────────────────
-st.markdown('<div class="diag-params-strip">', unsafe_allow_html=True)
-_PARAMS = [
-    ("&#127806;", "10",       t("diagnose.classes_label")),
-    ("&#128205;", "38",       t("common.models_ready")),
-    ("&#128293;", "Grad-CAM", t("diagnose.gradcam_title")),
-    ("&#9889;",   "&lt;2s",   t("common.instant")),
-]
-p1, p2, p3, p4 = st.columns(4, gap="small")
-for pcol, (icon, val, lbl) in zip([p1, p2, p3, p4], _PARAMS):
-    with pcol:
-        st.markdown(
-            f'<div class="diag-param-card">'
-            f'<div class="diag-param-icon">{icon}</div>'
-            f'<div class="diag-param-val">{val}</div>'
-            f'<div class="diag-param-lbl">{lbl}</div>'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
+# ── Voice Q&A panel ──────────────────────────────────────────────────────────
+st.markdown(
+    '<div class="voice-qa-panel">'
+    '<div class="voice-qa-hd">'
+    '<span class="voice-qa-hd-icon">&#128172;</span>'
+    'Ask AI by Voice'
+    '<span class="voice-qa-hd-ta"> · குரல் மூலம் AI ஐ கேளுங்கள்</span>'
+    '</div>'
+    '<div style="font-size:.78rem;color:#6b7280;margin-bottom:12px;">'
+    'Ask anything about this disease — symptoms, treatment, medicines, prevention…'
+    '</div>',
+    unsafe_allow_html=True,
+)
+_qa_audio = st.audio_input(
+    "Ask any question about crop disease",
+    label_visibility="collapsed",
+    key="voice_qa_audio",
+)
 st.markdown('</div>', unsafe_allow_html=True)
+
+if _qa_audio is not None:
+    with st.spinner("&#128266; Transcribing your question..."):
+        try:
+            from utils.voice_utils import transcribe_audio as _qa_transcribe
+            _qa_text = _qa_transcribe(_qa_audio.read(), lang_key=get_lang())
+        except Exception:
+            _qa_text = None
+    if _qa_text and _qa_text not in ("Transcription failed", "Could not understand audio"):
+        st.session_state["voice_qa_question"] = _qa_text
+        with st.spinner("&#129302; AI is answering..."):
+            try:
+                from src.llm.groq_client import call_groq
+                _lang_name = {"en": "English", "ta": "Tamil", "hi": "Hindi"}.get(get_lang(), "English")
+                _qa_sys = (
+                    f"You are AgriShield-TN, an expert AI crop doctor for Tamil Nadu paddy farmers. "
+                    f"Answer the farmer's question about crop diseases, prevention, medicines, and treatment. "
+                    f"Be practical and concise (under 120 words). Use simple language. "
+                    f"Reply in {_lang_name}."
+                )
+                _diag_ctx = st.session_state.get("diag_disease_name")
+                if _diag_ctx:
+                    _pct_ctx = st.session_state.get("diag_pct", 0)
+                    _qa_sys += f" Current diagnosis context: {_diag_ctx} ({_pct_ctx:.0f}% confidence)."
+                _qa_answer = call_groq(_qa_text, system_prompt=_qa_sys, max_tokens=200)
+            except Exception:
+                _qa_answer = None
+        st.session_state["voice_qa_answer"] = _qa_answer or "Unable to get an answer. Please try again."
+    elif _qa_text is not None:
+        st.warning("Could not transcribe. Please speak clearly and try again.")
+
+# Show Q&A exchange if available
+if st.session_state.get("voice_qa_question"):
+    st.markdown(
+        f'<div class="voice-qa-question">'
+        f'<div class="voice-qa-question-lbl">&#127908; YOUR QUESTION</div>'
+        f'{st.session_state["voice_qa_question"]}'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+if st.session_state.get("voice_qa_answer"):
+    st.markdown(
+        f'<div class="voice-qa-answer">'
+        f'<div class="voice-qa-answer-lbl">&#129302; AI ANSWER</div>'
+        f'{st.session_state["voice_qa_answer"]}'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+    # Listen to answer button + Stop
+    _qa_listen_col, _qa_stop_col, _qa_clear_col = st.columns([2, 1, 1], gap="small")
+    with _qa_listen_col:
+        if st.button("🔊 Listen to Answer", key="qa_listen_btn", use_container_width=True):
+            with st.spinner("Generating voice..."):
+                try:
+                    from utils.voice_utils import generate_speech, autoplay_audio
+                    _qa_audio_b64 = generate_speech(
+                        st.session_state["voice_qa_answer"], lang=get_lang()
+                    )
+                    autoplay_audio(_qa_audio_b64)
+                except Exception as _qve:
+                    st.warning(f"Voice unavailable: {_qve}")
+    with _qa_stop_col:
+        if st.button("■ Stop", key="qa_stop_btn", use_container_width=True):
+            from utils.voice_utils import stop_audio
+            stop_audio()
+    with _qa_clear_col:
+        if st.button("✕ Clear", key="qa_clear_btn", use_container_width=True):
+            st.session_state["voice_qa_question"] = None
+            st.session_state["voice_qa_answer"] = None
+            if "voice_qa_audio" in st.session_state:
+                del st.session_state["voice_qa_audio"]
+            st.rerun()
+
 
 # ── Module-level action helpers ──────────────────────────────────────────────
 _ACTION_MAP = [
@@ -255,174 +474,6 @@ _ACTION_MAP = [
      "1536054009244-c43bb5f1c1ac","linear-gradient(135deg,#3a0c0c,#6b1e1e)"),
 ]
 
-# ── Disease story data (disease → visual story content) ─────────────────────
-_DISEASE_STORY_MAP = {
-    "blast": {
-        "plant_emoji": "&#127806;&#128119;", "plant_bg": "#fef2f2",
-        "circle_emoji": "&#128168;&#127807;", "circle_bg": "linear-gradient(135deg,#bfdbfe,#93c5fd)",
-        "what_sub": "Gray diamond-shaped spots with brown borders found on your leaves.",
-        "why_text": "Fungal spores spread fast in humid, cool, and windy weather.",
-        "wx_icon": "&#128168;", "wx_icon2": "&#127745;",
-        "humidity_label": "High 78%", "weather_label": "Humid &amp; Windy",
-        "actions": [
-            ("&#128167;", "Drain extra water",       "#bfdbfe", "#60a5fa"),
-            ("&#127807;", "Remove damaged leaves",   "#bbf7d0", "#4ade80"),
-            ("&#129514;", "Spray fungicide today",   "#ede9fe", "#8b5cf6"),
-            ("&#128683;", "Avoid fertilizer now",    "#fef3c7", "#fbbf24"),
-        ],
-        "tip_days": 3,
-    },
-    "bacterial_leaf_blight": {
-        "plant_emoji": "&#127806;&#128128;", "plant_bg": "#fef9c3",
-        "circle_emoji": "&#127783;&#127807;", "circle_bg": "linear-gradient(135deg,#bfdbfe,#60a5fa)",
-        "what_sub": "Yellow water-soaked edges spreading along your leaf borders.",
-        "why_text": "Bacteria travel in flood water, rain splashes, and strong winds.",
-        "wx_icon": "&#127783;", "wx_icon2": "&#128167;",
-        "humidity_label": "High 82%", "weather_label": "Rainy &amp; Wet",
-        "actions": [
-            ("&#128167;", "Improve drainage",        "#bfdbfe", "#60a5fa"),
-            ("&#127807;", "Remove infected leaves",  "#bbf7d0", "#4ade80"),
-            ("&#129514;", "Spray copper bactericide","#ede9fe", "#8b5cf6"),
-            ("&#128269;", "Monitor spread daily",    "#dcfce7", "#22c55e"),
-        ],
-        "tip_days": 2,
-    },
-    "bacterial_leaf_streak": {
-        "plant_emoji": "&#127806;&#128117;", "plant_bg": "#fef3c7",
-        "circle_emoji": "&#127807;&#128117;", "circle_bg": "linear-gradient(135deg,#fde68a,#fbbf24)",
-        "what_sub": "Narrow brown streaks running along the veins of your leaves.",
-        "why_text": "Bacteria enter through wounds and spread in wet and windy weather.",
-        "wx_icon": "&#127783;", "wx_icon2": "&#128168;",
-        "humidity_label": "High 75%", "weather_label": "Wet &amp; Windy",
-        "actions": [
-            ("&#127807;", "Remove streaked leaves",  "#bbf7d0", "#4ade80"),
-            ("&#129514;", "Spray copper fungicide",  "#ede9fe", "#8b5cf6"),
-            ("&#128167;", "Reduce leaf wetness",     "#bfdbfe", "#60a5fa"),
-            ("&#128269;", "Check crop daily",        "#dcfce7", "#22c55e"),
-        ],
-        "tip_days": 4,
-    },
-    "bacterial_panicle_blight": {
-        "plant_emoji": "&#127806;&#128128;", "plant_bg": "#fef2f2",
-        "circle_emoji": "&#127806;&#128128;", "circle_bg": "linear-gradient(135deg,#fecaca,#f87171)",
-        "what_sub": "Panicle grains turning brown and shriveling on your crop.",
-        "why_text": "Bacteria attack panicles in hot and humid conditions at flowering.",
-        "wx_icon": "&#9728;", "wx_icon2": "&#127783;",
-        "humidity_label": "High 80%", "weather_label": "Hot &amp; Humid",
-        "actions": [
-            ("&#127807;", "Remove affected panicles","#bbf7d0", "#4ade80"),
-            ("&#129514;", "Apply bactericide spray", "#ede9fe", "#8b5cf6"),
-            ("&#128683;", "Stop excess nitrogen",    "#fef3c7", "#fbbf24"),
-            ("&#128269;", "Monitor new panicles",    "#dcfce7", "#22c55e"),
-        ],
-        "tip_days": 3,
-    },
-    "brown_spot": {
-        "plant_emoji": "&#127806;&#129304;", "plant_bg": "#fef9c3",
-        "circle_emoji": "&#127807;&#128282;", "circle_bg": "linear-gradient(135deg,#fde68a,#d97706)",
-        "what_sub": "Round brown spots with yellow halos on your leaves.",
-        "why_text": "Fungus thrives when nutrients are low and conditions stay wet.",
-        "wx_icon": "&#127781;", "wx_icon2": "&#128167;",
-        "humidity_label": "Moderate 68%", "weather_label": "Warm &amp; Damp",
-        "actions": [
-            ("&#127807;", "Remove spotted leaves",   "#bbf7d0", "#4ade80"),
-            ("&#129514;", "Apply fungicide spray",   "#ede9fe", "#8b5cf6"),
-            ("&#127803;", "Add balanced fertilizer", "#fef3c7", "#fbbf24"),
-            ("&#128269;", "Monitor weekly",          "#dcfce7", "#22c55e"),
-        ],
-        "tip_days": 5,
-    },
-    "dead_heart": {
-        "plant_emoji": "&#127806;&#128128;&#128027;", "plant_bg": "#fef2f2",
-        "circle_emoji": "&#128027;&#127806;", "circle_bg": "linear-gradient(135deg,#fed7aa,#f97316)",
-        "what_sub": "Central tiller shoots are drying out and dying in your crop.",
-        "why_text": "Stem borer insects are feeding inside the stems from the base.",
-        "wx_icon": "&#127781;", "wx_icon2": "&#128027;",
-        "humidity_label": "Moderate 65%", "weather_label": "Warm Conditions",
-        "actions": [
-            ("&#9889;",   "Remove dead tillers",     "#fee2e2", "#ef4444"),
-            ("&#129514;", "Spray insecticide",       "#ede9fe", "#8b5cf6"),
-            ("&#128167;", "Drain field briefly",     "#bfdbfe", "#60a5fa"),
-            ("&#128269;", "Check for new damage",    "#dcfce7", "#22c55e"),
-        ],
-        "tip_days": 2,
-    },
-    "downy_mildew": {
-        "plant_emoji": "&#127806;&#129300;", "plant_bg": "#f0f9ff",
-        "circle_emoji": "&#127787;&#127807;", "circle_bg": "linear-gradient(135deg,#e0f2fe,#7dd3fc)",
-        "what_sub": "White or gray fuzzy growth on the underside of your leaves.",
-        "why_text": "Fungus thrives in cool, moist, and foggy weather conditions.",
-        "wx_icon": "&#127787;", "wx_icon2": "&#128168;",
-        "humidity_label": "Very High 88%", "weather_label": "Foggy &amp; Cool",
-        "actions": [
-            ("&#128167;", "Reduce leaf moisture",    "#bfdbfe", "#60a5fa"),
-            ("&#127807;", "Remove affected leaves",  "#bbf7d0", "#4ade80"),
-            ("&#129514;", "Spray metalaxyl fungicide","#ede9fe","#8b5cf6"),
-            ("&#128168;", "Improve air flow",        "#e0f9ff", "#38bdf8"),
-        ],
-        "tip_days": 3,
-    },
-    "hispa": {
-        "plant_emoji": "&#127806;&#128027;", "plant_bg": "#fef9c3",
-        "circle_emoji": "&#128027;&#127807;", "circle_bg": "linear-gradient(135deg,#fef08a,#eab308)",
-        "what_sub": "Tiny white or brown scratch marks running across your leaves.",
-        "why_text": "Hispa beetles scrape and mine inside the leaf tissue.",
-        "wx_icon": "&#9728;", "wx_icon2": "&#128027;",
-        "humidity_label": "Moderate 70%", "weather_label": "Warm &amp; Dry",
-        "actions": [
-            ("&#9889;",   "Remove infested leaves",  "#fee2e2", "#ef4444"),
-            ("&#129514;", "Spray insecticide",       "#ede9fe", "#8b5cf6"),
-            ("&#128269;", "Inspect leaves daily",    "#dcfce7", "#22c55e"),
-            ("&#127807;", "Thin dense crop areas",   "#bbf7d0", "#4ade80"),
-        ],
-        "tip_days": 3,
-    },
-    "tungro": {
-        "plant_emoji": "&#127806;&#128184;&#128128;", "plant_bg": "#fef2f2",
-        "circle_emoji": "&#127806;&#128184;", "circle_bg": "linear-gradient(135deg,#fde68a,#f97316)",
-        "what_sub": "Leaves turning yellow-orange from tip to base rapidly.",
-        "why_text": "Virus spread by green leafhoppers — act immediately to stop it.",
-        "wx_icon": "&#128027;", "wx_icon2": "&#128128;",
-        "humidity_label": "Any Conditions", "weather_label": "Leafhoppers Active",
-        "actions": [
-            ("&#9889;",   "Remove infected plants",  "#fee2e2", "#ef4444"),
-            ("&#129514;", "Spray insecticide now",   "#ede9fe", "#8b5cf6"),
-            ("&#128683;", "No nitrogen fertilizer",  "#fef3c7", "#fbbf24"),
-            ("&#128269;", "Monitor for leafhoppers", "#dcfce7", "#22c55e"),
-        ],
-        "tip_days": 1,
-    },
-    "normal": {
-        "plant_emoji": "&#127806;&#127806;&#9989;", "plant_bg": "#f0fdf4",
-        "circle_emoji": "&#9989;&#127807;", "circle_bg": "linear-gradient(135deg,#bbf7d0,#22c55e)",
-        "what_sub": "No signs of disease detected. Your crop looks healthy!",
-        "why_text": "Good crop management is keeping your paddy field healthy.",
-        "wx_icon": "&#9728;", "wx_icon2": "&#127807;",
-        "humidity_label": "Normal 60%", "weather_label": "Favorable",
-        "actions": [
-            ("&#128167;", "Maintain watering",       "#bfdbfe", "#60a5fa"),
-            ("&#127803;", "Apply balanced nutrients","#fef9c3", "#fbbf24"),
-            ("&#128269;", "Inspect weekly",          "#dcfce7", "#22c55e"),
-            ("&#127807;", "Keep crop spacing",       "#bbf7d0", "#4ade80"),
-        ],
-        "tip_days": 7,
-    },
-    "_default": {
-        "plant_emoji": "&#127806;&#129300;", "plant_bg": "#f9fafb",
-        "circle_emoji": "&#129300;&#127806;", "circle_bg": "linear-gradient(135deg,#e5e7eb,#9ca3af)",
-        "what_sub": "Unusual signs detected on your crop leaves.",
-        "why_text": "Conditions may be favorable for disease development in your area.",
-        "wx_icon": "&#127780;", "wx_icon2": "&#127807;",
-        "humidity_label": "Unknown", "weather_label": "Monitor Closely",
-        "actions": [
-            ("&#128269;", "Monitor crop daily",       "#dcfce7", "#22c55e"),
-            ("&#127807;", "Remove damaged leaves",    "#bbf7d0", "#4ade80"),
-            ("&#129514;", "Consult an expert",        "#ede9fe", "#8b5cf6"),
-            ("&#128683;", "Avoid excess fertilizer",  "#fef3c7", "#fbbf24"),
-        ],
-        "tip_days": 3,
-    },
-}
 
 
 def _classify_action(text: str):
@@ -516,105 +567,141 @@ if uploaded_file is not None and st.session_state.get("run_analysis"):
 
         # ── STORY-BASED VISUAL RESULTS ────────────────────────────────────────
         import base64
-        _story = _DISEASE_STORY_MAP.get(predicted_class, _DISEASE_STORY_MAP["_default"])
+        _fstory: FarmerStory  = build_story(predicted_class, sev, confidence, wx, disease_name)
+        _vstate: VisualState  = build_visual_state(sev, wx, _fstory)
 
-        # Risk display vars
-        if sev in ("CRITICAL", "HIGH"):
-            _risk_cls, _risk_badge_cls = "sc-risk--high", "sc-risk-badge--high"
-            _risk_label = "&#9888;&#65039; High Risk"
-            _risk_msg   = "This can spread fast if we don&#39;t take action today."
-            _sad_leaf   = "&#128148;&#127807;"
-            _greeting   = f"Vanakkam! &#128075; Your crop needs attention."
-            _greeting_sub = f"I found <strong>{disease_name}</strong> &mdash; follow the steps below."
-            _tip_msg    = f"Check your field again in {_story['tip_days']} days and repeat these steps."
-        elif sev == "MODERATE":
-            _risk_cls, _risk_badge_cls = "sc-risk--mod", "sc-risk-badge--mod"
-            _risk_label = "&#9888;&#65039; Moderate Risk"
-            _risk_msg   = "Treatment now will prevent this from spreading further."
-            _sad_leaf   = "&#128528;&#127807;"
-            _greeting   = f"Vanakkam! &#128075; Your crop needs some care."
-            _greeting_sub = f"I found early signs of <strong>{disease_name}</strong>. Let me help."
-            _tip_msg    = f"Check your field again in {_story['tip_days']} days and follow up."
+        # ── AI image generation (cached 24h — only calls API on first run per state)
+        _gen_farmer_url = _gen_farmer_img(_vstate.farmer_mood)
+        _gen_crop_url   = _gen_crop_img(_vstate.crop_state)
+        _gen_wx_url     = _gen_wx_img(_vstate.weather_state)
+
+        # Pre-compute crop illustration: AI-generated → emoji fallback
+        _crop_illus = (
+            f'<img src="{_gen_crop_url}" class="sc-gen-img" alt="{_vstate.crop_label}" />'
+            if _gen_crop_url
+            else _fstory.plant_emoji
+        )
+
+        # Farmer illustration: AI-generated → static asset → emoji fallback
+        if _gen_farmer_url:
+            _farmer_el = (
+                f'<img src="{_gen_farmer_url}"'
+                f' class="sg-farmer {_vstate.farmer_css_class}"'
+                f' title="{_vstate.farmer_label}" />'
+            )
         else:
-            _risk_cls, _risk_badge_cls = "sc-risk--low", "sc-risk-badge--low"
-            _risk_label = "&#9989; Low Risk"
-            _risk_msg   = "Your crop looks mostly healthy. Keep monitoring it."
-            _sad_leaf   = "&#128516;&#127807;"
-            _greeting   = "Vanakkam! &#128075; Great news about your crop."
-            _greeting_sub = f"<strong>{disease_name}</strong> detected &mdash; crop is in good shape."
-            _tip_msg    = f"Check your field again in {_story['tip_days']} days. Keep it up!"
+            _farmer_img_path = _APP_DIR / "assets" / _vstate.farmer_img_local
+            if _farmer_img_path.exists():
+                with open(str(_farmer_img_path), "rb") as _bf:
+                    _f64 = base64.b64encode(_bf.read()).decode()
+                _farmer_el = (
+                    f'<img src="data:image/png;base64,{_f64}"'
+                    f' class="sg-farmer {_vstate.farmer_css_class}"'
+                    f' title="{_vstate.farmer_label}" />'
+                )
+            else:
+                _farmer_el = (
+                    f'<span class="sg-farmer-emoji {_vstate.farmer_css_class}"'
+                    f' title="{_vstate.farmer_label}">{_vstate.farmer_emoji}</span>'
+                )
 
-        # Farmer illustration
-        _farmer_img_path = _APP_DIR / "assets" / "farmer_ai.png"
-        if _farmer_img_path.exists():
-            with open(str(_farmer_img_path), "rb") as _bf:
-                _f64 = base64.b64encode(_bf.read()).decode()
-            _farmer_el = f'<img src="data:image/png;base64,{_f64}" class="sg-farmer" />'
-        else:
-            _farmer_el = '<span class="sg-farmer-emoji">&#128119;&#127996;</span>'
-
-        # 1. Greeting banner
+        # 1. Greeting banner — mood class drives banner border/bg tint
         st.markdown(
-            f'<div class="sg-banner">'
+            f'<div class="sg-banner sg-banner--{_vstate.farmer_mood}">'
             f'<div class="sg-text">'
-            f'<div class="sg-title">{_greeting}</div>'
-            f'<div class="sg-sub">{_greeting_sub}</div>'
+            f'<div class="sg-title">{_fstory.greeting}</div>'
+            f'<div class="sg-sub">{_fstory.greeting_sub}</div>'
             f'</div>'
             f'{_farmer_el}'
             f'</div>',
             unsafe_allow_html=True,
         )
 
-        # 2. What's happening
+        # ── Voice readout — compact helper bar ────────────────────────────────
+        _vl_left, _vl_btn1, _vl_btn2 = st.columns([5, 1, 1], gap="small")
+        with _vl_left:
+            st.markdown(
+                '<div class="voice-listen-sentinel"></div>'
+                '<span class="voice-listen-icon">&#128266;</span>'
+                '<span class="voice-listen-text">'
+                '<span class="voice-listen-title">&#128266; Hear diagnosis read aloud</span>'
+                '<span class="voice-listen-sub"> &nbsp;·&nbsp; கண்டறிதலை கேளுங்கள்</span>'
+                '</span>',
+                unsafe_allow_html=True,
+            )
+        with _vl_btn1:
+            if st.button("▶", key="voice_readout_btn", use_container_width=True, help="Listen to diagnosis"):
+                _speech_parts = [
+                    f"{disease_name} detected with {pct:.0f} percent confidence.",
+                    insight.cause[:160].rstrip(".") + ".",
+                ]
+                if insight.immediate_actions:
+                    _speech_parts.append(f"First action: {insight.immediate_actions[0]}.")
+                _speech_text = " ".join(_speech_parts)
+                with st.spinner("Generating voice..."):
+                    try:
+                        from utils.voice_utils import generate_speech, autoplay_audio
+                        _audio_b64 = generate_speech(_speech_text, lang=get_lang())
+                        autoplay_audio(_audio_b64)
+                    except Exception as _ve:
+                        st.warning(f"Voice unavailable: {_ve}")
+        with _vl_btn2:
+            if st.button("■", key="voice_diag_stop_btn", use_container_width=True, help="Stop audio"):
+                from utils.voice_utils import stop_audio
+                stop_audio()
+
+        # 2. What's happening — crop state class drives left-border accent
         st.markdown(
-            f'<div class="story-card story-card--d1">'
+            f'<div class="story-card story-card--d1 {_vstate.crop_css_class}">'
             f'<div class="sc-illus">'
-            f'<div class="sc-illus-plants" style="background:{_story["plant_bg"]};">'
-            f'{_story["plant_emoji"]}'
+            f'<div class="sc-illus-plants" style="background:{_fstory.plant_bg};">'
+            f'{_crop_illus}'
             f'</div>'
             f'</div>'
             f'<div class="sc-body">'
             f'<div class="sc-title">What&#39;s happening in your crop?</div>'
-            f'<div class="sc-sub">{_story["what_sub"]}</div>'
-            f'<div class="sc-risk {_risk_cls}">'
-            f'<span class="sc-risk-badge {_risk_badge_cls}">{_risk_label}</span>'
-            f'<span class="sc-risk-text">{_risk_msg}</span>'
+            f'<div class="sc-sub">{_fstory.what_sub}</div>'
+            f'<div class="sc-risk {_fstory.risk_cls}">'
+            f'<span class="sc-risk-badge {_fstory.risk_badge_cls}">{_fstory.risk_label}</span>'
+            f'<span class="sc-risk-text">{_fstory.risk_msg}</span>'
             f'</div>'
             f'</div>'
-            f'<div class="sc-sad-leaf">{_sad_leaf}</div>'
+            f'<div class="sc-sad-leaf">{_fstory.sad_leaf}</div>'
             f'</div>',
             unsafe_allow_html=True,
         )
 
-        # 3. Why is this happening
+        # 3. Why is this happening — use live weather when available
         if wx.get("available") and isinstance(wx.get("humidity"), (int, float)):
-            _hum_display = f"{int(wx['humidity'])}%"
-            _wx_display  = wx.get("risk_label", _story["weather_label"])
+            _hum_display  = f"{int(wx['humidity'])}%"
+            _cond_icon    = wx.get("condition_icon", _fstory.wx_icon2)
+            _cond_display = wx.get("condition", wx.get("risk_label", _fstory.weather_label))
+            _rain_cue     = (
+                f'&nbsp;&nbsp;&#183;&nbsp;&nbsp;&#127783; {wx["rain_3day"]:.0f}mm rain / 3d'
+                if isinstance(wx.get("rain_3day"), (int, float)) and wx["rain_3day"] > 0
+                else ""
+            )
         else:
-            _hum_display = _story["humidity_label"]
-            _wx_display  = _story["weather_label"]
+            _hum_display  = _fstory.humidity_label
+            _cond_icon    = _fstory.wx_icon2
+            _cond_display = _fstory.weather_label
+            _rain_cue     = ""
 
         st.markdown(
             f'<div class="story-card story-card--d2">'
             f'<div class="sc-illus">'
-            f'<div class="sc-illus-circle" style="background:{_story["circle_bg"]};">'
-            f'{_story["circle_emoji"]}'
+            f'<div class="sc-illus-circle" style="background:{_fstory.circle_bg};">'
+            f'{_fstory.circle_emoji}'
             f'</div>'
             f'</div>'
             f'<div class="sc-body">'
             f'<div class="sc-title">Why is this happening?</div>'
-            f'<div class="sc-sub">{_story["why_text"]}</div>'
-            f'<div class="sc-wx-row">'
-            f'<div class="sc-wx-card">'
-            f'<div class="sc-wx-icon">{_story["wx_icon"]}</div>'
-            f'<div><div class="sc-wx-lbl">Humidity</div>'
-            f'<div class="sc-wx-val">{_hum_display}</div></div>'
-            f'</div>'
-            f'<div class="sc-wx-card">'
-            f'<div class="sc-wx-icon">{_story["wx_icon2"]}</div>'
-            f'<div><div class="sc-wx-lbl">Condition</div>'
-            f'<div class="sc-wx-val">{_wx_display}</div></div>'
-            f'</div>'
+            f'<div class="sc-sub">{_fstory.why_text}</div>'
+            f'<div class="sc-why-cues">'
+            f'{_fstory.wx_icon} {_hum_display} humidity'
+            f'&nbsp;&nbsp;&#183;&nbsp;&nbsp;'
+            f'{_cond_icon} {_cond_display}'
+            f'{_rain_cue}'
             f'</div>'
             f'</div>'
             f'</div>',
@@ -625,48 +712,79 @@ if uploaded_file is not None and st.session_state.get("run_analysis"):
         st.markdown('<div class="sa-section-hd">What should you do now?</div>', unsafe_allow_html=True)
         st.markdown('<div class="sa-section-sub">Follow these simple steps to protect your crop.</div>', unsafe_allow_html=True)
         _sa_html = '<div class="sa-grid">'
-        for _i, (_ico, _lbl, _bg1, _bg2) in enumerate(_story["actions"][:4], 1):
+        for _i, (_ico, _lbl, _bg1, _bg2) in enumerate(_fstory.actions[:4], 1):
             _sa_html += (
                 f'<div class="sa-card">'
-                f'<div class="sa-header">'
-                f'<div class="sa-num">{_i}</div>'
-                f'<div class="sa-label">{_lbl}</div>'
-                f'</div>'
                 f'<div class="sa-illus" style="background:linear-gradient(135deg,{_bg1},{_bg2});">'
-                f'<span style="font-size:2.8rem;">{_ico}</span>'
-                f'<div class="sa-check">&#10003;</div>'
+                f'<span style="font-size:3.4rem;">{_ico}</span>'
+                f'<div class="sa-num-badge">{_i}</div>'
+                f'</div>'
+                f'<div class="sa-footer">'
+                f'<div class="sa-label">{_lbl}</div>'
                 f'</div>'
                 f'</div>'
             )
         _sa_html += '</div>'
         st.markdown(_sa_html, unsafe_allow_html=True)
 
-        # 5. Weather section
+        # 5. Weather section — live data from district API
         if wx.get("available"):
-            _wx_risk = wx.get("risk_level", "UNKNOWN")
+            _wx_risk     = wx.get("risk_level", "UNKNOWN")
+            _sw_headline = wx.get("farmer_headline", "How is the weather today?")
+            _sw_story    = wx.get("farmer_story", "")
+            _cond_icon   = wx.get("condition_icon", "&#127780;&#65039;")
+            _cond_label  = wx.get("condition", "")
             if _wx_risk == "HIGH":
-                _sw_cls, _sw_icon, _sw_icon_cls = "sw-section--bad", "&#9928;&#65039;", "sw-icon--cloud"
-                _sw_msg   = "Rain expected &#8212; this disease may spread faster. Act quickly!"
-                _sw_badge = "&#9928;&#65039; Rainy &rarr; Spread risk is HIGH &#9888;&#65039;"
+                _sw_cls, _sw_icon_cls = "sw-section--bad", "sw-icon--cloud"
+                _sw_badge = f'{_cond_icon} {_cond_label} &rarr; Spread risk is HIGH &#9888;&#65039;'
             elif _wx_risk == "MODERATE":
-                _sw_cls, _sw_icon, _sw_icon_cls = "sw-section--mod", "&#127781;&#65039;", "sw-icon--cloud"
-                _sw_msg   = "Humid conditions detected. Keep monitoring your crop closely."
-                _sw_badge = "&#127781;&#65039; Humid &rarr; Monitor closely"
+                _sw_cls, _sw_icon_cls = "sw-section--mod", "sw-icon--cloud"
+                _sw_badge = f'{_cond_icon} {_cond_label} &rarr; Monitor closely'
             else:
-                _sw_cls, _sw_icon, _sw_icon_cls = "sw-section--good", "&#9728;&#65039;", "sw-icon--sun"
-                _sw_msg   = "Good news! The weather is not helping this problem spread."
-                _sw_badge = "&#9728;&#65039; Dry Weather &rarr; Spread is unlikely &#128578;"
+                _sw_cls, _sw_icon_cls = "sw-section--good", "sw-icon--sun"
+                _sw_badge = f'{_cond_icon} {_cond_label} &rarr; Spread is unlikely &#128578;'
         else:
-            _sw_cls, _sw_icon, _sw_icon_cls = "sw-section--unk", "&#127780;&#65039;", "sw-icon--sun"
-            _sw_msg   = "Weather data not available for your area. Stay vigilant."
-            _sw_badge = "&#127780;&#65039; Unknown &rarr; Stay vigilant"
+            _sw_cls, _sw_icon_cls = "sw-section--unk", "sw-icon--sun"
+            _cond_icon   = "&#127780;&#65039;"
+            _sw_headline = "How is the weather today?"
+            _sw_story    = "Weather data is unavailable for your area. Stay vigilant and monitor your crop."
+            _sw_badge    = "&#127780;&#65039; Unknown &rarr; Stay vigilant"
 
+        # Weather icon: AI-generated scene → WMO emoji fallback
+        _wx_icon_html = (
+            f'<img src="{_gen_wx_url}" class="sc-gen-img--wx" alt="{_vstate.weather_label}" />'
+            if _gen_wx_url
+            else _cond_icon
+        )
+
+        _wx_pills_html = ""
+        if wx.get("available") and isinstance(wx.get("temp"), (int, float)):
+            _wind_p  = (
+                f'<span class="wx-data-pill">&#128168; <strong>{round(wx["wind_kmh"])} km/h</strong> wind</span>'
+                if isinstance(wx.get("wind_kmh"), (int, float)) and wx["wind_kmh"] > 0 else ""
+            )
+            _cloud_p = (
+                f'<span class="wx-data-pill">&#9729;&#65039; <strong>{int(wx["cloud_pct"])}%</strong> cloud</span>'
+                if isinstance(wx.get("cloud_pct"), (int, float)) else ""
+            )
+            _wx_pills_html = (
+                f'<div class="wx-data-pills">'
+                f'<span class="wx-data-pill">&#127777;&#65039; <strong>{wx["temp"]:.0f}&#176;C</strong>'
+                f' <small style="font-weight:400;opacity:.75;">'
+                f'&#8595;{wx["temp_min"]:.0f}&#176; &#8593;{wx["temp_max"]:.0f}&#176;</small></span>'
+                f'<span class="wx-data-pill">&#128167; <strong>{int(wx["humidity"])}%</strong> humidity</span>'
+                f'<span class="wx-data-pill">&#127783; <strong>{wx["rain_3day"]:.0f}mm</strong> / 3 days</span>'
+                f'{_wind_p}'
+                f'{_cloud_p}'
+                f'</div>'
+            )
         st.markdown(
             f'<div class="sw-section {_sw_cls}">'
-            f'<div class="sw-icon {_sw_icon_cls}">{_sw_icon}</div>'
+            f'<div class="sw-icon {_sw_icon_cls} {_vstate.weather_css_class}">{_wx_icon_html}</div>'
             f'<div class="sw-content">'
-            f'<div class="sw-title">How is the weather today?</div>'
-            f'<div class="sw-msg">{_sw_msg}</div>'
+            f'<div class="sw-title">{_sw_headline}</div>'
+            f'<div class="sw-msg">{_sw_story}</div>'
+            f'{_wx_pills_html}'
             f'<div class="sw-badge">{_sw_badge}</div>'
             f'</div>'
             f'</div>',
@@ -677,7 +795,7 @@ if uploaded_file is not None and st.session_state.get("run_analysis"):
         st.markdown(
             f'<div class="story-tip">'
             f'<span class="st-tip-icon">&#128161;</span>'
-            f'<span class="st-tip-text"><strong>Tip:</strong> {_tip_msg}</span>'
+            f'<span class="st-tip-text"><strong>Tip:</strong> {_fstory.tip_msg}</span>'
             f'<span class="st-tip-farmer">&#128119;&#127996;&#128077;</span>'
             f'</div>',
             unsafe_allow_html=True,

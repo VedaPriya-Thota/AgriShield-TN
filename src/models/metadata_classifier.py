@@ -19,6 +19,9 @@ Fusion pipeline
 BatchNorm1d on the concatenated vector normalises the scale difference
 between the 512-dim image features and the 32-dim metadata features,
 preventing one branch from dominating the gradient signal.
+
+NOTE: This model is fully trained but not yet wired into the Streamlit UI.
+      The UI currently uses PaddyDiseaseClassifier (image-only).
 """
 
 import torch
@@ -52,27 +55,29 @@ class PaddyMetadataClassifier(nn.Module):
         """
         super().__init__()
 
+        # Two separate encoders — one per modality
         self.image_encoder = ImageEncoder(pretrained=pretrained)
         self.metadata_encoder = MetadataEncoder(
             num_varieties=num_varieties,
             variety_embed_dim=variety_embed_dim,
             age_embed_dim=age_embed_dim,
-            dropout=dropout * 0.67,   # slightly lower inside the encoder
+            dropout=dropout * 0.67,   # slightly lower dropout inside the encoder
         )
 
+        # Combined feature dimension: 512 (image) + 32 (metadata) = 544
         fusion_dim = self.image_encoder.output_dim + self.metadata_encoder.output_dim
-        # 512 (ResNet-18) + 32 (variety 16 + age 16) = 544
 
         self.classifier = nn.Sequential(
-            # BatchNorm bridges the scale gap between the two feature branches
+            # BatchNorm bridges the scale gap between the two feature branches.
+            # Without this, the 512-dim image features would dominate the 32-dim metadata.
             nn.BatchNorm1d(fusion_dim),
-            nn.Linear(fusion_dim, 256),
+            nn.Linear(fusion_dim, 256),         # compress fused 544-dim → 256
             nn.ReLU(inplace=True),
             nn.Dropout(p=dropout),
-            nn.Linear(256, 128),
+            nn.Linear(256, 128),                # further compress 256 → 128
             nn.ReLU(inplace=True),
-            nn.Dropout(p=dropout * 0.5),
-            nn.Linear(128, num_classes),
+            nn.Dropout(p=dropout * 0.5),        # less dropout in deeper layers
+            nn.Linear(128, num_classes),         # final projection to 10 disease classes
         )
 
     def forward(
@@ -92,7 +97,7 @@ class PaddyMetadataClassifier(nn.Module):
         -------
         logits      : FloatTensor [B, num_classes]
         """
-        img_feat  = self.image_encoder(image)                # [B, 512]
-        meta_feat = self.metadata_encoder(variety_idx, age)  # [B, 32]
-        fused     = torch.cat([img_feat, meta_feat], dim=1)  # [B, 544]
-        return self.classifier(fused)                         # [B, num_classes]
+        img_feat  = self.image_encoder(image)                # [B, 512] — visual features
+        meta_feat = self.metadata_encoder(variety_idx, age)  # [B, 32]  — variety + age
+        fused     = torch.cat([img_feat, meta_feat], dim=1)  # [B, 544] — combined
+        return self.classifier(fused)                         # [B, 10]  — logits

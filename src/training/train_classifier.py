@@ -1,3 +1,13 @@
+# train_classifier.py — Main training script for the image-only disease classifier.
+#
+# What this script does:
+#   1. Loads the full dataset from train.csv and splits it 80/20 (stratified by class)
+#   2. Creates two DataLoaders: one with augmentation (train) and one without (val)
+#   3. Trains PaddyDiseaseClassifier for NUM_EPOCHS using Adam + CrossEntropyLoss
+#   4. Saves the best model weights (by val accuracy) to checkpoints/
+#
+# Run with: python -m src.training.train_classifier
+
 import random
 from copy import deepcopy
 
@@ -22,6 +32,7 @@ from src.models.disease_classifier import PaddyDiseaseClassifier
 
 
 def set_seed(seed: int = RANDOM_SEED):
+    # Fix all random number generators so results are reproducible across runs
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -29,37 +40,41 @@ def set_seed(seed: int = RANDOM_SEED):
 
 
 def get_device():
+    # Use GPU if available, otherwise fall back to CPU
     return torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def create_dataloaders():
-    # Load full dataset once to get labels and indices
+    # Load dataset once without any transform just to get the list of labels for stratified split
     base_dataset = PaddyImageDataset(transform=None)
 
-    labels = base_dataset.data["label"].tolist()
+    labels  = base_dataset.data["label"].tolist()
     indices = list(range(len(base_dataset)))
 
+    # Stratified split ensures each class has ~80% in train and ~20% in val
     train_indices, val_indices = train_test_split(
         indices,
         test_size=0.2,
         random_state=RANDOM_SEED,
-        stratify=labels
+        stratify=labels  # preserves class distribution across both splits
     )
 
+    # Create two separate dataset objects with different transforms
+    # (we can't reuse one dataset object because the transform is baked in)
     train_dataset = PaddyImageDataset(transform=get_train_transforms())
-    val_dataset = PaddyImageDataset(transform=get_val_transforms())
+    val_dataset   = PaddyImageDataset(transform=get_val_transforms())
 
+    # Wrap with Subset to apply the train/val index split
     train_subset = Subset(train_dataset, train_indices)
-    val_subset = Subset(val_dataset, val_indices)
+    val_subset   = Subset(val_dataset, val_indices)
 
+    # shuffle=True for training (important for SGD convergence)
+    # shuffle=False for validation (order doesn't matter, just need consistent metrics)
     train_loader = DataLoader(
         train_subset,
         batch_size=BATCH_SIZE,
         shuffle=True,
         num_workers=NUM_WORKERS
-  
-  
-  
     )
 
     val_loader = DataLoader(
@@ -76,47 +91,51 @@ def create_dataloaders():
 
 
 def train_one_epoch(model, loader, criterion, optimizer, device):
+    # Switch model to training mode: activates Dropout and BatchNorm updates
     model.train()
 
     running_loss = 0.0
-    correct = 0
-    total = 0
+    correct      = 0
+    total        = 0
 
     progress_bar = tqdm(loader, desc="Training", leave=False)
 
     for images, labels, _ in progress_bar:
+        # Move batch to GPU/CPU
         images = images.to(device)
         labels = labels.to(device)
 
-        optimizer.zero_grad()
+        optimizer.zero_grad()          # clear gradients from the previous step
 
-        logits = model(images)
-        loss = criterion(logits, labels)
+        logits = model(images)         # forward pass → raw class scores
+        loss   = criterion(logits, labels)  # CrossEntropyLoss (applies softmax internally)
 
-        loss.backward()
-        optimizer.step()
+        loss.backward()                # backpropagation: compute gradients
+        optimizer.step()               # update weights using Adam
 
-        running_loss += loss.item() * images.size(0)
+        # Accumulate metrics for reporting at end of epoch
+        running_loss += loss.item() * images.size(0)  # weight by batch size
 
-        preds = torch.argmax(logits, dim=1)
+        preds    = torch.argmax(logits, dim=1)         # predicted class index
         correct += (preds == labels).sum().item()
-        total += labels.size(0)
+        total   += labels.size(0)
 
         progress_bar.set_postfix(loss=loss.item())
 
     epoch_loss = running_loss / total
-    epoch_acc = correct / total
+    epoch_acc  = correct / total
 
     return epoch_loss, epoch_acc
 
 
-@torch.no_grad()
+@torch.no_grad()  # disable gradient tracking — faster and uses less memory during eval
 def validate_one_epoch(model, loader, criterion, device):
+    # Switch model to eval mode: disables Dropout, fixes BatchNorm stats
     model.eval()
 
     running_loss = 0.0
-    correct = 0
-    total = 0
+    correct      = 0
+    total        = 0
 
     progress_bar = tqdm(loader, desc="Validation", leave=False)
 
@@ -125,16 +144,16 @@ def validate_one_epoch(model, loader, criterion, device):
         labels = labels.to(device)
 
         logits = model(images)
-        loss = criterion(logits, labels)
+        loss   = criterion(logits, labels)
 
         running_loss += loss.item() * images.size(0)
 
-        preds = torch.argmax(logits, dim=1)
+        preds    = torch.argmax(logits, dim=1)
         correct += (preds == labels).sum().item()
-        total += labels.size(0)
+        total   += labels.size(0)
 
     epoch_loss = running_loss / total
-    epoch_acc = correct / total
+    epoch_acc  = correct / total
 
     return epoch_loss, epoch_acc
 
@@ -147,12 +166,14 @@ def main():
 
     train_loader, val_loader = create_dataloaders()
 
+    # Build model with pretrained ImageNet backbone for faster convergence
     model = PaddyDiseaseClassifier(pretrained=True).to(device)
 
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss()  # standard multi-class loss
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
-    best_val_acc = 0.0
+    # Track the best validation accuracy to know when to save the checkpoint
+    best_val_acc    = 0.0
     best_model_state = None
 
     for epoch in range(NUM_EPOCHS):
@@ -171,8 +192,10 @@ def main():
             f"Val Loss: {val_loss:.4f} | Val Acc: {val_acc:.4f}"
         )
 
+        # Save checkpoint only when validation accuracy improves
+        # deepcopy ensures we store a snapshot, not a reference to the live model
         if val_acc > best_val_acc:
-            best_val_acc = val_acc
+            best_val_acc    = val_acc
             best_model_state = deepcopy(model.state_dict())
 
             save_path = CHECKPOINT_DIR / "best_disease_classifier.pth"
